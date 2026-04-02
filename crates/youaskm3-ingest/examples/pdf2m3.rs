@@ -26,10 +26,50 @@ fn run() -> Result<(), Box<dyn Error>> {
         extracted_text,
     })?;
 
-    if let Some(parent) = Path::new(&output_path).parent() {
-        fs::create_dir_all(parent)?;
-    }
+    ensure_output_directory(Path::new(&output_path))?;
 
     fs::write(output_path, markdown)?;
     Ok(())
+}
+
+fn ensure_output_directory(output_path: &Path) -> Result<(), Box<dyn Error>> {
+    if let Some(parent) = output_path.parent()
+        && !parent.as_os_str().is_empty()
+    {
+        fs::create_dir_all(parent)?;
+    }
+
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ensure_output_directory;
+    use std::{
+        fs,
+        path::PathBuf,
+        time::{SystemTime, UNIX_EPOCH},
+    };
+
+    #[test]
+    fn output_in_current_directory_does_not_require_parent_creation() {
+        assert!(ensure_output_directory(PathBuf::from("out.md").as_path()).is_ok());
+    }
+
+    #[test]
+    fn nested_output_path_creates_missing_parent_directory() {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time should be after unix epoch")
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!("youaskm3-pdf2m3-{unique}"));
+        let output_path = root.join("nested").join("out.md");
+
+        ensure_output_directory(&output_path)
+            .expect("creating nested parent directories should succeed");
+
+        assert!(root.join("nested").is_dir());
+
+        fs::remove_dir_all(root).expect("temporary directory cleanup should succeed");
+    }
 }
