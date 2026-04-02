@@ -1,0 +1,16 @@
+name: Knowledge Index
+
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+jobs:
+  rebuild-index:
+    name: Rebuild Knowledge Index
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Echo stub index rebuild
+        shell: bash
+        run: echo "index rebuild"

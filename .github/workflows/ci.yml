@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  rust-quality:
+    name: Rust Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Rust 1.94.0
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.94.0
+          components: clippy, rustfmt, llvm-tools-preview
+          targets: wasm32-wasip1
+
+      - name: Install cargo-llvm-cov
+        shell: bash
+        run: cargo install cargo-llvm-cov --locked
+
+      - name: Run formatting and clippy gates
+        shell: bash
+        run: bash ./scripts/lint.sh
+
+      - name: Run locked Rust tests
+        shell: bash
+        run: cargo test --locked
+
+  business-logic-coverage:
+    name: Business Logic Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Rust 1.94.0
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.94.0
+          components: llvm-tools-preview
+
+      - name: Install cargo-llvm-cov
+        shell: bash
+        run: cargo install cargo-llvm-cov --locked
+
+      - name: Enforce 100 percent coverage for business logic crates
+        shell: bash
+        run: bash ./scripts/check-coverage.sh
+
+  wasm-build:
+    name: WASM Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Rust 1.94.0 with wasm target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.94.0
+          targets: wasm32-wasip1
+
+      - name: Build workspace for wasm32-wasip1
+        shell: bash
+        run: cargo build --locked --workspace --target wasm32-wasip1
+
+  typescript-quality:
+    name: TypeScript Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install npm dependencies
+        shell: bash
+        run: npm install
+
+      - name: Run ESLint
+        shell: bash
+        run: npm run lint
+
+      - name: Run TypeScript typecheck
+        shell: bash
+        run: npm run typecheck
+
+      - name: Run Vitest
+        shell: bash
+        run: npm test
+
+  spec-reference:
+    name: Spec Reference
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PR body for spec reference
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          BODY="${{ github.event.pull_request.body }}"
+          if [[ "$BODY" != *"openspec/specs/"* ]]; then
+            echo "Pull requests must reference a spec path under openspec/specs/." >&2
+            exit 1
+          fi
+
+      - name: Skip spec reference gate on push
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: echo "Spec reference gate applies to pull requests only."

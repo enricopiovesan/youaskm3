@@ -1,0 +1,150 @@
+{
+  "tools": [
+    {
+      "name": "search",
+      "description": "Semantic and keyword hybrid search across indexed knowledge.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": ["query"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": ["results"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "remember",
+      "description": "Ingest and index new content from text, URLs, or files.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": ["source"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "accepted": {
+            "type": "boolean"
+          }
+        },
+        "required": ["accepted"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "recall",
+      "description": "Retrieve knowledge by topic, date, source, or tag.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "filter": {
+            "type": "string"
+          }
+        },
+        "required": ["filter"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "matches": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": ["matches"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "connect",
+      "description": "Surface connections between concepts across the knowledge base.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string"
+          }
+        },
+        "required": ["topic"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "connections": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": ["connections"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_sources",
+      "description": "List all indexed sources with metadata.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": ["sources"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "status",
+      "description": "Report index status, last sync, and coverage information.",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": ["status"],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+title: youaskm3
+message: "If you use this project in research or teaching, please cite it with the metadata below."
+type: software
+authors:
+  - family-names: Piovesan
+    given-names: Enrico
+    email: enrico.piovesan10@gmail.com
+repository-code: "https://github.com/enricopiovesan/youaskm3"
+url: "https://github.com/enricopiovesan/youaskm3"
+abstract: >-
+  youaskm3 is an open source, WASM-native, MCP-powered personal knowledge layer
+  that keeps knowledge queryable through git-native, portable infrastructure.
+license: "MIT OR Apache-2.0"
+version: 0.1.0
+date-released: 2026-04-01

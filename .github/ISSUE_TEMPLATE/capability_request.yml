@@ -1,0 +1,33 @@
+name: Capability request
+description: Propose a spec-governed capability or milestone task.
+title: "capability: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the capability and what problem it solves.
+    validations:
+      required: true
+  - type: input
+    id: spec_section
+    attributes:
+      label: Spec section
+      description: Reference the governing section in SPEC.md or the proposed spec path.
+      placeholder: SPEC.md section 8 or openspec/specs/[capability]/spec.md
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List the criteria that would make the capability complete.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Add context, constraints, or design notes from the reference docs.

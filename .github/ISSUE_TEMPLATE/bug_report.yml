@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a defect against an existing spec or validated workflow.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the problem and why it matters.
+    validations:
+      required: true
+  - type: input
+    id: spec_reference
+    attributes:
+      label: Spec reference
+      description: Link the relevant spec path if one exists.
+      placeholder: openspec/specs/[capability]/spec.md
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Share the steps needed to reproduce the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Explain the user-visible or contributor-visible impact.
+    validations:
+      required: true
