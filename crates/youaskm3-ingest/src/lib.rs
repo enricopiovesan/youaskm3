@@ -219,7 +219,10 @@ mod tests {
             render_pdf_markdown(&input),
             Err(PdfMarkdownError::MissingTitle)
         );
-        assert_eq!(PdfMarkdownError::MissingTitle.to_string(), "missing PDF title");
+        assert_eq!(
+            PdfMarkdownError::MissingTitle.to_string(),
+            "missing PDF title"
+        );
     }
 
     #[test]
