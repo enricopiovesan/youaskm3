@@ -67,9 +67,10 @@ pub fn render_pdf_markdown(input: &PdfMarkdownInput) -> Result<String, PdfMarkdo
 
     let paragraphs = normalize_pdf_text(extracted_text);
     let body = paragraphs.join("\n\n");
+    let source_line = render_source_line(source_path);
 
     Ok(format!(
-        "# {title}\n\n## Source\n\n- type: pdf\n- path: `{source_path}`\n- ingested_by: `pdf2m3`\n\n## Extracted Text\n\n{body}\n"
+        "# {title}\n\n## Source\n\n- type: pdf\n- {source_line}\n- ingested_by: `pdf2m3`\n\n## Extracted Text\n\n{body}\n"
     ))
 }
 
@@ -126,6 +127,10 @@ pub fn normalize_pdf_text(text: &str) -> Vec<String> {
     paragraphs
 }
 
+fn render_source_line(source_path: &str) -> String {
+    format!("path: {}", source_path.trim())
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
@@ -167,9 +172,22 @@ mod tests {
             extracted_text: "First paragraph.\nStill first paragraph.\n\nSecond paragraph."
                 .to_string(),
         };
-        let expected = "# Universal Microservices Architecture\n\n## Source\n\n- type: pdf\n- path: `ref/book.pdf`\n- ingested_by: `pdf2m3`\n\n## Extracted Text\n\nFirst paragraph. Still first paragraph.\n\nSecond paragraph.\n";
+        let expected = "# Universal Microservices Architecture\n\n## Source\n\n- type: pdf\n- path: ref/book.pdf\n- ingested_by: `pdf2m3`\n\n## Extracted Text\n\nFirst paragraph. Still first paragraph.\n\nSecond paragraph.\n";
 
         assert_eq!(render_pdf_markdown(&input), Ok(expected.to_string()));
+    }
+
+    #[test]
+    fn render_pdf_markdown_keeps_source_label_with_backticks_stable() {
+        let input = PdfMarkdownInput {
+            title: "Example".to_string(),
+            source_path: "notes/`quoted`.pdf".to_string(),
+            extracted_text: "Paragraph.".to_string(),
+        };
+
+        let markdown = render_pdf_markdown(&input).expect("rendering markdown should succeed");
+
+        assert!(markdown.contains("- path: notes/`quoted`.pdf\n"));
     }
 
     #[test]
