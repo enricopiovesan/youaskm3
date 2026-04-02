@@ -185,7 +185,10 @@ mod tests {
             extracted_text: "Paragraph.".to_string(),
         };
 
-        let markdown = render_pdf_markdown(&input).expect("rendering markdown should succeed");
+        let markdown_result = render_pdf_markdown(&input);
+
+        assert!(markdown_result.is_ok());
+        let markdown = markdown_result.unwrap_or_default();
 
         assert!(markdown.contains("- path: notes/`quoted`.pdf\n"));
     }
@@ -201,6 +204,47 @@ mod tests {
         assert_eq!(
             render_pdf_markdown(&input),
             Err(PdfMarkdownError::MissingExtractedText)
+        );
+    }
+
+    #[test]
+    fn render_pdf_markdown_rejects_missing_title() {
+        let input = PdfMarkdownInput {
+            title: "   ".to_string(),
+            source_path: "ref/example.pdf".to_string(),
+            extracted_text: "Paragraph.".to_string(),
+        };
+
+        assert_eq!(
+            render_pdf_markdown(&input),
+            Err(PdfMarkdownError::MissingTitle)
+        );
+        assert_eq!(PdfMarkdownError::MissingTitle.to_string(), "missing PDF title");
+    }
+
+    #[test]
+    fn render_pdf_markdown_rejects_missing_source_path() {
+        let input = PdfMarkdownInput {
+            title: "Example".to_string(),
+            source_path: "   ".to_string(),
+            extracted_text: "Paragraph.".to_string(),
+        };
+
+        assert_eq!(
+            render_pdf_markdown(&input),
+            Err(PdfMarkdownError::MissingSourcePath)
+        );
+        assert_eq!(
+            PdfMarkdownError::MissingSourcePath.to_string(),
+            "missing PDF source path"
+        );
+    }
+
+    #[test]
+    fn missing_extracted_text_error_has_stable_message() {
+        assert_eq!(
+            PdfMarkdownError::MissingExtractedText.to_string(),
+            "missing extracted PDF text"
         );
     }
 }
