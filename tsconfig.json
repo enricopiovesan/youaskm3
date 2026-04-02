@@ -6,8 +6,10 @@
     "noUnusedParameters": true,
     "exactOptionalPropertyTypes": true,
     "target": "ES2022",
+    "lib": ["ES2022", "DOM", "ESNext"],
     "module": "ESNext",
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "types": ["node", "vitest/globals"]
   },
   "include": ["app/**/*.ts"]
 }
