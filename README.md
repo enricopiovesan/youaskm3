@@ -1,4 +1,7 @@
+<img width="1434" height="944" alt="Screenshot 2026-04-01 at 10 12 08 PM" src="https://github.com/user-attachments/assets/6127686f-e00c-458e-b108-26679f4b2ddc" />
+
 # youaskm3
+
 
 your knowledge, queryable
 
@@ -14,7 +17,7 @@ Most personal knowledge tooling traps context inside proprietary silos, hosted b
 
 ## How it works
 
-The system keeps specs in `openspec/specs/`, business logic in Rust crates that compile to `wasm32-wasip1`, frontend glue in strict TypeScript, and knowledge artifacts in markdown and static indexes tracked by git. A future `m3` workflow will ingest content into `knowledge/`, generate indexes at build time, and expose that knowledge through a WASM MCP module that can run in the browser, CLI, or other hosts.
+The system keeps specs in `openspec/specs/`, business logic in Rust crates that compile to `wasm32-wasip1`, frontend glue in strict TypeScript, and knowledge artifacts in markdown and static indexes tracked by git. A future `m3` workflow will ingest content into `knowledge/`, generate indexes at build time, and expose that knowledge through the approved Traverse v0.1 app-consumable runtime, browser consumer, and MCP release surfaces.
 
 ## Milestones
 
@@ -35,7 +38,7 @@ Roadmap source: [SPEC.md](SPEC.md#8-milestones) and [GitHub Project 3](https://g
 |---|---|
 | Business logic | Rust to WASM |
 | MCP interface | WASM MCP module |
-| Runtime model | Traverse / UMA |
+| Runtime model | Traverse v0.1 / UMA |
 | UI | Web Components + PWA shell |
 | Scripting | TypeScript |
 | Knowledge format | Markdown + Mermaid + static JSON |
