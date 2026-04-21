@@ -1,9 +1,23 @@
 name: Capability request
-description: Propose a spec-governed capability or milestone task.
-title: "capability: "
+description: Propose a milestone-scoped, spec-governed capability or implementation task.
+title: "Mx: "
 labels:
   - enhancement
 body:
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: Milestone
+      description: Choose the milestone this ticket belongs to.
+      options:
+        - M0 - Foundation
+        - M1 - Knowledge layer
+        - M2 - WASM MCP core
+        - M3 - Chat interface
+        - M4 - Fork and run your own
+        - M5 - Federation
+    validations:
+      required: true
   - type: textarea
     id: summary
     attributes:
@@ -12,20 +26,25 @@ body:
     validations:
       required: true
   - type: input
-    id: spec_section
+    id: spec_reference
     attributes:
-      label: Spec section
-      description: Reference the governing section in SPEC.md or the proposed spec path.
-      placeholder: SPEC.md section 8 or openspec/specs/[capability]/spec.md
+      label: Spec reference
+      description: Reference the governing spec path and, if helpful, the relevant SPEC.md milestone section.
+      placeholder: openspec/specs/[capability]/spec.md; SPEC.md section 8
     validations:
       required: true
   - type: textarea
-    id: acceptance
+    id: definition_of_done
     attributes:
-      label: Acceptance criteria
-      description: List the criteria that would make the capability complete.
+      label: Definition of done
+      description: List the concrete conditions that must be true before this ticket can be closed.
     validations:
       required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+      description: Call out nearby work that should not be included in this ticket.
   - type: textarea
     id: notes
     attributes:

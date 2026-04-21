@@ -35,6 +35,10 @@ jobs:
         shell: bash
         run: cargo install cargo-llvm-cov --locked
 
+      - name: Install npm dependencies for shared lint script
+        shell: bash
+        run: npm install
+
       - name: Run formatting and clippy gates
         shell: bash
         run: bash ./scripts/lint.sh
