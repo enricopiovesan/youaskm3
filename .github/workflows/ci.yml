@@ -15,6 +15,15 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v5
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install npm dependencies
+        shell: bash
+        run: npm ci
+
       - name: Set up Rust 1.94.0
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -115,9 +124,12 @@ jobs:
       - name: Check PR body for spec reference
         if: github.event_name == 'pull_request'
         shell: bash
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          BODY="${{ github.event.pull_request.body }}"
-          if [[ "$BODY" != *"openspec/specs/"* ]]; then
+          # IMPORTANT: Do not interpolate the PR body directly into the shell script,
+          # or backticks / $() can be evaluated by bash.
+          if [[ "${PR_BODY:-}" != *"openspec/specs/"* ]]; then
             echo "Pull requests must reference a spec path under openspec/specs/." >&2
             exit 1
           fi
