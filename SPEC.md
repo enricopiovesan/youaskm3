@@ -42,7 +42,7 @@ Anyone can fork it, fill it with their own knowledge, and run their own instance
 |---|---|---|
 | Business logic | **Rust → WASM** | Portable, safe, fast. Runs anywhere. |
 | WASM runtime | **Wasmtime** (CLI/server) / **browser native** | Same module, different host |
-| Runtime model | **Traverse / UMA** | Contract-driven, governed, explainable |
+| Runtime model | **Traverse v0.1 / UMA** | Contract-driven, governed, explainable release surface |
 | MCP interface | **WASM MCP module** | Portable MCP server compiled to WASM |
 
 ### Frontend
@@ -166,6 +166,17 @@ idea → /openspec:proposal → proposal.md + design.md + tasks.md + spec delta
 - A PR that drifts from the approved spec must update the spec first (new proposal cycle).
 - Spec changes require explicit review — they are not incidental to code review.
 - The spec is the contract. If code and spec disagree, the spec wins.
+
+### Traverse integration baseline
+
+youaskm3 integrates with Traverse through documented public release surfaces instead of private Traverse internals. The current baseline is the Traverse v0.1 app-consumable release path:
+
+- versioned consumer bundle: Traverse `docs/app-consumable-consumer-bundle.md`
+- browser-hosted path: Traverse browser consumer package and browser adapter docs
+- MCP-facing path: Traverse `traverse-mcp` stdio server and MCP library surface
+- validation path: Traverse `youaskm3` integration, compatibility conformance, published artifact, and real shell validation scripts
+
+Roadmap work that touches runtime, MCP, browser hosting, or fork-and-run setup must pin an approved Traverse release pairing and include the relevant Traverse validation path.
 
 ### Spec format (OpenSpec)
 
@@ -293,17 +304,19 @@ Dual-licensed: **MIT** and **Apache-2.0**. Users choose.
 - [ ] Spec: `openspec/specs/mcp-interface/spec.md`
 - [ ] `contracts/mcp-tools.json` — UMA contracts for all MCP tools
 - [ ] `youaskm3-search` crate: WASM vector search
-- [ ] `youaskm3-mcp` crate: WASM MCP server module
-- [ ] MCP tools: `search`, `remember`, `recall`, `connect`
-- [ ] Runs in browser (browser WASM), CLI (wasmtime), edge
-- [ ] Built on Traverse runtime model
+- [ ] Traverse v0.1 release pairing pinned for runtime, browser consumer, and MCP surfaces
+- [ ] `youaskm3-mcp` crate acts as a thin integration adapter over the supported Traverse MCP/library surface where possible
+- [ ] MCP tools: `search`, `remember`, `recall`, `connect` mapped to contract-defined Traverse-compatible tool semantics
+- [ ] Runs through documented Traverse MCP/CLI validation paths before claiming browser, CLI, or edge compatibility
+- [ ] Built on the Traverse v0.1 app-consumable runtime model, not a bespoke runtime fork
 - [ ] 100% test coverage on all crates
 
 ### M3 — Chat interface *(v0.3)*
 - [ ] Spec: `openspec/specs/pwa-shell/spec.md`
 - [ ] PWA shell: installable, offline-capable
 - [ ] Web Components: `<m3-chat>`, `<m3-result>`, `<m3-source>`
-- [ ] WASM MCP runs client-side — zero server cost
+- [ ] Browser-hosted runtime path consumes the Traverse browser consumer package/adapter or its approved release successor
+- [ ] WASM/MCP behavior is validated through the Traverse `youaskm3` real shell validation path
 - [ ] youaskm3.com serves author's instance
 - [ ] Claude API integration (configurable key)
 - [ ] Works with any MCP-compatible LLM
@@ -313,6 +326,7 @@ Dual-licensed: **MIT** and **Apache-2.0**. Users choose.
 - [ ] `m3 build` — generates index, compiles WASM, prepares site
 - [ ] `m3 sync` — incremental re-index on content changes
 - [ ] GitHub Actions template included in repo
+- [ ] Traverse release pairing and compatibility conformance commands documented for forked instances
 - [ ] One-command setup documented in README
 - [ ] Setup time target: under 15 minutes
 
