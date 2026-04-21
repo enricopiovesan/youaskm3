@@ -102,3 +102,9 @@ Follow this path from start to finish:
 ## Issues
 
 Use the issue templates when possible so work lands with enough context to route cleanly through the project board and milestone workflow.
+
+Every capability or milestone ticket should include:
+
+- the target milestone
+- the governing spec reference under `openspec/specs/` or the relevant `SPEC.md` section
+- a concrete definition of done that can be used to decide whether the issue is actually complete
