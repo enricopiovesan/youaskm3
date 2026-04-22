@@ -9,5 +9,8 @@ rust-version.workspace = true
 [lib]
 path = "src/lib.rs"
 
+[dependencies]
+youaskm3-search = { path = "../youaskm3-search" }
+
 [lints]
 workspace = true
