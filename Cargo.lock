@@ -13,6 +13,9 @@ version = "0.1.0"
 [[package]]
 name = "youaskm3-mcp"
 version = "0.1.0"
+dependencies = [
+ "youaskm3-search",
+]
 
 [[package]]
 name = "youaskm3-search"
