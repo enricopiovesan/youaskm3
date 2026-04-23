@@ -13,4 +13,4 @@ This directory is the source-controlled knowledge store for a youaskm3 instance.
 
 ## Ingest path
 
-`m3 add` will populate this structure in M1. Until then, this index defines the intended layout and keeps the repository structure explicit for contributors.
+`m3 add` now routes PDF inputs into `knowledge/papers/<name>/index.md` through the existing `pdf2m3` ingest path. This index still defines the intended layout and keeps the repository structure explicit for contributors.

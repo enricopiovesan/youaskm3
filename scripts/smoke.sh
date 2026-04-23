@@ -41,6 +41,9 @@ require_cmd ruby
 
 cd "$ROOT_DIR"
 
+echo "Validating m3 add ingest routing..."
+bash ./scripts/m3-add-smoke.sh
+
 echo "Running lint checks..."
 bash ./scripts/lint.sh
 
