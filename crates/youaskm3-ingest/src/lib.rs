@@ -43,6 +43,73 @@ impl fmt::Display for PdfMarkdownError {
 
 impl std::error::Error for PdfMarkdownError {}
 
+/// Markdown content ready to be split into index-friendly chunks.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MarkdownChunkInput {
+    /// Human-readable title shared by generated chunks.
+    pub title: String,
+    /// Source path used for traceability and deterministic chunk identifiers.
+    pub source_path: String,
+    /// Markdown body to split into chunks.
+    pub markdown: String,
+}
+
+/// Configuration for deterministic markdown chunking.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ChunkingOptions {
+    /// Maximum number of UTF-8 bytes allowed in each chunk body.
+    pub max_chunk_bytes: usize,
+}
+
+impl ChunkingOptions {
+    /// Creates chunking options from a maximum byte size.
+    #[must_use]
+    pub const fn new(max_chunk_bytes: usize) -> Self {
+        Self { max_chunk_bytes }
+    }
+}
+
+/// One deterministic markdown chunk produced by the ingest crate.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MarkdownChunk {
+    /// Stable chunk identifier derived from the source path and sequence.
+    pub id: String,
+    /// One-based chunk sequence within the source document.
+    pub sequence: usize,
+    /// Human-readable source title.
+    pub title: String,
+    /// Source path copied from the input for traceability.
+    pub source_path: String,
+    /// Markdown content assigned to this chunk.
+    pub markdown: String,
+}
+
+/// Errors returned when markdown chunking input is incomplete or invalid.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MarkdownChunkError {
+    /// The title was empty after trimming.
+    MissingTitle,
+    /// The source path was empty after trimming.
+    MissingSourcePath,
+    /// The markdown body was empty after trimming.
+    MissingMarkdown,
+    /// The configured chunk size was zero.
+    InvalidChunkSize,
+}
+
+impl fmt::Display for MarkdownChunkError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::MissingTitle => f.write_str("missing markdown title"),
+            Self::MissingSourcePath => f.write_str("missing markdown source path"),
+            Self::MissingMarkdown => f.write_str("missing markdown content"),
+            Self::InvalidChunkSize => f.write_str("invalid markdown chunk size"),
+        }
+    }
+}
+
+impl std::error::Error for MarkdownChunkError {}
+
 /// Builds a stable markdown artifact from extracted PDF text.
 ///
 /// # Errors
@@ -127,6 +194,111 @@ pub fn normalize_pdf_text(text: &str) -> Vec<String> {
     paragraphs
 }
 
+/// Splits markdown into deterministic source-aware chunks.
+///
+/// Paragraphs are packed in order until adding another paragraph would exceed
+/// `max_chunk_bytes`. Paragraphs larger than the limit become their own chunk
+/// so content is never dropped or rewritten.
+///
+/// # Errors
+///
+/// Returns an error when the title, source path, or markdown body is empty, or
+/// when the configured chunk size is zero.
+pub fn chunk_markdown(
+    input: &MarkdownChunkInput,
+    options: ChunkingOptions,
+) -> Result<Vec<MarkdownChunk>, MarkdownChunkError> {
+    let title = input.title.trim();
+    let source_path = input.source_path.trim();
+    let markdown = input.markdown.trim();
+
+    if title.is_empty() {
+        return Err(MarkdownChunkError::MissingTitle);
+    }
+
+    if source_path.is_empty() {
+        return Err(MarkdownChunkError::MissingSourcePath);
+    }
+
+    if markdown.is_empty() {
+        return Err(MarkdownChunkError::MissingMarkdown);
+    }
+
+    if options.max_chunk_bytes == 0 {
+        return Err(MarkdownChunkError::InvalidChunkSize);
+    }
+
+    let paragraphs = normalize_pdf_text(markdown);
+    let chunk_bodies = pack_paragraphs(&paragraphs, options.max_chunk_bytes);
+
+    Ok(chunk_bodies
+        .into_iter()
+        .enumerate()
+        .map(|(index, body)| {
+            let sequence = index + 1;
+            MarkdownChunk {
+                id: format!("{}#chunk-{sequence:04}", stable_source_id(source_path)),
+                sequence,
+                title: title.to_string(),
+                source_path: source_path.to_string(),
+                markdown: body,
+            }
+        })
+        .collect())
+}
+
+fn pack_paragraphs(paragraphs: &[String], max_chunk_bytes: usize) -> Vec<String> {
+    let mut chunks = Vec::new();
+    let mut current = String::new();
+
+    for paragraph in paragraphs {
+        let candidate_len = if current.is_empty() {
+            paragraph.len()
+        } else {
+            current.len() + 2 + paragraph.len()
+        };
+
+        if !current.is_empty() && candidate_len > max_chunk_bytes {
+            chunks.push(current);
+            current = String::new();
+            append_paragraph(&mut current, paragraph);
+        } else {
+            append_paragraph(&mut current, paragraph);
+        }
+    }
+
+    if !current.is_empty() {
+        chunks.push(current);
+    }
+
+    chunks
+}
+
+fn append_paragraph(current: &mut String, paragraph: &str) {
+    if !current.is_empty() {
+        current.push_str("\n\n");
+    }
+
+    current.push_str(paragraph);
+}
+
+fn stable_source_id(source_path: &str) -> String {
+    source_path
+        .chars()
+        .map(|character| {
+            if character.is_ascii_alphanumeric() {
+                character.to_ascii_lowercase()
+            } else {
+                '-'
+            }
+        })
+        .collect::<String>()
+        .split('-')
+        .filter(|part| !part.is_empty())
+        .collect::<Vec<_>>()
+        .join("-")
+}
+
 fn render_source_line(source_path: &str) -> String {
     format!("path: {}", source_path.trim())
 }
@@ -134,7 +306,8 @@ fn render_source_line(source_path: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::{
-        PdfMarkdownError, PdfMarkdownInput, crate_name, derive_title_from_path, normalize_pdf_text,
+        ChunkingOptions, MarkdownChunk, MarkdownChunkError, MarkdownChunkInput, PdfMarkdownError,
+        PdfMarkdownInput, chunk_markdown, crate_name, derive_title_from_path, normalize_pdf_text,
         render_pdf_markdown,
     };
 
@@ -248,6 +421,121 @@ mod tests {
         assert_eq!(
             PdfMarkdownError::MissingExtractedText.to_string(),
             "missing extracted PDF text"
+        );
+    }
+
+    #[test]
+    fn chunk_markdown_packs_paragraphs_deterministically() {
+        let input = MarkdownChunkInput {
+            title: "Portable Knowledge".to_string(),
+            source_path: "knowledge/books/Portable Knowledge/index.md".to_string(),
+            markdown: "Alpha paragraph.\n\nBeta paragraph is longer.\n\nGamma.".to_string(),
+        };
+
+        let chunks = chunk_markdown(&input, ChunkingOptions::new(36));
+
+        assert_eq!(
+            chunks,
+            Ok(vec![
+                MarkdownChunk {
+                    id: "knowledge-books-portable-knowledge-index-md#chunk-0001".to_string(),
+                    sequence: 1,
+                    title: "Portable Knowledge".to_string(),
+                    source_path: "knowledge/books/Portable Knowledge/index.md".to_string(),
+                    markdown: "Alpha paragraph.".to_string(),
+                },
+                MarkdownChunk {
+                    id: "knowledge-books-portable-knowledge-index-md#chunk-0002".to_string(),
+                    sequence: 2,
+                    title: "Portable Knowledge".to_string(),
+                    source_path: "knowledge/books/Portable Knowledge/index.md".to_string(),
+                    markdown: "Beta paragraph is longer.\n\nGamma.".to_string(),
+                },
+            ])
+        );
+    }
+
+    #[test]
+    fn chunk_markdown_keeps_oversized_paragraph_intact() {
+        let input = MarkdownChunkInput {
+            title: "Example".to_string(),
+            source_path: "knowledge/papers/example.md".to_string(),
+            markdown: "A very long paragraph that exceeds the configured limit.".to_string(),
+        };
+
+        let chunks = chunk_markdown(&input, ChunkingOptions::new(8));
+
+        assert!(chunks.is_ok());
+        assert_eq!(chunks.unwrap_or_default().len(), 1);
+    }
+
+    #[test]
+    fn chunk_markdown_rejects_incomplete_input() {
+        let valid = MarkdownChunkInput {
+            title: "Example".to_string(),
+            source_path: "knowledge/example.md".to_string(),
+            markdown: "Body.".to_string(),
+        };
+
+        assert_eq!(
+            chunk_markdown(
+                &MarkdownChunkInput {
+                    title: " ".to_string(),
+                    ..valid.clone()
+                },
+                ChunkingOptions::new(10)
+            ),
+            Err(MarkdownChunkError::MissingTitle)
+        );
+        assert_eq!(
+            MarkdownChunkError::MissingTitle.to_string(),
+            "missing markdown title"
+        );
+        assert_eq!(
+            chunk_markdown(
+                &MarkdownChunkInput {
+                    source_path: " ".to_string(),
+                    ..valid.clone()
+                },
+                ChunkingOptions::new(10)
+            ),
+            Err(MarkdownChunkError::MissingSourcePath)
+        );
+        assert_eq!(
+            MarkdownChunkError::MissingSourcePath.to_string(),
+            "missing markdown source path"
+        );
+        assert_eq!(
+            chunk_markdown(
+                &MarkdownChunkInput {
+                    markdown: " ".to_string(),
+                    ..valid
+                },
+                ChunkingOptions::new(10)
+            ),
+            Err(MarkdownChunkError::MissingMarkdown)
+        );
+        assert_eq!(
+            MarkdownChunkError::MissingMarkdown.to_string(),
+            "missing markdown content"
+        );
+    }
+
+    #[test]
+    fn chunk_markdown_rejects_invalid_chunk_size() {
+        let input = MarkdownChunkInput {
+            title: "Example".to_string(),
+            source_path: "knowledge/example.md".to_string(),
+            markdown: "Body.".to_string(),
+        };
+
+        assert_eq!(
+            chunk_markdown(&input, ChunkingOptions::new(0)),
+            Err(MarkdownChunkError::InvalidChunkSize)
+        );
+        assert_eq!(
+            MarkdownChunkError::InvalidChunkSize.to_string(),
+            "invalid markdown chunk size"
         );
     }
 }
