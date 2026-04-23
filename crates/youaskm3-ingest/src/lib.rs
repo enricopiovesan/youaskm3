@@ -20,6 +20,17 @@ pub struct PdfMarkdownInput {
     pub extracted_text: String,
 }
 
+/// Metadata and captured text needed to render a URL-backed markdown artifact.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UrlMarkdownInput {
+    /// Human-readable title for the generated document.
+    pub title: String,
+    /// Source URL used for traceability.
+    pub source_url: String,
+    /// Captured text content fetched from the URL.
+    pub captured_text: String,
+}
+
 /// Errors returned when PDF ingest input is incomplete.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PdfMarkdownError {
@@ -42,6 +53,29 @@ impl fmt::Display for PdfMarkdownError {
 }
 
 impl std::error::Error for PdfMarkdownError {}
+
+/// Errors returned when URL ingest input is incomplete.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum UrlMarkdownError {
+    /// The title was empty after trimming.
+    MissingTitle,
+    /// The source URL was empty after trimming.
+    MissingSourceUrl,
+    /// The captured text was empty after trimming.
+    MissingCapturedText,
+}
+
+impl fmt::Display for UrlMarkdownError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::MissingTitle => f.write_str("missing URL title"),
+            Self::MissingSourceUrl => f.write_str("missing source URL"),
+            Self::MissingCapturedText => f.write_str("missing captured URL text"),
+        }
+    }
+}
+
+impl std::error::Error for UrlMarkdownError {}
 
 /// Markdown content ready to be split into index-friendly chunks.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -141,6 +175,36 @@ pub fn render_pdf_markdown(input: &PdfMarkdownInput) -> Result<String, PdfMarkdo
     ))
 }
 
+/// Builds a stable markdown artifact from URL-captured text.
+///
+/// # Errors
+///
+/// Returns an error if the title, source URL, or captured text is empty after trimming.
+pub fn render_url_markdown(input: &UrlMarkdownInput) -> Result<String, UrlMarkdownError> {
+    let title = input.title.trim();
+    let source_url = input.source_url.trim();
+    let captured_text = input.captured_text.trim();
+
+    if title.is_empty() {
+        return Err(UrlMarkdownError::MissingTitle);
+    }
+
+    if source_url.is_empty() {
+        return Err(UrlMarkdownError::MissingSourceUrl);
+    }
+
+    if captured_text.is_empty() {
+        return Err(UrlMarkdownError::MissingCapturedText);
+    }
+
+    let paragraphs = normalize_pdf_text(captured_text);
+    let body = paragraphs.join("\n\n");
+
+    Ok(format!(
+        "# {title}\n\n## Source\n\n- type: url\n- url: {source_url}\n- ingested_by: `url2m3`\n\n## Captured Text\n\n{body}\n"
+    ))
+}
+
 /// Derives a human-readable title from a PDF file path or file name.
 #[must_use]
 pub fn derive_title_from_path(path: &str) -> String {
@@ -153,6 +217,35 @@ pub fn derive_title_from_path(path: &str) -> String {
         .unwrap_or(trimmed);
 
     let normalized = file_name
+        .chars()
+        .map(|character| {
+            if matches!(character, '-' | '_' | '.') {
+                ' '
+            } else {
+                character
+            }
+        })
+        .collect::<String>();
+
+    normalized.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+/// Derives a human-readable title from a URL.
+#[must_use]
+pub fn derive_title_from_url(url: &str) -> String {
+    let trimmed = url.trim().trim_end_matches('/');
+    let without_fragment = trimmed.split('#').next().unwrap_or(trimmed);
+    let without_query = without_fragment
+        .split('?')
+        .next()
+        .unwrap_or(without_fragment);
+    let last_segment = without_query
+        .rsplit('/')
+        .next()
+        .filter(|segment| !segment.is_empty())
+        .unwrap_or("url capture");
+
+    let normalized = last_segment
         .chars()
         .map(|character| {
             if matches!(character, '-' | '_' | '.') {
@@ -307,8 +400,9 @@ fn render_source_line(source_path: &str) -> String {
 mod tests {
     use super::{
         ChunkingOptions, MarkdownChunk, MarkdownChunkError, MarkdownChunkInput, PdfMarkdownError,
-        PdfMarkdownInput, chunk_markdown, crate_name, derive_title_from_path, normalize_pdf_text,
-        render_pdf_markdown,
+        PdfMarkdownInput, UrlMarkdownError, UrlMarkdownInput, chunk_markdown, crate_name,
+        derive_title_from_path, derive_title_from_url, normalize_pdf_text, render_pdf_markdown,
+        render_url_markdown,
     };
 
     #[test]
@@ -322,6 +416,15 @@ mod tests {
             derive_title_from_path("ref/Universal_Microservices-Architecture.pdf"),
             "Universal Microservices Architecture"
         );
+    }
+
+    #[test]
+    fn derive_title_from_url_uses_last_path_segment() {
+        assert_eq!(
+            derive_title_from_url("https://example.com/posts/portable-knowledge.html?ref=m3"),
+            "portable knowledge html"
+        );
+        assert_eq!(derive_title_from_url("https://example.com/"), "example com");
     }
 
     #[test]
@@ -364,6 +467,19 @@ mod tests {
         let markdown = markdown_result.unwrap_or_default();
 
         assert!(markdown.contains("- path: notes/`quoted`.pdf\n"));
+    }
+
+    #[test]
+    fn render_url_markdown_includes_traceability_metadata() {
+        let input = UrlMarkdownInput {
+            title: "Portable Knowledge".to_string(),
+            source_url: "https://example.com/portable-knowledge".to_string(),
+            captured_text: "First paragraph.\nStill first paragraph.\n\nSecond paragraph."
+                .to_string(),
+        };
+        let expected = "# Portable Knowledge\n\n## Source\n\n- type: url\n- url: https://example.com/portable-knowledge\n- ingested_by: `url2m3`\n\n## Captured Text\n\nFirst paragraph. Still first paragraph.\n\nSecond paragraph.\n";
+
+        assert_eq!(render_url_markdown(&input), Ok(expected.to_string()));
     }
 
     #[test]
@@ -421,6 +537,49 @@ mod tests {
         assert_eq!(
             PdfMarkdownError::MissingExtractedText.to_string(),
             "missing extracted PDF text"
+        );
+    }
+
+    #[test]
+    fn render_url_markdown_rejects_incomplete_input() {
+        let valid = UrlMarkdownInput {
+            title: "Example".to_string(),
+            source_url: "https://example.com".to_string(),
+            captured_text: "Body.".to_string(),
+        };
+
+        assert_eq!(
+            render_url_markdown(&UrlMarkdownInput {
+                title: " ".to_string(),
+                ..valid.clone()
+            }),
+            Err(UrlMarkdownError::MissingTitle)
+        );
+        assert_eq!(
+            UrlMarkdownError::MissingTitle.to_string(),
+            "missing URL title"
+        );
+        assert_eq!(
+            render_url_markdown(&UrlMarkdownInput {
+                source_url: " ".to_string(),
+                ..valid.clone()
+            }),
+            Err(UrlMarkdownError::MissingSourceUrl)
+        );
+        assert_eq!(
+            UrlMarkdownError::MissingSourceUrl.to_string(),
+            "missing source URL"
+        );
+        assert_eq!(
+            render_url_markdown(&UrlMarkdownInput {
+                captured_text: " ".to_string(),
+                ..valid
+            }),
+            Err(UrlMarkdownError::MissingCapturedText)
+        );
+        assert_eq!(
+            UrlMarkdownError::MissingCapturedText.to_string(),
+            "missing captured URL text"
         );
     }
 
