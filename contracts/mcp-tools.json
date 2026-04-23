@@ -19,11 +19,43 @@
           "results": {
             "type": "array",
             "items": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "excerpt": {
+                  "type": "string"
+                },
+                "source_path": {
+                  "type": "string"
+                },
+                "score": {
+                  "type": "number"
+                }
+              },
+              "required": ["id", "title", "excerpt", "source_path", "score"],
+              "additionalProperties": false
             }
           }
         },
         "required": ["results"],
+        "additionalProperties": false
+      },
+      "error_schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["code", "message"],
         "additionalProperties": false
       }
     },
@@ -35,9 +67,19 @@
         "properties": {
           "source": {
             "type": "string"
+          },
+          "source_type": {
+            "type": "string",
+            "enum": ["text", "url", "file"]
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
-        "required": ["source"],
+        "required": ["source", "source_type"],
         "additionalProperties": false
       },
       "output_schema": {
@@ -45,9 +87,28 @@
         "properties": {
           "accepted": {
             "type": "boolean"
+          },
+          "entry_id": {
+            "type": "string"
+          },
+          "stored_path": {
+            "type": "string"
           }
         },
-        "required": ["accepted"],
+        "required": ["accepted", "entry_id", "stored_path"],
+        "additionalProperties": false
+      },
+      "error_schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["code", "message"],
         "additionalProperties": false
       }
     },
@@ -70,11 +131,40 @@
           "matches": {
             "type": "array",
             "items": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "source_path": {
+                  "type": "string"
+                },
+                "matched_on": {
+                  "type": "string"
+                }
+              },
+              "required": ["id", "title", "source_path", "matched_on"],
+              "additionalProperties": false
             }
           }
         },
         "required": ["matches"],
+        "additionalProperties": false
+      },
+      "error_schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["code", "message"],
         "additionalProperties": false
       }
     },
@@ -97,11 +187,40 @@
           "connections": {
             "type": "array",
             "items": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string"
+                },
+                "to": {
+                  "type": "string"
+                },
+                "relationship": {
+                  "type": "string"
+                },
+                "supporting_source_path": {
+                  "type": "string"
+                }
+              },
+              "required": ["from", "to", "relationship", "supporting_source_path"],
+              "additionalProperties": false
             }
           }
         },
         "required": ["connections"],
+        "additionalProperties": false
+      },
+      "error_schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["code", "message"],
         "additionalProperties": false
       }
     },
@@ -119,11 +238,40 @@
           "sources": {
             "type": "array",
             "items": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "source_type": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": ["id", "title", "source_type", "path"],
+              "additionalProperties": false
             }
           }
         },
         "required": ["sources"],
+        "additionalProperties": false
+      },
+      "error_schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["code", "message"],
         "additionalProperties": false
       }
     },
@@ -140,9 +288,29 @@
         "properties": {
           "status": {
             "type": "string"
+          },
+          "last_sync_at": {
+            "type": ["string", "null"]
+          },
+          "indexed_sources": {
+            "type": "integer",
+            "minimum": 0
           }
         },
-        "required": ["status"],
+        "required": ["status", "last_sync_at", "indexed_sources"],
+        "additionalProperties": false
+      },
+      "error_schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["code", "message"],
         "additionalProperties": false
       }
     }

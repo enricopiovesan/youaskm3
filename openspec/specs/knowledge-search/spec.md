@@ -25,3 +25,23 @@ The system SHALL preserve enough source context in search responses to let downs
 - GIVEN multiple knowledge files match a query
 - WHEN the search capability ranks and returns results
 - THEN each result can be associated with a source path or equivalent metadata
+
+### Requirement: Generate a deterministic knowledge index
+
+The system SHALL define a deterministic generation flow for `knowledge/index.md` that derives the master map from processed knowledge content rather than hand-maintained search metadata.
+
+#### Scenario: Refresh the master knowledge map
+
+- GIVEN processed markdown artifacts exist under `knowledge/books/`, `knowledge/papers/`, and `knowledge/blog/`
+- WHEN the index generation flow runs
+- THEN `knowledge/index.md` is updated from those artifacts with stable ordering, source paths, and category counts
+
+### Requirement: Separate raw captures from searchable artifacts
+
+The system SHALL exclude raw captures under `knowledge/inputs/` from the searchable index until an ingest workflow promotes them into a processed knowledge category.
+
+#### Scenario: Leave captured notes out of search results
+
+- GIVEN a raw transcript is stored under `knowledge/inputs/transcripts/`
+- WHEN the knowledge index is regenerated
+- THEN the transcript is reported as pending ingest instead of being treated as searchable knowledge
