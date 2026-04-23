@@ -18,6 +18,7 @@ cleanup() {
 trap cleanup EXIT
 
 mkdir -p "$FAKE_BIN_DIR"
+mkdir -p "$ROOT_DIR/ref"
 
 cat >"$FAKE_BIN_DIR/pdftotext" <<'EOF'
 #!/usr/bin/env bash
