@@ -83,6 +83,18 @@ export function browserComponentModulePath(): string {
   return "./components.js";
 }
 
+export function browserRuntimeModulePath(): string {
+  return "./runtime.js";
+}
+
+export function providerConfigPath(): string {
+  return "./provider-config.json";
+}
+
+export function authorInstancePath(): string {
+  return "./author-instance.json";
+}
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")

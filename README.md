@@ -22,6 +22,16 @@ The current M3 slice ships an installable static shell under `app/site/`. To val
 - run `bash scripts/pwa-shell-smoke.sh`
 - serve `app/site/` with a static file server such as `python3 -m http.server --directory app/site 4173`
 - open the served page in a browser and confirm the manifest and standalone shell are recognized
+- switch between provider profiles in the shell and confirm the selection persists in the browser
+- inspect `app/site/author-instance.json` and `app/site/provider-config.json` to verify what would be published with the static author instance
+
+## Provider configuration
+
+The current M3 provider slice keeps deployment static and portable:
+
+- `app/site/provider-config.json` defines the selectable provider profiles for the browser shell
+- `app/site/author-instance.json` defines the published author-instance metadata that ships with the static site
+- the browser demo profile remains the default publishable option, while hosted APIs stay explicit opt-in profiles that require user-supplied credentials in-browser
 
 ## How it works
 
