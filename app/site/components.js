@@ -1,5 +1,7 @@
 import { callBrowserTool, TOOL_DESCRIPTORS } from "./runtime.js";
 
+const PROVIDER_STORAGE_KEY = "youaskm3.provider-config";
+
 const styles = `
   :host {
     display: block;
@@ -80,6 +82,36 @@ const styles = `
   .tool-copy {
     display: grid;
     gap: 4px;
+  }
+
+  .provider-shell {
+    display: grid;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(23, 53, 47, 0.04);
+    border: 1px solid rgba(23, 53, 47, 0.08);
+  }
+
+  .provider-grid {
+    display: grid;
+    gap: 10px;
+  }
+
+  select,
+  input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(23, 53, 47, 0.14);
+    background: rgba(255, 252, 246, 0.9);
+    font: inherit;
+  }
+
+  .provider-meta,
+  .instance-meta {
+    color: #587168;
+    line-height: 1.6;
   }
 
   textarea {
@@ -288,6 +320,15 @@ class M3Chat extends HTMLElement {
     const toolName = this.getAttribute("tool") ?? "search";
     const toolDescription =
       TOOL_DESCRIPTORS.find((tool) => tool.name === toolName)?.description ?? "";
+    const providerLabel = this.getAttribute("provider-label") ?? "Browser demo";
+    const providerSummary = this.getAttribute("provider-summary") ?? "";
+    const providerOptions = JSON.parse(
+      this.getAttribute("provider-options") ?? "[]"
+    );
+    const providerAuth = this.getAttribute("provider-auth") ?? "none";
+    const instanceTitle =
+      this.getAttribute("instance-title") ?? "youaskm3 author instance";
+    const instanceUrl = this.getAttribute("instance-url") ?? "";
 
     root.innerHTML = template(`
       <section class="chat-shell">
@@ -313,6 +354,35 @@ class M3Chat extends HTMLElement {
               Tool input
               <textarea id="runtime-input">${escapeHtml(this.getAttribute("input") ?? "")}</textarea>
             </label>
+            <section class="provider-shell">
+              <strong>Provider configuration</strong>
+              <div class="provider-grid">
+                <label>
+                  Active provider
+                  <select id="provider-select">
+                    ${providerOptions
+                      .map(
+                        (provider) => `
+                          <option value="${escapeHtml(provider.id)}" ${provider.label === providerLabel ? "selected" : ""}>
+                            ${escapeHtml(provider.label)}
+                          </option>
+                        `
+                      )
+                      .join("")}
+                  </select>
+                </label>
+                <div class="provider-meta">${escapeHtml(providerSummary)}</div>
+                <label ${providerAuth === "api-key" ? "" : 'style="display:none"'}>
+                  Provider API key
+                  <input
+                    id="provider-key"
+                    type="password"
+                    autocomplete="off"
+                    placeholder="stored only in this browser session"
+                  />
+                </label>
+              </div>
+            </section>
           </div>
           <slot name="result"></slot>
           <div class="runtime-note">
@@ -322,6 +392,13 @@ class M3Chat extends HTMLElement {
         <aside class="panel">
           <div class="sources">
             <slot name="sources"></slot>
+          </div>
+          <div class="runtime-note">
+            <strong>Published author instance</strong>
+            <div class="instance-meta">
+              ${escapeHtml(instanceTitle)} is configured to publish from
+              ${escapeHtml(instanceUrl || "the current static shell URL")}.
+            </div>
           </div>
         </aside>
       </section>
@@ -355,6 +432,16 @@ class M3Chat extends HTMLElement {
         })
       );
     });
+
+    root.querySelector("#provider-select")?.addEventListener("change", (event) => {
+      const value = event.target instanceof HTMLSelectElement ? event.target.value : "";
+      this.dispatchEvent(
+        new CustomEvent("providerchange", {
+          detail: { providerId: value },
+          bubbles: true
+        })
+      );
+    });
   }
 }
 
@@ -371,6 +458,56 @@ for (const [name, element] of registrations) {
 }
 
 const shell = document.querySelector("m3-chat");
+let providerConfig = null;
+let authorInstance = null;
+
+async function loadProviderConfig() {
+  const response = await fetch("./provider-config.json");
+  if (!response.ok) {
+    throw new Error("failed to load provider-config.json");
+  }
+
+  const config = await response.json();
+  const persisted = window.localStorage.getItem(PROVIDER_STORAGE_KEY);
+  if (!persisted) {
+    return config;
+  }
+
+  try {
+    const parsed = JSON.parse(persisted);
+    return {
+      ...config,
+      activeProviderId: parsed.activeProviderId ?? config.activeProviderId
+    };
+  } catch {
+    return config;
+  }
+}
+
+async function loadAuthorInstance() {
+  const response = await fetch("./author-instance.json");
+  if (!response.ok) {
+    throw new Error("failed to load author-instance.json");
+  }
+
+  return response.json();
+}
+
+function activeProvider(config) {
+  return (
+    config.profiles.find((profile) => profile.id === config.activeProviderId) ??
+    config.profiles[0]
+  );
+}
+
+function providerSummary(profile) {
+  const authCopy =
+    profile.auth === "api-key"
+      ? "expects a user-supplied API key"
+      : "runs without a remote API key";
+
+  return `${profile.label} uses ${profile.endpoint}, ${authCopy}, and hints ${profile.modelHint}.`;
+}
 
 function syncShell(toolName, input) {
   if (!(shell instanceof HTMLElement)) {
@@ -399,9 +536,22 @@ function syncShell(toolName, input) {
   const summary = toolToSummary(toolName, output);
   const sources = toolToSources(toolName, output);
   const result = shell.querySelector("m3-result");
+  const provider = providerConfig ? activeProvider(providerConfig) : null;
 
   shell.setAttribute("tool", toolName);
   shell.setAttribute("input", input);
+  shell.setAttribute("provider-label", provider?.label ?? "Browser demo");
+  shell.setAttribute("provider-summary", provider ? providerSummary(provider) : "");
+  shell.setAttribute("provider-auth", provider?.auth ?? "none");
+  shell.setAttribute(
+    "provider-options",
+    JSON.stringify(providerConfig?.profiles ?? [])
+  );
+  shell.setAttribute(
+    "instance-title",
+    authorInstance?.title ?? "youaskm3 author instance"
+  );
+  shell.setAttribute("instance-url", authorInstance?.shellUrl ?? window.location.href);
 
   if (result instanceof HTMLElement) {
     result.setAttribute("prompt", summary.prompt);
@@ -426,10 +576,18 @@ function syncShell(toolName, input) {
 
 if (shell instanceof HTMLElement) {
   let currentTool = shell.getAttribute("tool") ?? "search";
-  let currentInput =
-    shell.getAttribute("input") ?? "portable MCP clients";
+  let currentInput = shell.getAttribute("input") ?? "portable MCP clients";
 
-  syncShell(currentTool, currentInput);
+  Promise.all([loadProviderConfig(), loadAuthorInstance()])
+    .then(([config, manifest]) => {
+      providerConfig = config;
+      authorInstance = manifest;
+      syncShell(currentTool, currentInput);
+    })
+    .catch((error) => {
+      console.error("Failed to load browser shell config", error);
+      syncShell(currentTool, currentInput);
+    });
 
   shell.addEventListener("toolchange", (event) => {
     const detail = event instanceof CustomEvent ? event.detail : null;
@@ -440,6 +598,21 @@ if (shell instanceof HTMLElement) {
   shell.addEventListener("runtimeinput", (event) => {
     const detail = event instanceof CustomEvent ? event.detail : null;
     currentInput = detail?.value ?? currentInput;
+    syncShell(currentTool, currentInput);
+  });
+
+  shell.addEventListener("providerchange", (event) => {
+    const detail = event instanceof CustomEvent ? event.detail : null;
+    if (providerConfig && detail?.providerId) {
+      providerConfig = {
+        ...providerConfig,
+        activeProviderId: detail.providerId
+      };
+      window.localStorage.setItem(
+        PROVIDER_STORAGE_KEY,
+        JSON.stringify({ activeProviderId: detail.providerId })
+      );
+    }
     syncShell(currentTool, currentInput);
   });
 }

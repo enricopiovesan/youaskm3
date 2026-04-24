@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  authorInstancePath,
   browserComponentModulePath,
+  browserRuntimeModulePath,
   chatTagName,
   componentNamespace,
+  providerConfigPath,
   renderChatCard,
   renderResultCard,
   renderSourceCard,
@@ -23,6 +26,9 @@ describe("component tags", () => {
     expect(resultTagName()).toBe("m3-result");
     expect(sourceTagName()).toBe("m3-source");
     expect(browserComponentModulePath()).toBe("./components.js");
+    expect(browserRuntimeModulePath()).toBe("./runtime.js");
+    expect(providerConfigPath()).toBe("./provider-config.json");
+    expect(authorInstancePath()).toBe("./author-instance.json");
   });
 });
 

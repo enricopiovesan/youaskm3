@@ -1,0 +1,29 @@
+{
+  "activeProviderId": "browser-demo",
+  "profiles": [
+    {
+      "id": "browser-demo",
+      "label": "Browser demo",
+      "endpoint": "local://browser-runtime",
+      "auth": "none",
+      "modelHint": "contract-shaped local adapter",
+      "publishable": true
+    },
+    {
+      "id": "claude-api",
+      "label": "Claude API",
+      "endpoint": "https://api.anthropic.com/v1/messages",
+      "auth": "api-key",
+      "modelHint": "claude-sonnet or later",
+      "publishable": false
+    },
+    {
+      "id": "openai-api",
+      "label": "OpenAI API",
+      "endpoint": "https://api.openai.com/v1/responses",
+      "auth": "api-key",
+      "modelHint": "gpt-5 or later",
+      "publishable": false
+    }
+  ]
+}
