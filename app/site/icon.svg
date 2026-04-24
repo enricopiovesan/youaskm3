@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">youaskm3 icon</title>
+  <desc id="desc">Rounded square knowledge shell icon with a layered m3 monogram.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#17352f" />
+      <stop offset="100%" stop-color="#29584f" />
+    </linearGradient>
+    <linearGradient id="ink" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f7f0e3" />
+      <stop offset="100%" stop-color="#d6c3a1" />
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#bg)" />
+  <path
+    d="M53 171V83h27l27 44 27-44h27v88h-24v-49l-22 35h-16l-22-35v49Zm100 0V83h28l27 44 27-44h-11"
+    fill="none"
+    stroke="url(#ink)"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="17"
+  />
+</svg>

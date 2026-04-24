@@ -44,6 +44,9 @@ cd "$ROOT_DIR"
 echo "Validating m3 add ingest routing..."
 bash ./scripts/m3-add-smoke.sh
 
+echo "Validating PWA shell assets..."
+bash ./scripts/pwa-shell-smoke.sh
+
 echo "Running lint checks..."
 bash ./scripts/lint.sh
 
