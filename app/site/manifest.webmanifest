@@ -1,0 +1,18 @@
+{
+  "name": "youaskm3",
+  "short_name": "youaskm3",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4efe4",
+  "theme_color": "#17352f",
+  "description": "Portable personal knowledge layer shell for youaskm3.",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

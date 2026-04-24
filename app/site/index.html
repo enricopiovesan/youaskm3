@@ -3,12 +3,247 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#17352f" />
+    <meta
+      name="description"
+      content="Installable offline shell for the youaskm3 knowledge interface."
+    />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <title>youaskm3</title>
+    <style>
+      :root {
+        --bg: #f4efe4;
+        --paper: rgba(255, 252, 246, 0.9);
+        --ink: #17352f;
+        --muted: #587168;
+        --line: rgba(23, 53, 47, 0.14);
+        --accent: #bd8b39;
+        --accent-soft: rgba(189, 139, 57, 0.15);
+        --shadow: 0 24px 80px rgba(23, 53, 47, 0.12);
+        --radius: 28px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Georgia, "Times New Roman", serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(189, 139, 57, 0.18), transparent 28%),
+          linear-gradient(180deg, #fbf7f0 0%, var(--bg) 100%);
+      }
+
+      .shell {
+        width: min(1100px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0 40px;
+      }
+
+      .hero,
+      .panel {
+        backdrop-filter: blur(18px);
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        padding: 28px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        color: var(--ink);
+        font-size: 0.9rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 18px 0 12px;
+        font-size: clamp(2.4rem, 6vw, 4.8rem);
+        line-height: 0.94;
+        letter-spacing: -0.04em;
+      }
+
+      .hero p,
+      .panel p,
+      .sources li,
+      .status li {
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .hero-copy {
+        max-width: 44rem;
+        font-size: 1.08rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.45fr 0.95fr;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .panel {
+        padding: 24px;
+      }
+
+      .panel h2 {
+        margin: 0 0 14px;
+        font-size: 1.1rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .prompt {
+        margin: 0 0 16px;
+        padding: 16px 18px;
+        border-radius: 20px;
+        background: #efe7d8;
+        font-size: 1rem;
+      }
+
+      .answer {
+        margin: 0;
+        padding: 18px 18px 0;
+        border-top: 1px solid var(--line);
+        font-size: 1.02rem;
+      }
+
+      .sources {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 12px;
+      }
+
+      .sources li {
+        padding: 16px;
+        border-radius: 20px;
+        background: rgba(23, 53, 47, 0.04);
+        border: 1px solid rgba(23, 53, 47, 0.08);
+      }
+
+      .source-label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink);
+      }
+
+      .status {
+        margin: 16px 0 0;
+        padding-left: 18px;
+      }
+
+      .install-note {
+        margin-top: 20px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: rgba(23, 53, 47, 0.06);
+        border: 1px dashed rgba(23, 53, 47, 0.22);
+      }
+
+      @media (max-width: 860px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .shell {
+          width: min(100% - 20px, 720px);
+          padding-top: 20px;
+        }
+
+        .hero,
+        .panel {
+          padding: 20px;
+        }
+      }
+    </style>
   </head>
   <body>
-    <main>
-      <h1>youaskm3</h1>
-      <p>Foundation site placeholder for GitHub Pages.</p>
+    <main class="shell">
+      <section class="hero">
+        <div class="eyebrow">M3 PWA Shell Baseline</div>
+        <h1>your knowledge, installable</h1>
+        <p class="hero-copy">
+          This shell is the static, offline-capable container for the future
+          chat experience. It already includes manifest metadata, service worker
+          registration, and reserved surfaces for answer rendering and source
+          attribution.
+        </p>
+        <div class="install-note">
+          Install from a supported browser after Pages deployment to validate
+          the standalone shell path for M3.
+        </div>
+      </section>
+
+      <section class="grid" aria-label="PWA shell preview">
+        <article class="panel">
+          <h2>Conversation Shell</h2>
+          <p class="prompt">What did I save about portable MCP clients?</p>
+          <div class="answer">
+            <p>
+              Portable MCP work in youaskm3 is designed to remain source-aware,
+              client-runnable, and hosted as static assets instead of depending
+              on a bespoke server runtime.
+            </p>
+            <p>
+              This placeholder answer proves the shell can reserve a stable
+              response area while later milestones wire in the real runtime and
+              components.
+            </p>
+          </div>
+        </article>
+
+        <aside class="panel">
+          <h2>Sources</h2>
+          <ul class="sources">
+            <li>
+              <span class="source-label">Spec</span>
+              <strong>openspec/specs/mcp-interface/spec.md</strong>
+              <div>Defines the contract-shaped MCP surface for knowledge tools.</div>
+            </li>
+            <li>
+              <span class="source-label">Roadmap</span>
+              <strong>SPEC.md, M3 - Chat interface</strong>
+              <div>Requires an installable shell that can host the future client experience.</div>
+            </li>
+          </ul>
+
+          <h2 style="margin-top: 22px">Offline Status</h2>
+          <ul class="status">
+            <li>Manifest linked from the served HTML shell.</li>
+            <li>Service worker registers and caches the shell assets.</li>
+            <li>Static assets stay compatible with GitHub Pages deployment.</li>
+          </ul>
+        </aside>
+      </section>
     </main>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js").catch((error) => {
+            console.error("Service worker registration failed", error);
+          });
+        });
+      }
+    </script>
   </body>
 </html>

@@ -1,9 +1,0 @@
-{
-  "name": "youaskm3",
-  "short_name": "youaskm3",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#f6f2ea",
-  "theme_color": "#1f3c34",
-  "description": "Portable personal knowledge layer shell for youaskm3."
-}

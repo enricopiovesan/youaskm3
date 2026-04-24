@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy Placeholder Site
+    name: Deploy PWA Shell
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -29,7 +29,7 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload placeholder site artifact
+      - name: Upload PWA shell artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: app/site

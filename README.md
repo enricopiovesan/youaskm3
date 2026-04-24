@@ -15,6 +15,14 @@ Most personal knowledge tooling traps context inside proprietary silos, hosted b
 
 > Coming in M4. This milestone prepares the repository, specs, toolchain, and validation flow so a future contributor can implement the one-command setup path with confidence.
 
+## PWA shell validation
+
+The current M3 slice ships an installable static shell under `app/site/`. To validate it locally:
+
+- run `bash scripts/pwa-shell-smoke.sh`
+- serve `app/site/` with a static file server such as `python3 -m http.server --directory app/site 4173`
+- open the served page in a browser and confirm the manifest and standalone shell are recognized
+
 ## How it works
 
 The system keeps specs in `openspec/specs/`, business logic in Rust crates that compile to `wasm32-wasip1`, frontend glue in strict TypeScript, and knowledge artifacts in markdown and static indexes tracked by git. A future `m3` workflow will ingest content into `knowledge/`, generate indexes at build time, and expose that knowledge through the approved Traverse v0.1 app-consumable runtime, browser consumer, and MCP release surfaces.
