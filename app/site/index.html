@@ -157,30 +157,21 @@
 
       <section class="grid" aria-label="PWA shell preview">
         <m3-chat
-          eyebrow="M3 Web Components"
-          title="Source-backed shell"
-          summary="The shell now renders answer and source areas through composable custom elements instead of fixed placeholder markup."
+          eyebrow="M3 Browser Runtime"
+          title="Client-side MCP shell"
+          summary="The browser shell now runs a thin client-side MCP-style adapter over the contract-defined tools instead of relying on fixed placeholder prose."
+          tool="search"
+          input="portable MCP clients"
         >
-          <m3-result prompt="What did I save about portable MCP clients?">
+          <m3-result prompt="Browser runtime tool: search">
             <p>
-              Portable MCP work in youaskm3 is designed to remain source-aware,
-              client-runnable, and hosted as static assets instead of depending
-              on a bespoke server runtime.
-            </p>
-            <p>
-              These web components give later milestones stable tags and
-              extension points for real provider wiring and runtime data.
+              Portable MCP work in youaskm3 is designed to remain source-aware and client-runnable.
             </p>
           </m3-result>
           <m3-source
-            label="Spec"
-            title="openspec/specs/mcp-interface/spec.md"
-            detail="Defines the contract-shaped MCP surface for knowledge tools."
-          ></m3-source>
-          <m3-source
-            label="Roadmap"
-            title="SPEC.md, M3 - Chat interface"
-            detail="Requires an installable shell that can host the future client experience."
+            label="Search result"
+            title="Portable MCP"
+            detail="knowledge/books/portable-mcp.md"
           ></m3-source>
         </m3-chat>
 
@@ -191,6 +182,7 @@
             <li>Service worker registers and caches the shell assets.</li>
             <li>Static assets stay compatible with GitHub Pages deployment.</li>
             <li>Custom elements render the conversation and source surfaces.</li>
+            <li>Browser runtime module executes `search`, `remember`, `recall`, and `connect` locally.</li>
           </ul>
         </aside>
       </section>
