@@ -1,0 +1,12 @@
+{
+  "instanceId": "youaskm3-author",
+  "shellUrl": "https://enricopiovesan.github.io/youaskm3/",
+  "knowledgeDocumentCount": 0,
+  "pendingInputCount": 0,
+  "artifacts": [
+    "app/site/search-index.json",
+    "app/site/build-manifest.json",
+    "app/site/author-instance.json",
+    "app/site/provider-config.json"
+  ]
+}

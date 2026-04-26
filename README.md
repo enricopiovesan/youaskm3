@@ -21,6 +21,14 @@ The first M4 slice now bootstraps local instance metadata and knowledge scaffold
 
 That command initializes `app/site/author-instance.json`, `app/site/provider-config.json`, and the tracked `knowledge/` layout. The full fork-and-run flow, including `m3 build` and `m3 sync`, continues in later M4 tickets.
 
+The current `m3 build` slice now prepares deployable static artifacts as well:
+
+```bash
+./scripts/m3.sh build
+```
+
+That command generates `app/site/search-index.json` and `app/site/build-manifest.json`, then compiles the native and `wasm32-wasip1` workspace targets.
+
 ## PWA shell validation
 
 The current M3 slice ships an installable static shell under `app/site/`. To validate it locally:
