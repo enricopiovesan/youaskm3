@@ -13,7 +13,13 @@ Most personal knowledge tooling traps context inside proprietary silos, hosted b
 
 ## Quick start
 
-> Coming in M4. This milestone prepares the repository, specs, toolchain, and validation flow so a future contributor can implement the one-command setup path with confidence.
+The first M4 slice now bootstraps local instance metadata and knowledge scaffolding:
+
+```bash
+./scripts/m3.sh init --name "Your Instance" --shell-url "https://example.com/your-instance/" --yes
+```
+
+That command initializes `app/site/author-instance.json`, `app/site/provider-config.json`, and the tracked `knowledge/` layout. The full fork-and-run flow, including `m3 build` and `m3 sync`, continues in later M4 tickets.
 
 ## PWA shell validation
 

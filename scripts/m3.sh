@@ -7,7 +7,7 @@ COMMAND="${1:-}"
 cd "$ROOT_DIR"
 
 usage() {
-  echo "Usage: ./scripts/m3.sh {add|build|test|lint|smoke|status}" >&2
+  echo "Usage: ./scripts/m3.sh {init|add|build|test|lint|smoke|status}" >&2
 }
 
 slugify_url() {
@@ -62,6 +62,10 @@ run_add() {
 }
 
 case "$COMMAND" in
+  init)
+    shift
+    bash ./scripts/m3-init.sh "$@"
+    ;;
   add)
     shift
     run_add "$@"
