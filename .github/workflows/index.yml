@@ -7,10 +7,28 @@ on:
 
 jobs:
   rebuild-index:
-    name: Rebuild Knowledge Index
+    name: Build Federation Index
     runs-on: ubuntu-latest
+    env:
+      FEDERATION_REGISTRY_URL: https://raw.githubusercontent.com/youaskm3/registry/main/instances.json
 
     steps:
-      - name: Echo stub index rebuild
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+
+      - name: Generate federation index artifacts
         shell: bash
-        run: echo "index rebuild"
+        run: ruby scripts/generate-federation-index.rb "$FEDERATION_REGISTRY_URL" app/site
+
+      - name: Upload federation index artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: federation-index
+          path: |
+            app/site/federation-search-index.json
+            app/site/federation-index-manifest.json

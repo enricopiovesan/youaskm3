@@ -59,6 +59,9 @@ bash ./scripts/m3-build-smoke.sh
 echo "Validating incremental sync..."
 bash ./scripts/m3-sync-smoke.sh
 
+echo "Validating federation index generation..."
+bash ./scripts/federation-index-smoke.sh
+
 echo "Running Rust tests..."
 bash ./scripts/test.sh
 
