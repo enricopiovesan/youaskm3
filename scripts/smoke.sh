@@ -54,7 +54,7 @@ echo "Running lint checks..."
 bash ./scripts/lint.sh
 
 echo "Running build checks..."
-bash ./scripts/build.sh
+bash ./scripts/m3-build-smoke.sh
 
 echo "Running Rust tests..."
 bash ./scripts/test.sh
