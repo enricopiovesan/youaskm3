@@ -1,0 +1,15 @@
+{
+  "registry_repository": "https://github.com/youaskm3/registry",
+  "instances": [
+    {
+      "name": "Enrico Piovesan",
+      "url": "https://enricopiovesan.github.io/youaskm3/",
+      "search_index_url": "https://enricopiovesan.github.io/youaskm3/search-index.json",
+      "description": "Author instance covering WASM, UMA, distributed systems, and architecture writing.",
+      "topics": ["WASM", "UMA", "distributed systems", "architecture"],
+      "since": "2026-04-01",
+      "author_instance_url": "https://enricopiovesan.github.io/youaskm3/author-instance.json",
+      "repo": "https://github.com/enricopiovesan/youaskm3"
+    }
+  ]
+}
