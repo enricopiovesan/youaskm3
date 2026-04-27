@@ -1,99 +1,148 @@
-<img width="1434" height="944" alt="Screenshot 2026-04-01 at 10 12 08 PM" src="https://github.com/user-attachments/assets/6127686f-e00c-458e-b108-26679f4b2ddc" />
+[![CI](https://github.com/enricopiovesan/youaskm3/actions/workflows/ci.yml/badge.svg)](https://github.com/enricopiovesan/youaskm3/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/enricopiovesan/youaskm3/actions/workflows/ci.yml)
+[![Spec Governed](https://img.shields.io/badge/spec-governed-blueviolet)](openspec/specs/)
+[![License](https://img.shields.io/badge/license-MIT%20%7C%20Apache--2.0-blue)](LICENSE-APACHE)
+[![Rust](https://img.shields.io/badge/rust-1.94%2B-orange)](https://www.rust-lang.org/)
+[![Built on Traverse](https://img.shields.io/badge/built%20on-Traverse-black)](https://github.com/enricopiovesan/Traverse)
 
 # youaskm3
 
+**your knowledge, queryable**
 
-your knowledge, queryable
+youaskm3 is an open source, WASM-native, MCP-powered personal knowledge project for turning your books, papers, notes, and source material into something you can query, inspect, fork, and evolve in the open.
 
-youaskm3 is an open source, WASM-native, MCP-powered personal knowledge layer that ingests what you write, read, and save, then makes that knowledge queryable through conversational interfaces while preserving a git-native, zero-server deployment model.
+It is designed on top of [Traverse](https://github.com/enricopiovesan/Traverse) and the broader [Universal Microservices Architecture](https://github.com/enricopiovesan/UMA-code-examples) direction: portable capability contracts, governed specs, and runtime surfaces that stay usable across tools and hosts.
 
-## Why this exists
+## Why This Exists
 
-Most personal knowledge tooling traps context inside proprietary silos, hosted backends, or interfaces that do not travel with the author. youaskm3 exists to give people an open, portable layer they can fork, host, inspect, and evolve so their books, papers, notes, articles, and transcripts stay in plain text and remain usable through any MCP-capable client.
+Most personal knowledge tooling locks your context inside closed products, hosted backends, or app-specific interfaces. youaskm3 takes the opposite path:
 
-## Quick start
+- your knowledge stays in files you control
+- your workflows stay visible in specs, scripts, and contracts
+- your runtime path stays portable through WASM and MCP-friendly surfaces
+- your project stays forkable by humans and workable by coding agents
 
-The first M4 slice now bootstraps local instance metadata and knowledge scaffolding:
+## Core Use
+
+youaskm3 is for people who want to:
+
+- ingest source material like PDFs into a git-tracked knowledge base
+- prepare knowledge artifacts that can later be queried through MCP-capable clients
+- run a strict, deterministic development workflow with CI, coverage, and spec gates
+- build an agent-friendly repo where humans and coding agents can work from the same source of truth
+
+## Current Scope
+
+This repository already gives you:
+
+- a Rust workspace for `core`, `ingest`, `search`, and `mcp` crates
+- strict TypeScript tooling for frontend and validation work
+- OpenSpec contracts for ingest, search, MCP, federation, and PWA behavior
+- smoke, lint, test, coverage, and WASM build validation from repo root
+- the first `m3` command surface for add, build, lint, test, smoke, and status flows
+
+## Quick Start
 
 ```bash
-./scripts/m3.sh init --name "Your Instance" --shell-url "https://example.com/your-instance/" --yes
+git clone https://github.com/enricopiovesan/youaskm3.git
+cd youaskm3
+
+npm install
+bash scripts/smoke.sh
 ```
 
-That command initializes `app/site/author-instance.json`, `app/site/provider-config.json`, and the tracked `knowledge/` layout. The full fork-and-run flow, including `m3 build` and `m3 sync`, continues in later M4 tickets.
-
-The current `m3 build` slice now prepares deployable static artifacts as well:
+If you want a smaller first pass:
 
 ```bash
-./scripts/m3.sh build
+bash scripts/lint.sh
+bash scripts/test.sh
+bash scripts/build.sh
 ```
 
-That command generates `app/site/search-index.json` and `app/site/build-manifest.json`, then compiles the native and `wasm32-wasip1` workspace targets.
+## First Developer Flow
 
-Incremental updates now have a dedicated path as well:
+Use this path if you want to start contributing right away:
+
+1. Read [SPEC.md](SPEC.md).
+2. Read [CONTRIBUTING.md](CONTRIBUTING.md).
+3. Review the governing capability specs in [openspec/specs/](openspec/specs/).
+4. Run `bash scripts/smoke.sh`.
+5. Make the smallest spec-backed change possible.
+
+## First Agent Flow
+
+If you are using Codex, Claude Code, or another coding agent, start here:
+
+1. Read [SPEC.md](SPEC.md) before making changes.
+2. Use [CONTRIBUTING.md](CONTRIBUTING.md) as the workflow contract.
+3. Treat [openspec/specs/](openspec/specs/) as the implementation source of truth.
+4. Use [contracts/mcp-tools.json](contracts/mcp-tools.json) for the current MCP surface contract.
+5. Validate changes with `bash scripts/smoke.sh` before opening a PR.
+
+This repo is intentionally structured so humans and agents can navigate the same files, rules, and validation commands without hidden context.
+
+## Key Entry Points
+
+| Goal | Start Here |
+|---|---|
+| Understand the project contract | [SPEC.md](SPEC.md) |
+| Learn contribution rules | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Review active capability specs | [openspec/specs/](openspec/specs/) |
+| Review current MCP contracts | [contracts/mcp-tools.json](contracts/mcp-tools.json) |
+| Inspect the repo command surface | [scripts/m3.sh](scripts/m3.sh) |
+| Run the full validation path | [scripts/smoke.sh](scripts/smoke.sh) |
+| Review current knowledge layout | [knowledge/index.md](knowledge/index.md) |
+
+## Command Surface
+
+The current repo-level command entrypoint is:
 
 ```bash
-./scripts/m3.sh sync
+./scripts/m3.sh {add|build|test|lint|smoke|status}
 ```
 
-`m3 sync` re-checks tracked knowledge and instance metadata, refreshes the generated JSON artifacts only when the source fingerprint changes, and skips the Rust rebuild path when nothing relevant changed.
+Current highlights:
 
-## PWA shell validation
+- `m3 add` routes PDF ingest into the knowledge structure
+- `m3 build` validates native and `wasm32-wasip1` builds
+- `m3 smoke` runs the full repository validation path
 
-The current M3 slice ships an installable static shell under `app/site/`. To validate it locally:
+## Project Standards
 
-- run `bash scripts/pwa-shell-smoke.sh`
-- serve `app/site/` with a static file server such as `python3 -m http.server --directory app/site 4173`
-- open the served page in a browser and confirm the manifest and standalone shell are recognized
-- switch between provider profiles in the shell and confirm the selection persists in the browser
-- inspect `app/site/author-instance.json` and `app/site/provider-config.json` to verify what would be published with the static author instance
+This project is set up like a production-minded open source repository:
 
-## Provider configuration
+- spec-governed changes
+- zero-warning Rust quality gates
+- 100% business-logic coverage enforcement
+- strict TypeScript settings
+- executable validation scripts from repo root
+- CI-ready workflows for build, coverage, pages, and index tasks
 
-The current M3 provider slice keeps deployment static and portable:
+## Built On Traverse and UMA
 
-- `app/site/provider-config.json` defines the selectable provider profiles for the browser shell
-- `app/site/author-instance.json` defines the published author-instance metadata that ships with the static site
-- the browser demo profile remains the default publishable option, while hosted APIs stay explicit opt-in profiles that require user-supplied credentials in-browser
+youaskm3 is not an isolated experiment. It sits in a larger line of work:
 
-## How it works
+- [Traverse](https://github.com/enricopiovesan/Traverse) provides the portable runtime and integration baseline
+- [UMA code examples](https://github.com/enricopiovesan/UMA-code-examples) provide the broader architectural direction and reference patterns
 
-The system keeps specs in `openspec/specs/`, business logic in Rust crates that compile to `wasm32-wasip1`, frontend glue in strict TypeScript, and knowledge artifacts in markdown and static indexes tracked by git. A future `m3` workflow will ingest content into `knowledge/`, generate indexes at build time, and expose that knowledge through the approved Traverse v0.1 app-consumable runtime, browser consumer, and MCP release surfaces.
+Traverse answers the runtime question. youaskm3 applies that model to personal knowledge.
 
-## Milestones
+## Roadmap
 
-| Milestone | Focus | Status |
-|---|---|---|
-| M0 | Foundation: specs, repo layout, CI, workspace, open source setup | In progress |
-| M1 | Knowledge ingest and indexing | Planned |
-| M2 | WASM MCP core and contracts | Planned |
-| M3 | PWA chat shell | Planned |
-| M4 | Fork-and-run workflow | Planned |
-| M5 | Federation and registry | Planned |
+| Milestone | Focus |
+|---|---|
+| M1 | Knowledge ingest and indexing |
+| M2 | WASM MCP core and contracts |
+| M3 | PWA chat shell |
+| M4 | Fork-and-run workflow |
+| M5 | Federation and registry |
 
 Roadmap source: [SPEC.md](SPEC.md#8-milestones) and [GitHub Project 3](https://github.com/users/enricopiovesan/projects/3).
 
-## Stack
-
-| Layer | Technology |
-|---|---|
-| Business logic | Rust to WASM |
-| MCP interface | WASM MCP module |
-| Runtime model | Traverse v0.1 / UMA |
-| UI | Web Components + PWA shell |
-| Scripting | TypeScript |
-| Knowledge format | Markdown + Mermaid + static JSON |
-| Hosting | GitHub Pages |
-| CI/CD | GitHub Actions |
-| Spec management | OpenSpec |
-
 ## Contributing
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md). The repo follows a spec-first workflow and treats approved specs as the contract for implementation.
+Read [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), and [SECURITY.md](SECURITY.md) before opening a PR.
 
 ## License
 
-This project is dual licensed under [MIT](LICENSE-MIT) and [Apache-2.0](LICENSE-APACHE).
-
-## Born in the Purcells
-
-youaskm3 began in Golden, British Columbia, in the Purcell Mountains, where the idea of a portable personal knowledge layer became concrete enough to build in public.
+Dual licensed under [MIT](LICENSE-MIT) and [Apache-2.0](LICENSE-APACHE).
