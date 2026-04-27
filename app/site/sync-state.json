@@ -1,15 +1,10 @@
 {
   "instanceId": "youaskm3-author",
-  "shellUrl": "https://enricopiovesan.github.io/youaskm3/",
   "sourceFingerprint": "8049373a1a474a63d5d48700ba4ae23fff1fc6fe40ed96b30df11feed3ad8238",
   "knowledgeDocumentCount": 0,
   "pendingInputCount": 0,
-  "artifacts": [
-    "app/site/search-index.json",
-    "app/site/build-manifest.json",
-    "app/site/sync-state.json",
-    "app/site/author-instance.json",
-    "app/site/provider-config.json"
+  "trackedSourcePaths": [
+    "app/site/author-instance.json"
   ],
   "sources": [
     {

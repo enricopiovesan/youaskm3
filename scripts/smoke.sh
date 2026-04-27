@@ -56,6 +56,9 @@ bash ./scripts/lint.sh
 echo "Running build checks..."
 bash ./scripts/m3-build-smoke.sh
 
+echo "Validating incremental sync..."
+bash ./scripts/m3-sync-smoke.sh
+
 echo "Running Rust tests..."
 bash ./scripts/test.sh
 

@@ -48,6 +48,21 @@ Index generation runs in three places:
 
 Until the generator is implemented, contributors must update the managed section manually when adding processed knowledge artifacts. Manual edits should follow the same ordering and source-traceability rules so the later generator can adopt the file without churn.
 
+## Incremental Sync Rules
+
+`m3 build` remains the full preparation path: it refreshes generated site artifacts and recompiles the Rust workspace for native and `wasm32-wasip1` targets.
+
+`m3 sync` is the incremental path for already-initialized instances:
+
+| Change | `m3 sync` behavior | Full rebuild required |
+|---|---|---:|
+| Processed markdown added, removed, or edited under `knowledge/books/`, `knowledge/papers/`, or `knowledge/blog/` | Recompute `app/site/search-index.json`, `app/site/build-manifest.json`, and `app/site/sync-state.json` | no |
+| Raw captures added or removed under `knowledge/inputs/` | Refresh counts and tracked pending-input paths in generated site artifacts | no |
+| `app/site/author-instance.json` changes | Refresh generated site artifacts so published metadata stays aligned | no |
+| Rust code, frontend shell code, or dependency changes | `m3 sync` does not rebuild binaries or static shell assets | yes |
+
+The incremental path is deterministic: it compares the current source fingerprint to the last generated `app/site/sync-state.json` and only rewrites artifacts when tracked inputs change. The sync state records every source path and content hash so later validations can trace exactly which files fed a generated artifact set.
+
 ## Non-Goals
 
 This M1 flow does not define vector embeddings, federation-wide index exchange, browser storage, or MCP search execution. Those belong to later `knowledge-search`, `federation`, and `mcp-interface` implementation tickets.
