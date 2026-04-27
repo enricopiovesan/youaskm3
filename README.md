@@ -31,17 +31,33 @@ youaskm3 is for people who want to:
 - run a strict, deterministic development workflow with CI, coverage, and spec gates
 - build an agent-friendly repo where humans and coding agents can work from the same source of truth
 
-## Current Scope
+## What Works Today
 
-This repository already gives you:
+If you clone this repository right now, you can:
 
-- a Rust workspace for `core`, `ingest`, `search`, and `mcp` crates
-- strict TypeScript tooling for frontend and validation work
-- OpenSpec contracts for ingest, search, MCP, federation, and PWA behavior
-- smoke, lint, test, coverage, and WASM build validation from repo root
-- the first `m3` command surface for add, build, lint, test, smoke, and status flows
+- run the full repo validation path with `bash scripts/smoke.sh`
+- lint, test, and build the Rust and TypeScript workspace from repo root
+- initialize a local instance with `./scripts/m3.sh init`
+- ingest a PDF or URL into the knowledge structure with `./scripts/m3.sh add`
+- generate static knowledge artifacts and WASM builds with `./scripts/m3.sh build`
+- refresh generated artifacts incrementally with `./scripts/m3.sh sync`
+- inspect and extend the current Rust crates for `core`, `ingest`, `search`, and `mcp`
+- work against real OpenSpec contracts and CI gates instead of placeholders
 
-## Quick Start
+## What Is Still Missing
+
+This repository is not yet a finished end-user product. The main gaps today are:
+
+- no polished end-user query workflow in the README yet
+- no stable `m3 search` or `m3 serve` command in the repo command surface
+- no finished fork-and-run onboarding path for a brand-new user in under 15 minutes
+- no complete federation explore experience
+- no full cross-instance search fan-out flow
+- no claim yet that the full MCP-powered knowledge experience is production-ready
+
+The repo is ready for development today. The complete product experience is still being built milestone by milestone.
+
+## Quick Start For Developers
 
 ```bash
 git clone https://github.com/enricopiovesan/youaskm3.git
@@ -93,18 +109,20 @@ This repo is intentionally structured so humans and agents can navigate the same
 | Run the full validation path | [scripts/smoke.sh](scripts/smoke.sh) |
 | Review current knowledge layout | [knowledge/index.md](knowledge/index.md) |
 
-## Command Surface
+## Command Surface Today
 
 The current repo-level command entrypoint is:
 
 ```bash
-./scripts/m3.sh {add|build|test|lint|smoke|status}
+./scripts/m3.sh {init|add|build|sync|test|lint|smoke|status}
 ```
 
-Current highlights:
+Available now:
 
-- `m3 add` routes PDF ingest into the knowledge structure
-- `m3 build` validates native and `wasm32-wasip1` builds
+- `m3 init` bootstraps local instance metadata and knowledge scaffolding
+- `m3 add` routes PDF and URL ingest into the knowledge structure
+- `m3 build` generates static knowledge artifacts and validates native plus `wasm32-wasip1` builds
+- `m3 sync` refreshes generated artifacts without forcing a full rebuild every time
 - `m3 smoke` runs the full repository validation path
 
 ## Project Standards
