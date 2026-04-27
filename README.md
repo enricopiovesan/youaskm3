@@ -29,6 +29,14 @@ The current `m3 build` slice now prepares deployable static artifacts as well:
 
 That command generates `app/site/search-index.json` and `app/site/build-manifest.json`, then compiles the native and `wasm32-wasip1` workspace targets.
 
+Incremental updates now have a dedicated path as well:
+
+```bash
+./scripts/m3.sh sync
+```
+
+`m3 sync` re-checks tracked knowledge and instance metadata, refreshes the generated JSON artifacts only when the source fingerprint changes, and skips the Rust rebuild path when nothing relevant changed.
+
 ## PWA shell validation
 
 The current M3 slice ships an installable static shell under `app/site/`. To validate it locally:
