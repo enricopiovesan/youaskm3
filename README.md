@@ -1,4 +1,4 @@
-<img width="1983" height="793" alt="169e2a21dccfd32703c7a5f491017ce2403228bd05866a5b3ff11a85f72fdd10" src="https://github.com/user-attachments/assets/1bcb40f2-03cf-455c-8360-7e100b795b15" />
+<img width="100%" alt="youaskm3 — your knowledge, queryable" src="https://github.com/user-attachments/assets/1bcb40f2-03cf-455c-8360-7e100b795b15" />
 
 
 [![CI](https://github.com/enricopiovesan/youaskm3/actions/workflows/ci.yml/badge.svg)](https://github.com/enricopiovesan/youaskm3/actions/workflows/ci.yml)
