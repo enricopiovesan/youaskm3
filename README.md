@@ -1,4 +1,5 @@
 <img width="100%" alt="youaskm3 — your knowledge, queryable" src="https://github.com/user-attachments/assets/1bcb40f2-03cf-455c-8360-7e100b795b15" />
+# youaskm3
 
 
 [![CI](https://github.com/enricopiovesan/youaskm3/actions/workflows/ci.yml/badge.svg)](https://github.com/enricopiovesan/youaskm3/actions/workflows/ci.yml)
@@ -8,7 +9,6 @@
 [![Rust](https://img.shields.io/badge/rust-1.94%2B-orange)](https://www.rust-lang.org/)
 [![Built on Traverse](https://img.shields.io/badge/built%20on-Traverse-black)](https://github.com/enricopiovesan/Traverse)
 
-# youaskm3
 
 **your knowledge, queryable**
 
