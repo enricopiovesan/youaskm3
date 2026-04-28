@@ -1,6 +1,6 @@
 <img width="100%" alt="youaskm3 — your knowledge, queryable" src="https://github.com/user-attachments/assets/1bcb40f2-03cf-455c-8360-7e100b795b15" />
-# youaskm3
 
+# youaskm3
 
 [![CI](https://github.com/enricopiovesan/youaskm3/actions/workflows/ci.yml/badge.svg)](https://github.com/enricopiovesan/youaskm3/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/enricopiovesan/youaskm3/actions/workflows/ci.yml)
