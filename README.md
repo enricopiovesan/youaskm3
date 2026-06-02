@@ -167,3 +167,12 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md
 ## License
 
 Dual licensed under [MIT](LICENSE-MIT) and [Apache-2.0](LICENSE-APACHE).
+
+
+## Related Work
+
+- [Traverse](https://github.com/enricopiovesan/Traverse)
+- [Universal Microservices Architecture — Book](https://www.amazon.com/dp/B0GTTTTQH4)
+- [Contract-Driven AI Development (C-DAD) — White Paper](https://drive.google.com/file/d/1HC_ZWJl9aYaMeN78qiL3ZYBVY7mAGl3f/view)
+- [Speaking](https://enricopiovesan.github.io/enricopiovesan/)
+- [github.com/enricopiovesan](https://github.com/enricopiovesan)
