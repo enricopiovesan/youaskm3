@@ -22,3 +22,5 @@ The generated markdown includes:
 - a document title derived from the URL or supplied title
 - source URL traceability metadata
 - normalized captured text grouped into markdown paragraphs
+
+For local files beyond PDFs, see [../markitdown2m3/README.md](../markitdown2m3/README.md).

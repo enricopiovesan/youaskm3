@@ -31,6 +31,19 @@ pub struct UrlMarkdownInput {
     pub captured_text: String,
 }
 
+/// Metadata and captured markdown needed to render a MarkItDown-backed artifact.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MarkItDownMarkdownInput {
+    /// Human-readable title for the generated document.
+    pub title: String,
+    /// Source file path used for traceability.
+    pub source_path: String,
+    /// Source format handled by `MarkItDown`.
+    pub source_format: String,
+    /// Markdown content produced by `MarkItDown`.
+    pub captured_markdown: String,
+}
+
 /// Errors returned when PDF ingest input is incomplete.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PdfMarkdownError {
@@ -76,6 +89,32 @@ impl fmt::Display for UrlMarkdownError {
 }
 
 impl std::error::Error for UrlMarkdownError {}
+
+/// Errors returned when `MarkItDown` ingest input is incomplete.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MarkItDownMarkdownError {
+    /// The title was empty after trimming.
+    MissingTitle,
+    /// The source path was empty after trimming.
+    MissingSourcePath,
+    /// The source format was empty after trimming.
+    MissingSourceFormat,
+    /// The captured markdown was empty after trimming.
+    MissingCapturedMarkdown,
+}
+
+impl fmt::Display for MarkItDownMarkdownError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::MissingTitle => f.write_str("missing MarkItDown title"),
+            Self::MissingSourcePath => f.write_str("missing MarkItDown source path"),
+            Self::MissingSourceFormat => f.write_str("missing MarkItDown source format"),
+            Self::MissingCapturedMarkdown => f.write_str("missing MarkItDown markdown"),
+        }
+    }
+}
+
+impl std::error::Error for MarkItDownMarkdownError {}
 
 /// Markdown content ready to be split into index-friendly chunks.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -205,6 +244,41 @@ pub fn render_url_markdown(input: &UrlMarkdownInput) -> Result<String, UrlMarkdo
     ))
 }
 
+/// Builds a stable markdown artifact from MarkItDown-generated markdown.
+///
+/// # Errors
+///
+/// Returns an error if the title, source path, source format, or captured markdown
+/// is empty after trimming.
+pub fn render_markitdown_markdown(
+    input: &MarkItDownMarkdownInput,
+) -> Result<String, MarkItDownMarkdownError> {
+    let title = input.title.trim();
+    let source_path = input.source_path.trim();
+    let source_format = input.source_format.trim();
+    let captured_markdown = input.captured_markdown.trim();
+
+    if title.is_empty() {
+        return Err(MarkItDownMarkdownError::MissingTitle);
+    }
+
+    if source_path.is_empty() {
+        return Err(MarkItDownMarkdownError::MissingSourcePath);
+    }
+
+    if source_format.is_empty() {
+        return Err(MarkItDownMarkdownError::MissingSourceFormat);
+    }
+
+    if captured_markdown.is_empty() {
+        return Err(MarkItDownMarkdownError::MissingCapturedMarkdown);
+    }
+
+    Ok(format!(
+        "# {title}\n\n## Source\n\n- type: file\n- format: {source_format}\n- path: {source_path}\n- ingested_by: `markitdown2m3`\n\n## Captured Markdown\n\n{captured_markdown}\n"
+    ))
+}
+
 /// Derives a human-readable title from a PDF file path or file name.
 #[must_use]
 pub fn derive_title_from_path(path: &str) -> String {
@@ -246,6 +320,29 @@ pub fn derive_title_from_url(url: &str) -> String {
         .unwrap_or("url capture");
 
     let normalized = last_segment
+        .chars()
+        .map(|character| {
+            if matches!(character, '-' | '_' | '.') {
+                ' '
+            } else {
+                character
+            }
+        })
+        .collect::<String>();
+
+    normalized.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+/// Derives a human-readable title from a local file path by stripping the final extension.
+#[must_use]
+pub fn derive_title_from_file_path(path: &str) -> String {
+    let trimmed = path.trim();
+    let file_name = trimmed.rsplit(['/', '\\']).next().unwrap_or(trimmed);
+    let stem = file_name
+        .rsplit_once('.')
+        .map_or(file_name, |(prefix, _)| prefix);
+
+    let normalized = stem
         .chars()
         .map(|character| {
             if matches!(character, '-' | '_' | '.') {
@@ -399,10 +496,11 @@ fn render_source_line(source_path: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::{
-        ChunkingOptions, MarkdownChunk, MarkdownChunkError, MarkdownChunkInput, PdfMarkdownError,
-        PdfMarkdownInput, UrlMarkdownError, UrlMarkdownInput, chunk_markdown, crate_name,
-        derive_title_from_path, derive_title_from_url, normalize_pdf_text, render_pdf_markdown,
-        render_url_markdown,
+        ChunkingOptions, MarkItDownMarkdownError, MarkItDownMarkdownInput, MarkdownChunk,
+        MarkdownChunkError, MarkdownChunkInput, PdfMarkdownError, PdfMarkdownInput,
+        UrlMarkdownError, UrlMarkdownInput, chunk_markdown, crate_name,
+        derive_title_from_file_path, derive_title_from_path, derive_title_from_url,
+        normalize_pdf_text, render_markitdown_markdown, render_pdf_markdown, render_url_markdown,
     };
 
     #[test]
@@ -425,6 +523,18 @@ mod tests {
             "portable knowledge html"
         );
         assert_eq!(derive_title_from_url("https://example.com/"), "example com");
+    }
+
+    #[test]
+    fn derive_title_from_file_path_strips_the_last_extension() {
+        assert_eq!(
+            derive_title_from_file_path("ref/Portable_Knowledge.html"),
+            "Portable Knowledge"
+        );
+        assert_eq!(
+            derive_title_from_file_path("notes/meeting-notes.docx"),
+            "meeting notes"
+        );
     }
 
     #[test]
@@ -480,6 +590,19 @@ mod tests {
         let expected = "# Portable Knowledge\n\n## Source\n\n- type: url\n- url: https://example.com/portable-knowledge\n- ingested_by: `url2m3`\n\n## Captured Text\n\nFirst paragraph. Still first paragraph.\n\nSecond paragraph.\n";
 
         assert_eq!(render_url_markdown(&input), Ok(expected.to_string()));
+    }
+
+    #[test]
+    fn render_markitdown_markdown_includes_traceability_metadata() {
+        let input = MarkItDownMarkdownInput {
+            title: "Portable Knowledge".to_string(),
+            source_path: "ref/portable-knowledge.html".to_string(),
+            source_format: "html".to_string(),
+            captured_markdown: "## Portable Knowledge\n\nHello **world**.".to_string(),
+        };
+        let expected = "# Portable Knowledge\n\n## Source\n\n- type: file\n- format: html\n- path: ref/portable-knowledge.html\n- ingested_by: `markitdown2m3`\n\n## Captured Markdown\n\n## Portable Knowledge\n\nHello **world**.\n";
+
+        assert_eq!(render_markitdown_markdown(&input), Ok(expected.to_string()));
     }
 
     #[test]
@@ -580,6 +703,61 @@ mod tests {
         assert_eq!(
             UrlMarkdownError::MissingCapturedText.to_string(),
             "missing captured URL text"
+        );
+    }
+
+    #[test]
+    fn render_markitdown_markdown_rejects_incomplete_input() {
+        let valid = MarkItDownMarkdownInput {
+            title: "Example".to_string(),
+            source_path: "ref/example.html".to_string(),
+            source_format: "html".to_string(),
+            captured_markdown: "Body.".to_string(),
+        };
+
+        assert_eq!(
+            render_markitdown_markdown(&MarkItDownMarkdownInput {
+                title: " ".to_string(),
+                ..valid.clone()
+            }),
+            Err(MarkItDownMarkdownError::MissingTitle)
+        );
+        assert_eq!(
+            MarkItDownMarkdownError::MissingTitle.to_string(),
+            "missing MarkItDown title"
+        );
+        assert_eq!(
+            render_markitdown_markdown(&MarkItDownMarkdownInput {
+                source_path: " ".to_string(),
+                ..valid.clone()
+            }),
+            Err(MarkItDownMarkdownError::MissingSourcePath)
+        );
+        assert_eq!(
+            MarkItDownMarkdownError::MissingSourcePath.to_string(),
+            "missing MarkItDown source path"
+        );
+        assert_eq!(
+            render_markitdown_markdown(&MarkItDownMarkdownInput {
+                source_format: " ".to_string(),
+                ..valid.clone()
+            }),
+            Err(MarkItDownMarkdownError::MissingSourceFormat)
+        );
+        assert_eq!(
+            MarkItDownMarkdownError::MissingSourceFormat.to_string(),
+            "missing MarkItDown source format"
+        );
+        assert_eq!(
+            render_markitdown_markdown(&MarkItDownMarkdownInput {
+                captured_markdown: " ".to_string(),
+                ..valid
+            }),
+            Err(MarkItDownMarkdownError::MissingCapturedMarkdown)
+        );
+        assert_eq!(
+            MarkItDownMarkdownError::MissingCapturedMarkdown.to_string(),
+            "missing MarkItDown markdown"
         );
     }
 

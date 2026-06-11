@@ -1,6 +1,7 @@
 /ref/
 /target
 /node_modules
+/.cache
 /coverage
 /dist
 *.wasm
