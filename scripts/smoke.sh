@@ -47,6 +47,9 @@ bash ./scripts/m3-init-smoke.sh
 echo "Validating m3 add ingest routing..."
 bash ./scripts/m3-add-smoke.sh
 
+echo "Validating MarkItDown ingest routing..."
+bash ./scripts/m3-markitdown-smoke.sh
+
 echo "Validating PWA shell assets..."
 bash ./scripts/pwa-shell-smoke.sh
 

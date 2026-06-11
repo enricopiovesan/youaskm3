@@ -45,18 +45,30 @@ run_add() {
       case "$source_name" in
         *.pdf|*.PDF)
           source_stem="${source_name%.*}"
+          bash "$ROOT_DIR/tools/pdf2m3/pdf2m3.sh" \
+            "$source_path" \
+            "knowledge/papers/${source_stem}/index.md" \
+            "$source_path"
+          ;;
+        *.html|*.HTML|*.htm|*.HTM|*.docx|*.DOCX|*.pptx|*.PPTX|*.xlsx|*.XLSX|*.xls|*.XLS|*.csv|*.CSV|*.json|*.JSON|*.xml|*.XML|*.epub|*.EPUB|*.zip|*.ZIP)
+          source_stem="${source_name%.*}"
+          if [[ -n "$title" ]]; then
+            bash "$ROOT_DIR/tools/markitdown2m3/markitdown2m3.sh" \
+              "$source_path" \
+              "knowledge/inputs/notes/${source_stem}.md" \
+              "$title"
+          else
+            bash "$ROOT_DIR/tools/markitdown2m3/markitdown2m3.sh" \
+              "$source_path" \
+              "knowledge/inputs/notes/${source_stem}.md"
+          fi
           ;;
         *)
-          echo "m3 add currently routes PDF files and HTTP(S) URLs." >&2
-          echo "Use a .pdf input or URL for this M1 slice." >&2
+          echo "m3 add currently routes PDF files, selected local document formats, and HTTP(S) URLs." >&2
+          echo "Use a supported file extension or URL for this M1 slice." >&2
           exit 1
           ;;
       esac
-
-      bash "$ROOT_DIR/tools/pdf2m3/pdf2m3.sh" \
-        "$source_path" \
-        "knowledge/papers/${source_stem}/index.md" \
-        "$source_path"
       ;;
   esac
 }

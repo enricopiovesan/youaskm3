@@ -23,3 +23,5 @@ The generated markdown includes:
 - a document title derived from the PDF file name
 - source traceability metadata
 - normalized extracted text grouped into markdown paragraphs
+
+For additional local file types, see [../markitdown2m3/README.md](../markitdown2m3/README.md).
