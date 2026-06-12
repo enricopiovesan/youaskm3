@@ -108,6 +108,7 @@ This repo is intentionally structured so humans and agents can navigate the same
 | Learn contribution rules | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Review active capability specs | [openspec/specs/](openspec/specs/) |
 | Review current MCP contracts | [contracts/mcp-tools.json](contracts/mcp-tools.json) |
+| Review Traverse release readiness assumptions | [docs/traverse-first-release-requirements.md](docs/traverse-first-release-requirements.md) |
 | Inspect the repo command surface | [scripts/m3.sh](scripts/m3.sh) |
 | Run the full validation path | [scripts/smoke.sh](scripts/smoke.sh) |
 | Review current knowledge layout | [knowledge/index.md](knowledge/index.md) |
