@@ -1,0 +1,148 @@
+{
+  "schema_version": "0.1.0",
+  "graph_id": "youaskm3-author.knowledge-graph",
+  "generated_from": [
+    "knowledge--blog--mvp-fixture-article--index",
+    "knowledge--books--mvp-fixture-handbook--index",
+    "knowledge--papers--mvp-fixture-note--index"
+  ],
+  "nodes": [
+    {
+      "node_id": "document:knowledge--blog--mvp-fixture-article--index",
+      "label": "Portable Knowledge Article",
+      "type": "document",
+      "source_artifact_ids": [
+        "knowledge--blog--mvp-fixture-article--index"
+      ],
+      "source_chunk_ids": [
+
+      ],
+      "source_paths": [
+        "knowledge/blog/mvp-fixture-article/index.md"
+      ]
+    },
+    {
+      "node_id": "chunk:knowledge--blog--mvp-fixture-article--index:chunk:0",
+      "label": "Portable Knowledge Article source chunk",
+      "type": "chunk",
+      "source_artifact_ids": [
+        "knowledge--blog--mvp-fixture-article--index"
+      ],
+      "source_chunk_ids": [
+        "knowledge--blog--mvp-fixture-article--index:chunk:0"
+      ],
+      "source_paths": [
+        "knowledge/blog/mvp-fixture-article/index.md"
+      ]
+    },
+    {
+      "node_id": "document:knowledge--books--mvp-fixture-handbook--index",
+      "label": "MVP Architecture Handbook",
+      "type": "document",
+      "source_artifact_ids": [
+        "knowledge--books--mvp-fixture-handbook--index"
+      ],
+      "source_chunk_ids": [
+
+      ],
+      "source_paths": [
+        "knowledge/books/mvp-fixture-handbook/index.md"
+      ]
+    },
+    {
+      "node_id": "chunk:knowledge--books--mvp-fixture-handbook--index:chunk:0",
+      "label": "MVP Architecture Handbook source chunk",
+      "type": "chunk",
+      "source_artifact_ids": [
+        "knowledge--books--mvp-fixture-handbook--index"
+      ],
+      "source_chunk_ids": [
+        "knowledge--books--mvp-fixture-handbook--index:chunk:0"
+      ],
+      "source_paths": [
+        "knowledge/books/mvp-fixture-handbook/index.md"
+      ]
+    },
+    {
+      "node_id": "document:knowledge--papers--mvp-fixture-note--index",
+      "label": "Source Grounding Note",
+      "type": "document",
+      "source_artifact_ids": [
+        "knowledge--papers--mvp-fixture-note--index"
+      ],
+      "source_chunk_ids": [
+
+      ],
+      "source_paths": [
+        "knowledge/papers/mvp-fixture-note/index.md"
+      ]
+    },
+    {
+      "node_id": "chunk:knowledge--papers--mvp-fixture-note--index:chunk:0",
+      "label": "Source Grounding Note source chunk",
+      "type": "chunk",
+      "source_artifact_ids": [
+        "knowledge--papers--mvp-fixture-note--index"
+      ],
+      "source_chunk_ids": [
+        "knowledge--papers--mvp-fixture-note--index:chunk:0"
+      ],
+      "source_paths": [
+        "knowledge/papers/mvp-fixture-note/index.md"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": "edge:knowledge--blog--mvp-fixture-article--index:document-source-chunk",
+      "from_node_id": "document:knowledge--blog--mvp-fixture-article--index",
+      "to_node_id": "chunk:knowledge--blog--mvp-fixture-article--index:chunk:0",
+      "relationship": "has_source_chunk",
+      "source_artifact_ids": [
+        "knowledge--blog--mvp-fixture-article--index"
+      ],
+      "source_chunk_ids": [
+        "knowledge--blog--mvp-fixture-article--index:chunk:0"
+      ],
+      "source_paths": [
+        "knowledge/blog/mvp-fixture-article/index.md"
+      ],
+      "extraction_method": "deterministic-site-artifact-generator",
+      "confidence": 1.0
+    },
+    {
+      "edge_id": "edge:knowledge--books--mvp-fixture-handbook--index:document-source-chunk",
+      "from_node_id": "document:knowledge--books--mvp-fixture-handbook--index",
+      "to_node_id": "chunk:knowledge--books--mvp-fixture-handbook--index:chunk:0",
+      "relationship": "has_source_chunk",
+      "source_artifact_ids": [
+        "knowledge--books--mvp-fixture-handbook--index"
+      ],
+      "source_chunk_ids": [
+        "knowledge--books--mvp-fixture-handbook--index:chunk:0"
+      ],
+      "source_paths": [
+        "knowledge/books/mvp-fixture-handbook/index.md"
+      ],
+      "extraction_method": "deterministic-site-artifact-generator",
+      "confidence": 1.0
+    },
+    {
+      "edge_id": "edge:knowledge--papers--mvp-fixture-note--index:document-source-chunk",
+      "from_node_id": "document:knowledge--papers--mvp-fixture-note--index",
+      "to_node_id": "chunk:knowledge--papers--mvp-fixture-note--index:chunk:0",
+      "relationship": "has_source_chunk",
+      "source_artifact_ids": [
+        "knowledge--papers--mvp-fixture-note--index"
+      ],
+      "source_chunk_ids": [
+        "knowledge--papers--mvp-fixture-note--index:chunk:0"
+      ],
+      "source_paths": [
+        "knowledge/papers/mvp-fixture-note/index.md"
+      ],
+      "extraction_method": "deterministic-site-artifact-generator",
+      "confidence": 1.0
+    }
+  ]
+}

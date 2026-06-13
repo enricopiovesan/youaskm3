@@ -8,14 +8,16 @@
       "label": "Traverse",
       "type": "runtime",
       "source_artifact_ids": ["artifact.portable-runtime-note"],
-      "source_chunk_ids": ["chunk.runtime.001"]
+      "source_chunk_ids": ["chunk.runtime.001"],
+      "source_paths": ["knowledge/blog/portable-runtime-note.md"]
     },
     {
       "node_id": "node.wasm-capability",
       "label": "WASM capability",
       "type": "execution_unit",
       "source_artifact_ids": ["artifact.portable-runtime-note"],
-      "source_chunk_ids": ["chunk.runtime.001"]
+      "source_chunk_ids": ["chunk.runtime.001"],
+      "source_paths": ["knowledge/blog/portable-runtime-note.md"]
     }
   ],
   "edges": [
@@ -26,6 +28,7 @@
       "relationship": "runs",
       "source_artifact_ids": ["artifact.portable-runtime-note"],
       "source_chunk_ids": ["chunk.runtime.001"],
+      "source_paths": ["knowledge/blog/portable-runtime-note.md"],
       "extraction_method": "fixture",
       "confidence": 1
     }

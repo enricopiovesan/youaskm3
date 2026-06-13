@@ -73,6 +73,9 @@ bash ./scripts/mvp-contracts-smoke.sh
 echo "Validating MVP fixture corpus..."
 bash ./scripts/mvp-fixture-corpus-smoke.sh
 
+echo "Validating MVP graph artifact..."
+bash ./scripts/mvp-graph-artifact-smoke.sh
+
 echo "Validating federation index generation..."
 bash ./scripts/federation-index-smoke.sh
 
