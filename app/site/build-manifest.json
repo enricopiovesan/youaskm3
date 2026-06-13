@@ -6,6 +6,7 @@
   "pendingInputCount": 0,
   "artifacts": [
     "app/site/search-index.json",
+    "app/site/knowledge-graph.json",
     "app/site/build-manifest.json",
     "app/site/sync-state.json",
     "app/site/author-instance.json",

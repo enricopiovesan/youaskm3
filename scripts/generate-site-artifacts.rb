@@ -88,6 +88,57 @@ knowledge_documents = processed_document_paths.map do |path|
   }
 end
 
+graph_nodes = knowledge_documents.flat_map do |document|
+  artifact_id = document.fetch("id")
+  chunk_id = "#{artifact_id}:chunk:0"
+  source_path = document.fetch("source_path")
+
+  [
+    {
+      "node_id" => "document:#{artifact_id}",
+      "label" => document.fetch("title"),
+      "type" => "document",
+      "source_artifact_ids" => [artifact_id],
+      "source_chunk_ids" => [],
+      "source_paths" => [source_path]
+    },
+    {
+      "node_id" => "chunk:#{chunk_id}",
+      "label" => "#{document.fetch("title")} source chunk",
+      "type" => "chunk",
+      "source_artifact_ids" => [artifact_id],
+      "source_chunk_ids" => [chunk_id],
+      "source_paths" => [source_path]
+    }
+  ]
+end
+
+graph_edges = knowledge_documents.map do |document|
+  artifact_id = document.fetch("id")
+  chunk_id = "#{artifact_id}:chunk:0"
+  source_path = document.fetch("source_path")
+
+  {
+    "edge_id" => "edge:#{artifact_id}:document-source-chunk",
+    "from_node_id" => "document:#{artifact_id}",
+    "to_node_id" => "chunk:#{chunk_id}",
+    "relationship" => "has_source_chunk",
+    "source_artifact_ids" => [artifact_id],
+    "source_chunk_ids" => [chunk_id],
+    "source_paths" => [source_path],
+    "extraction_method" => "deterministic-site-artifact-generator",
+    "confidence" => 1.0
+  }
+end
+
+knowledge_graph = {
+  "schema_version" => "0.1.0",
+  "graph_id" => "#{author_instance.fetch("instanceId")}.knowledge-graph",
+  "generated_from" => knowledge_documents.map { |document| document.fetch("id") },
+  "nodes" => graph_nodes,
+  "edges" => graph_edges
+}
+
 search_index = {
   "instanceId" => author_instance.fetch("instanceId"),
   "title" => author_instance.fetch("title"),
@@ -104,6 +155,7 @@ build_manifest = {
   "pendingInputCount" => pending_input_paths.length,
   "artifacts" => [
     "app/site/search-index.json",
+    "app/site/knowledge-graph.json",
     "app/site/build-manifest.json",
     "app/site/sync-state.json",
     "app/site/author-instance.json",
@@ -123,5 +175,6 @@ sync_state = {
 
 FileUtils.mkdir_p(output_dir)
 File.write(File.join(output_dir, "search-index.json"), JSON.pretty_generate(search_index) + "\n")
+File.write(File.join(output_dir, "knowledge-graph.json"), JSON.pretty_generate(knowledge_graph) + "\n")
 File.write(File.join(output_dir, "build-manifest.json"), JSON.pretty_generate(build_manifest) + "\n")
 File.write(File.join(output_dir, "sync-state.json"), JSON.pretty_generate(sync_state) + "\n")

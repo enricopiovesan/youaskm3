@@ -33,10 +33,12 @@ if [[ -f "$SYNC_STATE_FILE" ]] && cmp -s "$temp_dir/sync-state.json" "$SYNC_STAT
 fi
 
 cp "$temp_dir/search-index.json" "$SITE_DIR/search-index.json"
+cp "$temp_dir/knowledge-graph.json" "$SITE_DIR/knowledge-graph.json"
 cp "$temp_dir/build-manifest.json" "$SITE_DIR/build-manifest.json"
 cp "$temp_dir/sync-state.json" "$SITE_DIR/sync-state.json"
 
 echo "Detected source changes; refreshed static artifacts."
 echo "- app/site/search-index.json"
+echo "- app/site/knowledge-graph.json"
 echo "- app/site/build-manifest.json"
 echo "- app/site/sync-state.json"
