@@ -5,6 +5,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SPEC_FILES=(
   "openspec/specs/knowledge-ingest/spec.md"
   "openspec/specs/knowledge-search/spec.md"
+  "openspec/specs/knowledge-graph/spec.md"
+  "openspec/specs/traverse-integration/spec.md"
   "openspec/specs/mcp-interface/spec.md"
   "openspec/specs/federation/spec.md"
   "openspec/specs/pwa-shell/spec.md"
@@ -61,6 +63,12 @@ bash ./scripts/m3-build-smoke.sh
 
 echo "Validating incremental sync..."
 bash ./scripts/m3-sync-smoke.sh
+
+echo "Validating m3 search and serve commands..."
+bash ./scripts/m3-command-surface-smoke.sh
+
+echo "Validating MVP contracts..."
+bash ./scripts/mvp-contracts-smoke.sh
 
 echo "Validating federation index generation..."
 bash ./scripts/federation-index-smoke.sh

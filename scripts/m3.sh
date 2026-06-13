@@ -7,7 +7,7 @@ COMMAND="${1:-}"
 cd "$ROOT_DIR"
 
 usage() {
-  echo "Usage: ./scripts/m3.sh {init|add|build|sync|test|lint|smoke|status}" >&2
+  echo "Usage: ./scripts/m3.sh {init|add|build|sync|search|serve|test|lint|smoke|status}" >&2
 }
 
 slugify_url() {
@@ -88,6 +88,14 @@ case "$COMMAND" in
   sync)
     bash ./scripts/m3-sync.sh
     ;;
+  search)
+    shift
+    ruby ./scripts/m3-search.rb "$@"
+    ;;
+  serve)
+    shift
+    bash ./scripts/m3-serve.sh "$@"
+    ;;
   test)
     bash ./scripts/test.sh
     ;;
@@ -102,7 +110,7 @@ case "$COMMAND" in
     ;;
   *)
     usage
-    echo "Additional m3 commands arrive in later milestones." >&2
+    echo "Use one of the stable commands above." >&2
     exit 1
     ;;
 esac

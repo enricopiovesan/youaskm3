@@ -25,3 +25,23 @@ The system SHALL keep the MCP interface compatible with a WASM-native execution 
 - GIVEN the MCP module is compiled to the target WASM format
 - WHEN a supported host loads it
 - THEN the host can expose the same tool contract surface without host-specific behavior changes
+
+### Requirement: Expose the same MVP capabilities through MCP
+
+The system SHALL expose the MVP knowledge capabilities through Traverse MCP using the same contracts used by the app-facing runtime path.
+
+#### Scenario: Call the answer workflow from an MCP client
+
+- GIVEN the application bundle is registered with Traverse
+- WHEN an MCP client discovers the available youaskm3 capabilities
+- THEN it can inspect and execute the same `knowledge.query.answer` contract used by the PWA
+
+### Requirement: Preserve trace and evidence references in MCP responses
+
+The system SHALL return machine-readable trace, source, and graph evidence references through MCP responses when a capability produces an answer.
+
+#### Scenario: Inspect answer evidence from MCP
+
+- GIVEN an MCP client calls the answer workflow
+- WHEN the workflow completes
+- THEN the response includes answer text, citations, validation status, and trace identifiers equivalent to the app-facing response

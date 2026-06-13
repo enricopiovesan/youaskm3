@@ -1,0 +1,92 @@
+{
+  "kind": "youaskm3.capability_contract",
+  "schema_version": "1.0.0",
+  "id": "knowledge.query.answer",
+  "version": "0.1.0",
+  "lifecycle": "mvp",
+  "summary": "User-facing chat answer workflow entrypoint.",
+  "description": "Coordinates retrieval, graph expansion, context packing, inference, validation, and formatting behind the Traverse runtime boundary.",
+  "execution": {
+    "runtime": "traverse",
+    "business_logic": "wasm",
+    "permitted_targets": ["local", "server", "mcp"],
+    "requires_trace": true
+  },
+  "inputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "query": { "type": "string", "minLength": 1 },
+        "conversation_id": { "type": "string" },
+        "artifact_scope": { "type": "array", "items": { "type": "string" } },
+        "max_sources": { "type": "integer", "minimum": 1, "maximum": 20 }
+      },
+      "required": ["query"],
+      "additionalProperties": false
+    }
+  },
+  "outputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "answer": { "type": "string" },
+        "citations": { "$ref": "#/$defs/citations" },
+        "graph_evidence": { "$ref": "#/$defs/graphEvidence" },
+        "trace_id": { "type": "string" },
+        "validation": { "$ref": "#/$defs/validation" },
+        "failure": { "$ref": "#/$defs/failure" }
+      },
+      "required": ["answer", "citations", "graph_evidence", "trace_id", "validation"],
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "citation_id": { "type": "string" },
+          "artifact_id": { "type": "string" },
+          "chunk_id": { "type": "string" },
+          "source_path": { "type": "string" },
+          "excerpt": { "type": "string" }
+        },
+        "required": ["citation_id", "artifact_id", "chunk_id", "source_path", "excerpt"],
+        "additionalProperties": false
+      }
+    },
+    "graphEvidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "node_ids": { "type": "array", "items": { "type": "string" } },
+          "edge_ids": { "type": "array", "items": { "type": "string" } },
+          "supporting_chunk_ids": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["node_ids", "edge_ids", "supporting_chunk_ids"],
+        "additionalProperties": false
+      }
+    },
+    "validation": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "enum": ["valid", "invalid", "partial"] },
+        "checks": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["status", "checks"],
+      "additionalProperties": false
+    },
+    "failure": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "recoverable": { "type": "boolean" }
+      },
+      "required": ["code", "message", "recoverable"],
+      "additionalProperties": false
+    }
+  }
+}
