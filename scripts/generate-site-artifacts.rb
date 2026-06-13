@@ -13,9 +13,22 @@ author_instance_path = File.join(root, "app/site/author-instance.json")
 abort("Missing required file: app/site/author-instance.json") unless File.file?(author_instance_path)
 
 def trimmed_excerpt(markdown)
+  inside_html_comment = false
+
   markdown
     .each_line
     .map(&:strip)
+    .reject do |line|
+      if inside_html_comment
+        inside_html_comment = false if line.include?("-->")
+        true
+      elsif line.start_with?("<!--")
+        inside_html_comment = true unless line.include?("-->")
+        true
+      else
+        false
+      end
+    end
     .reject(&:empty?)
     .reject { |line| line.start_with?("#", "-", "|", "<!--") }
     .first

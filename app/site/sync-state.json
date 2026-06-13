@@ -1,16 +1,34 @@
 {
   "instanceId": "youaskm3-author",
-  "sourceFingerprint": "8049373a1a474a63d5d48700ba4ae23fff1fc6fe40ed96b30df11feed3ad8238",
-  "knowledgeDocumentCount": 0,
+  "sourceFingerprint": "ca954af000101d3b1fc170b193fa54e7f6f63ddeb7f8b18c759c5b1a4db8321e",
+  "knowledgeDocumentCount": 3,
   "pendingInputCount": 0,
   "trackedSourcePaths": [
-    "app/site/author-instance.json"
+    "app/site/author-instance.json",
+    "knowledge/blog/mvp-fixture-article/index.md",
+    "knowledge/books/mvp-fixture-handbook/index.md",
+    "knowledge/papers/mvp-fixture-note/index.md"
   ],
   "sources": [
     {
       "path": "app/site/author-instance.json",
       "kind": "instance-manifest",
       "sha256": "d2651ae376fbcd980d521b1da60930b92d9cfa7f325796595c916bdda03fd483"
+    },
+    {
+      "path": "knowledge/blog/mvp-fixture-article/index.md",
+      "kind": "processed-knowledge",
+      "sha256": "c27763a2440c75c45de9d9181de4506878fc790c6b7a0ba547263e2add2caea2"
+    },
+    {
+      "path": "knowledge/books/mvp-fixture-handbook/index.md",
+      "kind": "processed-knowledge",
+      "sha256": "28038fb843628893b8136a3713db321e9d65ccce38e7f80494ca45a9a3d5d89c"
+    },
+    {
+      "path": "knowledge/papers/mvp-fixture-note/index.md",
+      "kind": "processed-knowledge",
+      "sha256": "638e3f6c7f232743fc2e55a7e3e08f195f0d36acf09477561800ac4e00b956ae"
     }
   ]
 }

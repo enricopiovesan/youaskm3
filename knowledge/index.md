@@ -22,10 +22,14 @@ The generated portion of this file is managed by the M1 knowledge index flow doc
 <!-- youaskm3:index:start -->
 | Category | Processed entries | Pending inputs |
 |---|---:|---:|
-| `books/` | 0 | 0 |
-| `papers/` | 0 | 0 |
-| `blog/` | 0 | 0 |
+| `books/` | 1 | 0 |
+| `papers/` | 1 | 0 |
+| `blog/` | 1 | 0 |
 | `inputs/` | 0 | 0 |
 
-No processed knowledge artifacts have been committed yet.
+Processed fixture artifacts:
+
+- `knowledge/books/mvp-fixture-handbook/index.md`
+- `knowledge/papers/mvp-fixture-note/index.md`
+- `knowledge/blog/mvp-fixture-article/index.md`
 <!-- youaskm3:index:end -->
