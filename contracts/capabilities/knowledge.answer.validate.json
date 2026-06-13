@@ -1,0 +1,52 @@
+{
+  "kind": "youaskm3.capability_contract",
+  "schema_version": "1.0.0",
+  "id": "knowledge.answer.validate",
+  "version": "0.1.0",
+  "lifecycle": "mvp",
+  "summary": "Validate answer grounding, citations, and graph evidence.",
+  "description": "Checks that an answer is supported by source chunks and graph evidence before the product renders it as grounded.",
+  "execution": {
+    "runtime": "traverse",
+    "business_logic": "wasm",
+    "permitted_targets": ["local", "server", "mcp"],
+    "requires_trace": true
+  },
+  "inputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "answer": { "type": "string" },
+        "citations": { "type": "array", "items": { "type": "object" } },
+        "retrieved_chunks": { "type": "array", "items": { "type": "object" } },
+        "graph_evidence": { "type": "array", "items": { "type": "object" } }
+      },
+      "required": ["answer", "citations", "retrieved_chunks", "graph_evidence"],
+      "additionalProperties": false
+    }
+  },
+  "outputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "enum": ["valid", "invalid", "partial"] },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "status": { "type": "string", "enum": ["pass", "fail", "warn"] },
+              "message": { "type": "string" }
+            },
+            "required": ["name", "status", "message"],
+            "additionalProperties": false
+          }
+        },
+        "trace_id": { "type": "string" }
+      },
+      "required": ["status", "checks", "trace_id"],
+      "additionalProperties": false
+    }
+  }
+}

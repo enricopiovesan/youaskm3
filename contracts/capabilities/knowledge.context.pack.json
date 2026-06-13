@@ -1,0 +1,42 @@
+{
+  "kind": "youaskm3.capability_contract",
+  "schema_version": "1.0.0",
+  "id": "knowledge.context.pack",
+  "version": "0.1.0",
+  "lifecycle": "mvp",
+  "summary": "Build bounded prompt context from retrieved chunks and graph evidence.",
+  "description": "Constructs deterministic context packages inside model limits while preserving source and graph references.",
+  "execution": {
+    "runtime": "traverse",
+    "business_logic": "wasm",
+    "permitted_targets": ["local", "server", "mcp"],
+    "requires_trace": true
+  },
+  "inputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "query": { "type": "string", "minLength": 1 },
+        "retrieved_chunks": { "type": "array", "items": { "type": "object" } },
+        "graph_evidence": { "type": "array", "items": { "type": "object" } },
+        "token_budget": { "type": "integer", "minimum": 256, "maximum": 32768 }
+      },
+      "required": ["query", "retrieved_chunks", "graph_evidence", "token_budget"],
+      "additionalProperties": false
+    }
+  },
+  "outputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "context": { "type": "string" },
+        "included_chunk_ids": { "type": "array", "items": { "type": "string" } },
+        "included_edge_ids": { "type": "array", "items": { "type": "string" } },
+        "omitted_reasons": { "type": "array", "items": { "type": "string" } },
+        "trace_id": { "type": "string" }
+      },
+      "required": ["context", "included_chunk_ids", "included_edge_ids", "omitted_reasons", "trace_id"],
+      "additionalProperties": false
+    }
+  }
+}

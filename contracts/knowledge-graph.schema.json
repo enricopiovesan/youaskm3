@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://youaskm3.dev/contracts/knowledge-graph.schema.json",
+  "title": "youaskm3 knowledge graph artifact",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "string" },
+    "graph_id": { "type": "string", "minLength": 1 },
+    "generated_from": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "node_id": { "type": "string", "minLength": 1 },
+          "label": { "type": "string", "minLength": 1 },
+          "type": { "type": "string" },
+          "source_artifact_ids": { "type": "array", "items": { "type": "string" } },
+          "source_chunk_ids": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["node_id", "label", "type", "source_artifact_ids", "source_chunk_ids"],
+        "additionalProperties": false
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "edge_id": { "type": "string", "minLength": 1 },
+          "from_node_id": { "type": "string", "minLength": 1 },
+          "to_node_id": { "type": "string", "minLength": 1 },
+          "relationship": { "type": "string", "minLength": 1 },
+          "source_artifact_ids": { "type": "array", "items": { "type": "string" } },
+          "source_chunk_ids": { "type": "array", "items": { "type": "string" } },
+          "extraction_method": { "type": "string" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "required": ["edge_id", "from_node_id", "to_node_id", "relationship", "source_artifact_ids", "source_chunk_ids", "extraction_method", "confidence"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["schema_version", "graph_id", "generated_from", "nodes", "edges"],
+  "additionalProperties": false
+}

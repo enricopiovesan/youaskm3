@@ -1,0 +1,39 @@
+{
+  "schema_version": "0.1.0",
+  "artifact_id": "artifact.portable-runtime-note",
+  "title": "Portable Runtime Note",
+  "source": {
+    "type": "markdown",
+    "path": "knowledge/blog/portable-runtime-note.md",
+    "original_name": "portable-runtime-note.md"
+  },
+  "conversion": {
+    "tool": "markitdown",
+    "tool_version": "mvp-fixture",
+    "converted_at": "2026-06-13T00:00:00Z"
+  },
+  "sections": [
+    {
+      "section_id": "section.runtime",
+      "heading": "Runtime Boundary",
+      "markdown": "Business logic runs as governed WASM capabilities through Traverse.",
+      "source_locator": "line:1"
+    }
+  ],
+  "chunks": [
+    {
+      "chunk_id": "chunk.runtime.001",
+      "section_id": "section.runtime",
+      "token_estimate": 12,
+      "markdown": "Business logic runs as governed WASM capabilities through Traverse."
+    }
+  ],
+  "graph_hints": [
+    {
+      "hint_id": "hint.runtime.001",
+      "chunk_id": "chunk.runtime.001",
+      "label": "runtime_boundary",
+      "text": "Business logic runs through Traverse."
+    }
+  ]
+}

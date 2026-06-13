@@ -1,0 +1,43 @@
+{
+  "kind": "youaskm3.capability_contract",
+  "schema_version": "1.0.0",
+  "id": "knowledge.answer.format",
+  "version": "0.1.0",
+  "lifecycle": "mvp",
+  "summary": "Format validated answer envelopes for chat and MCP clients.",
+  "description": "Shapes final answer text, citations, source cards, graph evidence, and trace references without changing business meaning.",
+  "execution": {
+    "runtime": "traverse",
+    "business_logic": "wasm",
+    "permitted_targets": ["local", "server", "mcp"],
+    "requires_trace": true
+  },
+  "inputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "raw_answer": { "type": "string" },
+        "citations": { "type": "array", "items": { "type": "object" } },
+        "graph_evidence": { "type": "array", "items": { "type": "object" } },
+        "validation": { "type": "object" },
+        "target": { "type": "string", "enum": ["chat", "mcp"] }
+      },
+      "required": ["raw_answer", "citations", "graph_evidence", "validation", "target"],
+      "additionalProperties": false
+    }
+  },
+  "outputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "answer": { "type": "string" },
+        "source_cards": { "type": "array", "items": { "type": "object" } },
+        "graph_cards": { "type": "array", "items": { "type": "object" } },
+        "trace_id": { "type": "string" },
+        "display_status": { "type": "string", "enum": ["grounded", "needs_review", "failed"] }
+      },
+      "required": ["answer", "source_cards", "graph_cards", "trace_id", "display_status"],
+      "additionalProperties": false
+    }
+  }
+}

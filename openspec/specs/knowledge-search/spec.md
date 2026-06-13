@@ -26,6 +26,26 @@ The system SHALL preserve enough source context in search responses to let downs
 - WHEN the search capability ranks and returns results
 - THEN each result can be associated with a source path or equivalent metadata
 
+### Requirement: Retrieve from prepared artifacts through a capability boundary
+
+The system SHALL define retrieval as a Traverse-compatible capability that consumes prepared search, chunk, and markdown artifacts instead of embedding product retrieval logic in the PWA.
+
+#### Scenario: Retrieve evidence for a chat request
+
+- GIVEN a user submits a chat prompt through the PWA
+- WHEN retrieval is needed for the answer workflow
+- THEN the PWA delegates retrieval to the `knowledge.retrieve` capability and receives source-aware result objects
+
+### Requirement: Preserve chunk-level evidence
+
+The system SHALL include chunk ids, source artifact ids, source paths, excerpts, and score information in retrieval responses.
+
+#### Scenario: Return a cited chunk
+
+- GIVEN an indexed chunk matches a query
+- WHEN the retrieval capability returns it
+- THEN the response includes the chunk id, artifact id, source path, excerpt, and score needed for citation and validation
+
 ### Requirement: Generate a deterministic knowledge index
 
 The system SHALL define a deterministic generation flow for `knowledge/index.md` that derives the master map from processed knowledge content rather than hand-maintained search metadata.

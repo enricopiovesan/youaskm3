@@ -12,7 +12,7 @@
 
 **your knowledge, queryable**
 
-youaskm3 is an open source, WASM-native, MCP-powered personal knowledge project for turning your books, papers, notes, and source material into something you can query, inspect, fork, and evolve in the open.
+youaskm3 is an open source, WASM-native, MCP-powered personal knowledge product for turning your books, papers, notes, and source material into a local-first chat experience you can query, inspect, fork, and evolve in the open.
 
 It is designed on top of [Traverse](https://github.com/enricopiovesan/Traverse) and the broader [Universal Microservices Architecture](https://github.com/enricopiovesan/UMA-code-examples) direction: portable capability contracts, governed specs, and runtime surfaces that stay usable across tools and hosts.
 
@@ -29,8 +29,8 @@ Most personal knowledge tooling locks your context inside closed products, hoste
 
 youaskm3 is for people who want to:
 
-- ingest source material like PDFs into a git-tracked knowledge base
-- prepare knowledge artifacts that can later be queried through MCP-capable clients
+- ingest source material like PDFs, DOCX files, slides, notes, and articles into a git-tracked knowledge base
+- prepare markdown, chunk, search, and graph artifacts that can be queried by the chat product
 - run a strict, deterministic development workflow with CI, coverage, and spec gates
 - build an agent-friendly repo where humans and coding agents can work from the same source of truth
 
@@ -44,6 +44,8 @@ If you clone this repository right now, you can:
 - ingest a PDF or URL into the knowledge structure with `./scripts/m3.sh add`
 - generate static knowledge artifacts and WASM builds with `./scripts/m3.sh build`
 - refresh generated artifacts incrementally with `./scripts/m3.sh sync`
+- query the generated local search index with `./scripts/m3.sh search <query>`
+- serve the static PWA shell locally with `./scripts/m3.sh serve [port]`
 - inspect and extend the current Rust crates for `core`, `ingest`, `search`, and `mcp`
 - work against real OpenSpec contracts and CI gates instead of placeholders
 
@@ -51,8 +53,9 @@ If you clone this repository right now, you can:
 
 This repository is not yet a finished end-user product. The main gaps today are:
 
-- no polished end-user query workflow in the README yet
-- no stable `m3 search` or `m3 serve` command in the repo command surface
+- no finished end-user chat loop over Traverse-run WASM capabilities
+- no production graph artifact generator yet
+- no finished local LLM/inference capability delegated through Traverse yet
 - no finished fork-and-run onboarding path for a brand-new user in under 15 minutes
 - no complete federation explore experience
 - no full cross-instance search fan-out flow
@@ -108,6 +111,8 @@ This repo is intentionally structured so humans and agents can navigate the same
 | Learn contribution rules | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Review active capability specs | [openspec/specs/](openspec/specs/) |
 | Review current MCP contracts | [contracts/mcp-tools.json](contracts/mcp-tools.json) |
+| Review MVP capability contracts | [contracts/capabilities/](contracts/capabilities/) |
+| Start or resume ops workflow | [docs/youaskm3-ops.md](docs/youaskm3-ops.md) |
 | Inspect the repo command surface | [scripts/m3.sh](scripts/m3.sh) |
 | Run the full validation path | [scripts/smoke.sh](scripts/smoke.sh) |
 | Review current knowledge layout | [knowledge/index.md](knowledge/index.md) |
@@ -117,7 +122,7 @@ This repo is intentionally structured so humans and agents can navigate the same
 The current repo-level command entrypoint is:
 
 ```bash
-./scripts/m3.sh {init|add|build|sync|test|lint|smoke|status}
+./scripts/m3.sh {init|add|build|sync|search|serve|test|lint|smoke|status}
 ```
 
 Available now:
@@ -126,6 +131,8 @@ Available now:
 - `m3 add` routes PDF and URL ingest into the knowledge structure
 - `m3 build` generates static knowledge artifacts and validates native plus `wasm32-wasip1` builds
 - `m3 sync` refreshes generated artifacts without forcing a full rebuild every time
+- `m3 search <query>` queries the generated local search index from the CLI
+- `m3 serve [port]` serves the static PWA shell from `app/site` for local inspection
 - `m3 smoke` runs the full repository validation path
 
 ## Project Standards
@@ -148,15 +155,24 @@ youaskm3 is not an isolated experiment. It sits in a larger line of work:
 
 Traverse answers the runtime question. youaskm3 applies that model to personal knowledge.
 
+For the first MVP, the boundary is strict:
+
+- `youaskm3` CLI owns source discovery, MarkItDown-backed conversion, normalization, artifact writing, build/sync, and local serving.
+- `Traverse` owns runtime execution of product/business behavior as governed WASM capabilities or agents.
+- The PWA owns UI only: chat input, rendering answers, rendering sources, graph views, and execution status.
+- Query planning, retrieval ranking, graph traversal, context packing, inference selection, answer grounding, and response formatting are capability contracts, not browser or CLI shortcuts.
+
 ## Roadmap
 
 | Milestone | Focus |
 |---|---|
-| M1 | Knowledge ingest and indexing |
-| M2 | WASM MCP core and contracts |
-| M3 | PWA chat shell |
-| M4 | Fork-and-run workflow |
-| M5 | Federation and registry |
+| MVP-1 | Spec and contract reset around local-first chat, Traverse runtime boundaries, and artifact schemas |
+| MVP-2 | MarkItDown default conversion, normalized markdown artifacts, deterministic chunks, and fixture corpus |
+| MVP-3 | Search and graph artifact generation with source and chunk evidence |
+| MVP-4 | UI-only PWA chat shell wired to a temporary Traverse-compatible runtime harness |
+| MVP-5 | Traverse application bundle registration and real WASM capability execution |
+| MVP-6 | Local/server inference capability delegated through Traverse placement and dependency resolution |
+| Later | Fork-and-run polish, federation, cross-instance search, and registry workflows |
 
 Roadmap source: [SPEC.md](SPEC.md#8-milestones) and [GitHub Project 3](https://github.com/users/enricopiovesan/projects/3).
 

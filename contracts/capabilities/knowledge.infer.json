@@ -1,0 +1,62 @@
+{
+  "kind": "youaskm3.capability_contract",
+  "schema_version": "1.0.0",
+  "id": "knowledge.infer",
+  "version": "0.1.0",
+  "lifecycle": "mvp",
+  "summary": "Inference dependency resolved and placed by Traverse.",
+  "description": "Declares model inference as a governed capability so youaskm3 does not hardcode local, server, or external providers.",
+  "execution": {
+    "runtime": "traverse",
+    "business_logic": "wasm_or_agent",
+    "permitted_targets": ["local", "server"],
+    "requires_trace": true
+  },
+  "model_dependencies": [
+    {
+      "interface_id": "knowledge.inference.text.generate",
+      "version": "0.1.0",
+      "required": true,
+      "placement": ["local", "server"],
+      "notes": "Traverse resolves this dependency. youaskm3 does not select Ollama, WebLLM, llama.cpp, or cloud APIs directly."
+    }
+  ],
+  "inputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "prompt": { "type": "string", "minLength": 1 },
+        "context": { "type": "string" },
+        "max_output_tokens": { "type": "integer", "minimum": 1, "maximum": 8192 }
+      },
+      "required": ["prompt", "context"],
+      "additionalProperties": false
+    }
+  },
+  "outputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" },
+        "selected_inference_capability": { "type": "string" },
+        "placement": { "type": "string", "enum": ["local", "server"] },
+        "trace_id": { "type": "string" },
+        "failure": { "$ref": "#/$defs/failure" }
+      },
+      "required": ["text", "selected_inference_capability", "placement", "trace_id"],
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "failure": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "recoverable": { "type": "boolean" }
+      },
+      "required": ["code", "message", "recoverable"],
+      "additionalProperties": false
+    }
+  }
+}

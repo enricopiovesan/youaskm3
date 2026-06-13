@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://youaskm3.dev/contracts/markdown-artifact.schema.json",
+  "title": "youaskm3 normalized markdown artifact",
+  "type": "object",
+  "properties": {
+    "schema_version": { "type": "string" },
+    "artifact_id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["pdf", "docx", "pptx", "html", "url", "text", "markdown", "other"] },
+        "path": { "type": "string" },
+        "url": { "type": "string" },
+        "original_name": { "type": "string" }
+      },
+      "required": ["type"],
+      "additionalProperties": false
+    },
+    "conversion": {
+      "type": "object",
+      "properties": {
+        "tool": { "type": "string", "minLength": 1 },
+        "tool_version": { "type": "string" },
+        "converted_at": { "type": "string" },
+        "command": { "type": "string" }
+      },
+      "required": ["tool"],
+      "additionalProperties": false
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "section_id": { "type": "string", "minLength": 1 },
+          "heading": { "type": "string" },
+          "markdown": { "type": "string" },
+          "source_locator": { "type": "string" }
+        },
+        "required": ["section_id", "heading", "markdown"],
+        "additionalProperties": false
+      }
+    },
+    "chunks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "chunk_id": { "type": "string", "minLength": 1 },
+          "section_id": { "type": "string" },
+          "token_estimate": { "type": "integer", "minimum": 1 },
+          "markdown": { "type": "string" }
+        },
+        "required": ["chunk_id", "section_id", "token_estimate", "markdown"],
+        "additionalProperties": false
+      }
+    },
+    "graph_hints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "hint_id": { "type": "string" },
+          "chunk_id": { "type": "string" },
+          "label": { "type": "string" },
+          "text": { "type": "string" }
+        },
+        "required": ["hint_id", "chunk_id", "label", "text"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["schema_version", "artifact_id", "title", "source", "conversion", "sections", "chunks"],
+  "additionalProperties": false
+}

@@ -7,31 +7,33 @@
 **Born:** Golden, BC — Purcell Mountains  
 **Spec framework:** [OpenSpec](https://openspec.dev/)  
 **Spec version:** 0.1.0  
-**Status:** Foundation
+**Status:** MVP specification reset
 
 ---
 
 ## 1. Vision
 
-youaskm3 is an open source, WASM-native, MCP-powered personal knowledge layer. It ingests everything you write, read, and save — books, white papers, blog posts, YouTube transcripts, articles, notes — and makes it all queryable via any LLM or chat interface.
+youaskm3 is an open source, WASM-native, MCP-powered personal knowledge product. It ingests everything you write, read, and save — books, white papers, blog posts, YouTube transcripts, articles, notes — and turns those files into a local-first chat experience grounded in user-owned markdown, search, chunk, and graph artifacts.
 
 The system answers as *you*: in your voice, from your accumulated thinking.
 
-Anyone can fork it, fill it with their own knowledge, and run their own instance for free on GitHub Pages. Instances can optionally federate through a shared registry, making knowledge discoverable across the network.
+Anyone can fork it, fill it with their own knowledge, and run their own instance for free on GitHub Pages. Runtime business behavior is delegated to Traverse as governed WASM capabilities so the same application logic can run locally, on a server, or through MCP as Traverse placement improves. Instances can optionally federate through a shared registry, making knowledge discoverable across the network.
 
-**Core promise:** no server, no database, no cost, no lock-in. Git is the infrastructure.
+**Core promise:** no mandatory hosted service, no database, no lock-in. Git is the infrastructure, the browser is the product surface, and Traverse is the portable business-logic runtime.
 
 ---
 
 ## 2. Design Principles
 
 1. **Specs are the source of truth.** Code, tests, and PRs must align with approved specs. A PR that drifts from spec fails review.
-2. **WASM-first portability.** Business logic compiles to WASM and runs identically in browser, edge, cloud, and CLI. No host-specific shortcuts.
+2. **WASM-first portability.** Business logic compiles to WASM and runs through Traverse across browser, edge, cloud, CLI, and MCP hosts. No host-specific shortcuts.
 3. **Contracts before code.** Every capability is defined by an explicit contract before implementation begins.
 4. **100% business logic test coverage.** No exceptions. Coverage is enforced in CI — a PR that drops coverage below 100% does not merge.
 5. **Production quality from day one.** No prototype shortcuts in core paths. Quality standards apply from the first commit.
 6. **Open by default.** Apache-2.0 licensed. Designed to be forked, extended, and contributed to.
-7. **Git as infrastructure.** Knowledge store, registry, deployment, and history are all git-native. No external services required.
+7. **Git as infrastructure.** Knowledge store, registry, deployment, and history are all git-native. No mandatory external services required.
+8. **UI-only product shell.** The PWA renders chat, sources, graph context, and traces; it does not own retrieval, ranking, graph traversal, context packing, inference selection, answer validation, or response formatting.
+9. **CLI as artifact builder.** The CLI may convert files, normalize markdown, write artifacts, build, sync, serve, and register bundles; product semantics belong in Traverse-run capabilities.
 
 ---
 
@@ -42,8 +44,9 @@ Anyone can fork it, fill it with their own knowledge, and run their own instance
 |---|---|---|
 | Business logic | **Rust → WASM** | Portable, safe, fast. Runs anywhere. |
 | WASM runtime | **Wasmtime** (CLI/server) / **browser native** | Same module, different host |
-| Runtime model | **Traverse v0.1 / UMA** | Contract-driven, governed, explainable release surface |
+| Runtime model | **Traverse v0.3 baseline / UMA** | Contract-driven, governed, explainable release surface for portable capabilities |
 | MCP interface | **WASM MCP module** | Portable MCP server compiled to WASM |
+| Runtime integration | **Traverse app bundle** | Registers capability contracts, event contracts, workflows, WASM packages, and model dependencies |
 
 ### Frontend
 | Layer | Technology | Rationale |
@@ -57,9 +60,12 @@ Anyone can fork it, fill it with their own knowledge, and run their own instance
 | Layer | Technology | Rationale |
 |---|---|---|
 | Format | **Markdown** | Human-readable, LLM-native, git-diffable |
+| Conversion | **MarkItDown** | Default source-to-markdown conversion layer for supported office, PDF, and document formats |
+| Chunks | **Static JSON + markdown refs** | Deterministic context units with source and section evidence |
+| Graph | **Static JSON graph artifact** | Source-aware nodes and edges for graph-backed context |
 | Diagrams | **Mermaid** | Plain text, renders in GitHub, LLM-readable |
 | Index | **Static JSON** | Generated at build time, no DB needed |
-| Search | **WASM vector search** | Runs client-side, no server |
+| Search | **WASM retrieval capability** | Runs through Traverse locally or remotely based on placement |
 | Version control | **Git** | The only database you need |
 
 ### Tooling & infrastructure
@@ -89,6 +95,10 @@ youaskm3/
 │   │   │   └── spec.md
 │   │   ├── knowledge-search/
 │   │   │   └── spec.md
+│   │   ├── knowledge-graph/
+│   │   │   └── spec.md
+│   │   ├── traverse-integration/
+│   │   │   └── spec.md
 │   │   ├── mcp-interface/
 │   │   │   └── spec.md
 │   │   ├── federation/
@@ -106,10 +116,14 @@ youaskm3/
 │   └── youaskm3-mcp/           ← WASM MCP server module
 │
 ├── contracts/
+│   ├── capabilities/           ← MVP product capability contracts
+│   ├── markdown-artifact.schema.json
+│   ├── knowledge-graph.schema.json
 │   └── mcp-tools.json          ← MCP tool definitions as UMA contracts
 │
 ├── tools/
-│   ├── pdf2m3/                 ← PDF → structured markdown converter
+│   ├── markitdown2m3/          ← MarkItDown → normalized markdown wrapper
+│   ├── pdf2m3/                 ← legacy PDF → structured markdown converter
 │   └── url2m3/                 ← URL/transcript → markdown ingester
 │
 ├── app/
@@ -169,14 +183,17 @@ idea → /openspec:proposal → proposal.md + design.md + tasks.md + spec delta
 
 ### Traverse integration baseline
 
-youaskm3 integrates with Traverse through documented public release surfaces instead of private Traverse internals. The current baseline is the Traverse v0.1 app-consumable release path:
+youaskm3 integrates with Traverse through documented public release surfaces instead of private Traverse internals. The current working baseline is the Traverse v0.3 readiness path described in [docs/traverse-mvp-requirements.md](docs/traverse-mvp-requirements.md):
 
-- versioned consumer bundle: Traverse `docs/app-consumable-consumer-bundle.md`
-- browser-hosted path: Traverse browser consumer package and browser adapter docs
-- MCP-facing path: Traverse `traverse-mcp` stdio server and MCP library surface
-- validation path: Traverse `youaskm3` integration, compatibility conformance, published artifact, and real shell validation scripts
+- governed application bundle registration
+- WASM business capability execution
+- evented workflow composition
+- app-facing HTTP/JSON execution path
+- MCP-facing execution path
+- public traces for answer grounding
+- local/server placement and model dependency resolution
 
-Roadmap work that touches runtime, MCP, browser hosting, or fork-and-run setup must pin an approved Traverse release pairing and include the relevant Traverse validation path.
+Roadmap work that touches runtime, MCP, browser hosting, model inference, or fork-and-run setup must pin an approved Traverse release pairing and include the relevant Traverse validation path.
 
 ### Spec format (OpenSpec)
 
@@ -280,71 +297,54 @@ Dual-licensed: **MIT** and **Apache-2.0**. Users choose.
 
 ## 8. Milestones
 
-### M0 — Foundation *(now)*
-- [ ] Repo created: `github.com/youaskm3/youaskm3`
-- [ ] This SPEC.md committed as the root document
-- [ ] OpenSpec installed and configured
-- [ ] `openspec/specs/` directory seeded with initial capability specs
-- [ ] CI skeleton: lint, test, coverage, WASM build
-- [ ] LICENSE-MIT, LICENSE-APACHE, README, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY
-- [ ] Cargo workspace with `youaskm3-core` stub
-- [ ] rust-toolchain.toml pinned
-- [ ] youaskm3.com domain connected to GitHub Pages
+### MVP-1 — Spec and Contract Reset *(now)*
+- [ ] README and SPEC describe the chat-first MVP.
+- [ ] OpenSpec capabilities cover ingest, search, graph, PWA shell, MCP, and Traverse integration.
+- [ ] MVP capability contracts exist for query, retrieval, graph expansion, context packing, inference, answer validation, and answer formatting.
+- [ ] Markdown and graph artifact schemas are machine-checkable.
+- [ ] Smoke validation checks the new specs and contracts.
 
-### M1 — Knowledge layer *(v0.1)*
-- [ ] Spec: `openspec/specs/knowledge-ingest/spec.md`
-- [ ] `pdf2m3` tool: PDF → structured markdown with chapter chunking
-- [ ] Mermaid diagram generation from visual PDF pages (via Claude API)
-- [ ] `url2m3` tool: URL/transcript → markdown
-- [ ] `knowledge/index.md` auto-generated from content
-- [ ] `youaskm3-ingest` crate: 100% coverage
-- [ ] Author's books, white papers, blog posts ingested as first content
+### MVP-2 — Artifact Pipeline
+- [ ] MarkItDown is the default source-to-markdown converter.
+- [ ] Normalized markdown artifacts include stable ids, source metadata, conversion metadata, sections, chunks, and graph hints.
+- [ ] Deterministic chunks are generated from processed markdown, not raw captures.
+- [ ] A small fixture corpus validates search, graph, and chat flows without private content.
+- [ ] `m3 build` and `m3 sync` produce the full static artifact set.
 
-### M2 — WASM MCP core *(v0.2)*
-- [ ] Spec: `openspec/specs/mcp-interface/spec.md`
-- [ ] `contracts/mcp-tools.json` — UMA contracts for all MCP tools
-- [ ] `youaskm3-search` crate: WASM vector search
-- [ ] Traverse v0.1 release pairing pinned for runtime, browser consumer, and MCP surfaces
-- [ ] `youaskm3-mcp` crate acts as a thin integration adapter over the supported Traverse MCP/library surface where possible
-- [ ] MCP tools: `search`, `remember`, `recall`, `connect` mapped to contract-defined Traverse-compatible tool semantics
-- [ ] Runs through documented Traverse MCP/CLI validation paths before claiming browser, CLI, or edge compatibility
-- [ ] Built on the Traverse v0.1 app-consumable runtime model, not a bespoke runtime fork
-- [ ] 100% test coverage on all crates
+### MVP-3 — Search and Graph Evidence
+- [ ] Search artifacts include source paths, chunk ids, excerpts, and deterministic scoring inputs.
+- [ ] Graph artifacts include nodes, edges, source artifact ids, source chunk ids, labels, extraction method, confidence, and deterministic ordering.
+- [ ] Retrieval and graph expansion run behind Traverse-compatible capability contracts.
+- [ ] Empty, stale, and invalid artifact states return machine-readable failures.
 
-### M3 — Chat interface *(v0.3)*
-- [ ] Spec: `openspec/specs/pwa-shell/spec.md`
-- [ ] PWA shell: installable, offline-capable
-- [ ] Web Components: `<m3-chat>`, `<m3-result>`, `<m3-source>`
-- [ ] Browser-hosted runtime path consumes the Traverse browser consumer package/adapter or its approved release successor
-- [ ] WASM/MCP behavior is validated through the Traverse `youaskm3` real shell validation path
-- [ ] youaskm3.com serves author's instance
-- [ ] Claude API integration (configurable key)
-- [ ] Works with any MCP-compatible LLM
+### MVP-4 — UI-Only PWA Chat
+- [ ] The PWA provides the first user-facing product: a local-first chat interface.
+- [ ] Web Components render chat messages, source cards, graph evidence, and execution status.
+- [ ] The PWA can call a temporary local harness that exactly mirrors the Traverse app-facing contract.
+- [ ] The PWA contains no retrieval, ranking, graph traversal, prompt construction, inference selection, or answer validation logic.
 
-### M4 — Fork and run your own *(v0.4)*
-- [ ] `m3 init` — interactive setup for new instances
-- [ ] `m3 build` — generates index, compiles WASM, prepares site
-- [ ] `m3 sync` — incremental re-index on content changes
-- [ ] GitHub Actions template included in repo
-- [ ] Traverse release pairing and compatibility conformance commands documented for forked instances
-- [ ] One-command setup documented in README
-- [ ] Setup time target: under 15 minutes
+### MVP-5 — Traverse Runtime Integration
+- [ ] The CLI registers a Traverse application bundle through public APIs.
+- [ ] The bundle includes capability contracts, event contracts, workflows, WASM package manifests, binary digests, runtime constraints, and model dependencies.
+- [ ] Traverse executes the same product workflow through app-facing HTTP/JSON and MCP surfaces.
+- [ ] Execution traces include capability versions, placement, source evidence, graph evidence, inference dependency, validation outcome, and failure reasons.
 
-### M5 — Federation *(v1.0)*
-- [ ] Spec: `openspec/specs/federation/spec.md`
-- [ ] `github.com/youaskm3/registry` repo created
-- [ ] `instances.json` format defined
-- [ ] PR-based join process documented
-- [ ] Explore page at youaskm3.com (`/explore`)
-- [ ] Browse by topic across registered instances
-- [ ] Nightly GitHub Action: crawl registered instances, build cross-instance index
-- [ ] Cross-instance search (client-side fan-out)
+### MVP-6 — Local-First Inference Through Traverse
+- [ ] `knowledge.infer` declares inference needs by contract instead of hardcoding a provider.
+- [ ] Traverse can run a compatible local WASM inference capability when available.
+- [ ] Traverse can choose a server-side inference capability when allowed and available.
+- [ ] Missing inference capability fails clearly before user-facing execution begins.
+
+### Later — Fork, Federation, and Network Effects
+- [ ] One-command setup documented in README with a target under 15 minutes.
+- [ ] `youaskm3.com` serves the author's public instance.
+- [ ] Federation registry and cross-instance search remain separate from the first MVP.
 
 ---
 
 ## 9. MCP Tools (initial set)
 
-Defined as UMA contracts in `contracts/mcp-tools.json`.
+Defined as UMA contracts in `contracts/mcp-tools.json`; MVP product capabilities are defined separately under `contracts/capabilities/` and exposed through Traverse app-facing and MCP surfaces.
 
 | Tool | Description |
 |---|---|
@@ -355,9 +355,25 @@ Defined as UMA contracts in `contracts/mcp-tools.json`.
 | `list_sources` | List all indexed sources with metadata |
 | `status` | Report index status, last sync, coverage |
 
+## 10. MVP Product Capabilities
+
+The first chat workflow is composed from these product-level capability contracts:
+
+| Capability | Description |
+|---|---|
+| `knowledge.query.answer` | User-facing workflow entrypoint that returns a grounded answer envelope |
+| `knowledge.retrieve` | Source-aware retrieval over prepared search and chunk artifacts |
+| `knowledge.graph.expand` | Graph context expansion from retrieved chunks, topics, or cited nodes |
+| `knowledge.context.pack` | Deterministic context construction within model limits |
+| `knowledge.infer` | Model inference dependency resolved and placed by Traverse |
+| `knowledge.answer.validate` | Grounding, citation, and failure validation |
+| `knowledge.answer.format` | Final response shaping for chat and MCP clients |
+
+All seven capabilities must run as governed WASM capabilities or agents through Traverse for the production MVP. Temporary local harnesses are allowed only when they implement the same contract envelopes and are marked as replaceable.
+
 ---
 
-## 10. Knowledge Structure
+## 11. Knowledge Structure
 
 ```
 knowledge/
@@ -388,7 +404,7 @@ knowledge/
 
 ---
 
-## 11. Federation Protocol
+## 12. Federation Protocol
 
 ### Instance registration
 An instance joins the federation by opening a PR to `youaskm3/registry` adding one JSON entry to `instances.json`:
@@ -418,7 +434,7 @@ A nightly GitHub Action in `youaskm3/registry`:
 
 ---
 
-## 12. CLI Reference (`m3`)
+## 13. CLI Reference (`m3`)
 
 ```bash
 m3 init                  # interactive setup for new instance
@@ -432,7 +448,7 @@ m3 serve                 # local dev server
 
 ---
 
-## 13. Non-Goals
+## 14. Non-Goals
 
 The following are explicitly out of scope for v1.0:
 

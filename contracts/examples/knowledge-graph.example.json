@@ -1,0 +1,33 @@
+{
+  "schema_version": "0.1.0",
+  "graph_id": "graph.mvp-fixture",
+  "generated_from": ["artifact.portable-runtime-note"],
+  "nodes": [
+    {
+      "node_id": "node.traverse",
+      "label": "Traverse",
+      "type": "runtime",
+      "source_artifact_ids": ["artifact.portable-runtime-note"],
+      "source_chunk_ids": ["chunk.runtime.001"]
+    },
+    {
+      "node_id": "node.wasm-capability",
+      "label": "WASM capability",
+      "type": "execution_unit",
+      "source_artifact_ids": ["artifact.portable-runtime-note"],
+      "source_chunk_ids": ["chunk.runtime.001"]
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": "edge.traverse.runs.wasm",
+      "from_node_id": "node.traverse",
+      "to_node_id": "node.wasm-capability",
+      "relationship": "runs",
+      "source_artifact_ids": ["artifact.portable-runtime-note"],
+      "source_chunk_ids": ["chunk.runtime.001"],
+      "extraction_method": "fixture",
+      "confidence": 1
+    }
+  ]
+}
