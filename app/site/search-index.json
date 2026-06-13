@@ -2,8 +2,31 @@
   "instanceId": "youaskm3-author",
   "title": "youaskm3 author instance",
   "shellUrl": "https://enricopiovesan.github.io/youaskm3/",
-  "sourceFingerprint": "8049373a1a474a63d5d48700ba4ae23fff1fc6fe40ed96b30df11feed3ad8238",
+  "sourceFingerprint": "ca954af000101d3b1fc170b193fa54e7f6f63ddeb7f8b18c759c5b1a4db8321e",
   "documents": [
-
+    {
+      "id": "knowledge--blog--mvp-fixture-article--index",
+      "title": "Portable Knowledge Article",
+      "source_path": "knowledge/blog/mvp-fixture-article/index.md",
+      "category": "blog",
+      "excerpt": "Portable knowledge keeps useful context in files that a person can inspect, version, and move between tools. A local-first chat product should answer from those files without hidin",
+      "content_sha256": "c27763a2440c75c45de9d9181de4506878fc790c6b7a0ba547263e2add2caea2"
+    },
+    {
+      "id": "knowledge--books--mvp-fixture-handbook--index",
+      "title": "MVP Architecture Handbook",
+      "source_path": "knowledge/books/mvp-fixture-handbook/index.md",
+      "category": "books",
+      "excerpt": "Architecture decisions for the first MVP are easiest to test when the repository contains a small handbook-style document. This fixture explains that artifact preparation and runti",
+      "content_sha256": "28038fb843628893b8136a3713db321e9d65ccce38e7f80494ca45a9a3d5d89c"
+    },
+    {
+      "id": "knowledge--papers--mvp-fixture-note--index",
+      "title": "Source Grounding Note",
+      "source_path": "knowledge/papers/mvp-fixture-note/index.md",
+      "category": "papers",
+      "excerpt": "Source grounding means every answer should carry evidence that a user can trace back to a markdown artifact, a chunk identifier, and eventually a graph relationship. The first MVP ",
+      "content_sha256": "638e3f6c7f232743fc2e55a7e3e08f195f0d36acf09477561800ac4e00b956ae"
+    }
   ]
 }
