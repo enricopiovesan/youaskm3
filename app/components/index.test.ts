@@ -11,6 +11,8 @@ import {
   renderResultCard,
   renderSourceCard,
   resultTagName,
+  searchIndexPath,
+  knowledgeGraphPath,
   sourceTagName
 } from "./index";
 
@@ -29,6 +31,8 @@ describe("component tags", () => {
     expect(browserRuntimeModulePath()).toBe("./runtime.js");
     expect(providerConfigPath()).toBe("./provider-config.json");
     expect(authorInstancePath()).toBe("./author-instance.json");
+    expect(searchIndexPath()).toBe("./search-index.json");
+    expect(knowledgeGraphPath()).toBe("./knowledge-graph.json");
   });
 });
 

@@ -1,4 +1,4 @@
-import { callBrowserTool, TOOL_DESCRIPTORS } from "./runtime.js";
+import { callBrowserTool, loadBrowserArtifacts, TOOL_DESCRIPTORS } from "./runtime.js";
 
 const PROVIDER_STORAGE_KEY = "youaskm3.provider-config";
 
@@ -272,7 +272,7 @@ class M3Source extends HTMLElement {
   }
 
   render() {
-    const root = this.attachShadow({ mode: "open" });
+    const root = this.shadowRoot ?? this.attachShadow({ mode: "open" });
     root.innerHTML = template(`
       <article class="source-card">
         <span class="source-label">${escapeHtml(this.getAttribute("label") ?? "")}</span>
@@ -289,7 +289,7 @@ class M3Result extends HTMLElement {
   }
 
   render() {
-    const root = this.attachShadow({ mode: "open" });
+    const root = this.shadowRoot ?? this.attachShadow({ mode: "open" });
     const prompt = this.getAttribute("prompt") ?? "";
     const paragraphs = this.querySelectorAll("p");
     const body = Array.from(paragraphs)
@@ -311,7 +311,7 @@ class M3Chat extends HTMLElement {
   }
 
   render() {
-    const root = this.attachShadow({ mode: "open" });
+    const root = this.shadowRoot ?? this.attachShadow({ mode: "open" });
     const eyebrow = this.getAttribute("eyebrow") ?? "";
     const title = this.getAttribute("title") ?? "";
     const summary = this.getAttribute("summary") ?? "";
@@ -460,6 +460,12 @@ for (const [name, element] of registrations) {
 const shell = document.querySelector("m3-chat");
 let providerConfig = null;
 let authorInstance = null;
+let artifactState = {
+  status: "missing",
+  documents: [],
+  graph: null,
+  message: "Generated search-index.json is missing or unavailable."
+};
 
 async function loadProviderConfig() {
   const response = await fetch("./provider-config.json");
@@ -516,7 +522,7 @@ function syncShell(toolName, input) {
 
   let output;
   try {
-    output = callBrowserTool(toolName, input);
+    output = callBrowserTool(toolName, input, artifactState.documents);
   } catch (error) {
     output = {
       type: "search",
@@ -555,7 +561,17 @@ function syncShell(toolName, input) {
 
   if (result instanceof HTMLElement) {
     result.setAttribute("prompt", summary.prompt);
-    result.innerHTML = summary.paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("");
+    const artifactParagraph =
+      toolName === "remember"
+        ? []
+        : [
+            `${artifactState.message}${
+              artifactState.graph?.graph_id ? ` Graph: ${artifactState.graph.graph_id}.` : ""
+            }`
+          ];
+    result.innerHTML = [...artifactParagraph, ...summary.paragraphs]
+      .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+      .join("");
     result.render?.();
   }
 
@@ -578,10 +594,11 @@ if (shell instanceof HTMLElement) {
   let currentTool = shell.getAttribute("tool") ?? "search";
   let currentInput = shell.getAttribute("input") ?? "portable MCP clients";
 
-  Promise.all([loadProviderConfig(), loadAuthorInstance()])
-    .then(([config, manifest]) => {
+  Promise.all([loadProviderConfig(), loadAuthorInstance(), loadBrowserArtifacts()])
+    .then(([config, manifest, artifacts]) => {
       providerConfig = config;
       authorInstance = manifest;
+      artifactState = artifacts;
       syncShell(currentTool, currentInput);
     })
     .catch((error) => {

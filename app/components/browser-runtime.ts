@@ -5,6 +5,37 @@ export type BrowserDocument = {
   sourcePath: string;
 };
 
+export type SearchIndexDocument = {
+  id: string;
+  title: string;
+  excerpt: string;
+  source_path: string;
+};
+
+export type SearchIndexArtifact = {
+  documents?: SearchIndexDocument[];
+};
+
+export type KnowledgeGraphArtifact = {
+  graph_id?: string;
+  nodes?: unknown[];
+  edges?: unknown[];
+};
+
+export type BrowserArtifactState =
+  | {
+      status: "ready";
+      documents: BrowserDocument[];
+      graph: KnowledgeGraphArtifact | null;
+      message: string;
+    }
+  | {
+      status: "empty" | "missing";
+      documents: [];
+      graph: KnowledgeGraphArtifact | null;
+      message: string;
+    };
+
 export type BrowserSearchResult = BrowserDocument & {
   score: number;
 };
@@ -56,27 +87,6 @@ export const BROWSER_TOOL_DESCRIPTORS = [
   }
 ] as const;
 
-export const SAMPLE_BROWSER_DOCUMENTS: BrowserDocument[] = [
-  {
-    id: "portable-mcp",
-    title: "Portable MCP",
-    excerpt: "Traverse-compatible clients can discover and call contract-defined tools.",
-    sourcePath: "knowledge/books/portable-mcp.md"
-  },
-  {
-    id: "pwa-shell",
-    title: "PWA shell roadmap",
-    excerpt: "The browser shell should stay static, installable, and source-aware.",
-    sourcePath: "SPEC.md#8-milestones"
-  },
-  {
-    id: "mcp-interface-spec",
-    title: "MCP interface spec",
-    excerpt: "The interface defines discoverable search, remember, recall, and connect tools.",
-    sourcePath: "openspec/specs/mcp-interface/spec.md"
-  }
-];
-
 export function browserToolNames(): BrowserToolName[] {
   return BROWSER_TOOL_DESCRIPTORS.map((tool) => tool.name);
 }
@@ -88,7 +98,7 @@ export function isBrowserToolName(value: string): value is BrowserToolName {
 export function callBrowserTool(
   toolName: BrowserToolName,
   input: string,
-  documents: BrowserDocument[] = SAMPLE_BROWSER_DOCUMENTS
+  documents: BrowserDocument[] = []
 ): BrowserRuntimeOutput {
   switch (toolName) {
     case "search":
@@ -112,6 +122,46 @@ export function callBrowserTool(
         connections: connectDocuments(input, documents)
       };
   }
+}
+
+export function documentsFromSearchIndex(artifact: SearchIndexArtifact): BrowserDocument[] {
+  return (artifact.documents ?? []).map((document) => ({
+    id: document.id,
+    title: document.title,
+    excerpt: document.excerpt,
+    sourcePath: document.source_path
+  }));
+}
+
+export function browserArtifactState(
+  searchIndex: SearchIndexArtifact | null,
+  graph: KnowledgeGraphArtifact | null = null
+): BrowserArtifactState {
+  if (!searchIndex) {
+    return {
+      status: "missing",
+      documents: [],
+      graph,
+      message: "Generated search-index.json is missing or unavailable."
+    };
+  }
+
+  const documents = documentsFromSearchIndex(searchIndex);
+  if (documents.length === 0) {
+    return {
+      status: "empty",
+      documents: [],
+      graph,
+      message: "Generated search-index.json does not contain searchable documents."
+    };
+  }
+
+  return {
+    status: "ready",
+    documents,
+    graph,
+    message: `Loaded ${documents.length} generated knowledge documents.`
+  };
 }
 
 function searchDocuments(
