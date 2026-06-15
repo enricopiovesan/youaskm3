@@ -161,19 +161,19 @@
         <m3-chat
           eyebrow="M3 Browser Runtime"
           title="Client-side MCP shell"
-          summary="The browser shell now runs a thin client-side MCP-style adapter over the contract-defined tools instead of relying on fixed placeholder prose."
+          summary="The browser shell now runs a thin client-side MCP-style adapter over generated search and graph artifacts."
           tool="search"
-          input="portable MCP clients"
+          input="portable knowledge"
         >
           <m3-result prompt="Browser runtime tool: search">
             <p>
-              Portable MCP work in youaskm3 is designed to remain source-aware and client-runnable.
+              Portable Knowledge Article is loaded from the generated search index.
             </p>
           </m3-result>
           <m3-source
             label="Search result"
-            title="Portable MCP"
-            detail="knowledge/books/portable-mcp.md"
+            title="Portable Knowledge Article"
+            detail="knowledge/blog/mvp-fixture-article/index.md"
           ></m3-source>
         </m3-chat>
 
@@ -186,6 +186,7 @@
             <li>Custom elements render the conversation and source surfaces.</li>
             <li>Browser runtime module executes `search`, `remember`, `recall`, and `connect` locally.</li>
             <li>Provider profiles and published author-instance metadata are loaded from static JSON.</li>
+            <li>Search and graph evidence load from generated static artifacts.</li>
           </ul>
         </aside>
       </section>

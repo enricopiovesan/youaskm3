@@ -17,28 +17,7 @@ export const TOOL_DESCRIPTORS = [
   }
 ];
 
-export const SAMPLE_DOCUMENTS = [
-  {
-    id: "portable-mcp",
-    title: "Portable MCP",
-    excerpt: "Traverse-compatible clients can discover and call contract-defined tools.",
-    sourcePath: "knowledge/books/portable-mcp.md"
-  },
-  {
-    id: "pwa-shell",
-    title: "PWA shell roadmap",
-    excerpt: "The browser shell should stay static, installable, and source-aware.",
-    sourcePath: "SPEC.md#8-milestones"
-  },
-  {
-    id: "mcp-interface-spec",
-    title: "MCP interface spec",
-    excerpt: "The interface defines discoverable search, remember, recall, and connect tools.",
-    sourcePath: "openspec/specs/mcp-interface/spec.md"
-  }
-];
-
-export function callBrowserTool(toolName, input, documents = SAMPLE_DOCUMENTS) {
+export function callBrowserTool(toolName, input, documents = []) {
   switch (toolName) {
     case "search":
       return { type: "search", results: searchDocuments(input, documents) };
@@ -51,6 +30,61 @@ export function callBrowserTool(toolName, input, documents = SAMPLE_DOCUMENTS) {
     default:
       throw new Error(`unknown browser tool: ${toolName}`);
   }
+}
+
+export function documentsFromSearchIndex(artifact) {
+  return (artifact.documents ?? []).map((document) => ({
+    id: document.id,
+    title: document.title,
+    excerpt: document.excerpt,
+    sourcePath: document.source_path
+  }));
+}
+
+export function browserArtifactState(searchIndex, graph = null) {
+  if (!searchIndex) {
+    return {
+      status: "missing",
+      documents: [],
+      graph,
+      message: "Generated search-index.json is missing or unavailable."
+    };
+  }
+
+  const documents = documentsFromSearchIndex(searchIndex);
+  if (documents.length === 0) {
+    return {
+      status: "empty",
+      documents: [],
+      graph,
+      message: "Generated search-index.json does not contain searchable documents."
+    };
+  }
+
+  return {
+    status: "ready",
+    documents,
+    graph,
+    message: `Loaded ${documents.length} generated knowledge documents.`
+  };
+}
+
+export async function loadBrowserArtifacts() {
+  const searchIndex = await fetchJson("./search-index.json", true);
+  const graph = await fetchJson("./knowledge-graph.json", false);
+  return browserArtifactState(searchIndex, graph);
+}
+
+async function fetchJson(path, required) {
+  const response = await fetch(path);
+  if (!response.ok) {
+    if (required) {
+      throw new Error(`failed to load ${path}`);
+    }
+    return null;
+  }
+
+  return response.json();
 }
 
 function searchDocuments(input, documents) {

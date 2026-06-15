@@ -95,6 +95,14 @@ export function authorInstancePath(): string {
   return "./author-instance.json";
 }
 
+export function searchIndexPath(): string {
+  return "./search-index.json";
+}
+
+export function knowledgeGraphPath(): string {
+  return "./knowledge-graph.json";
+}
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
