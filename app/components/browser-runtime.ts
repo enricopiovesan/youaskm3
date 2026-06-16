@@ -18,8 +18,20 @@ export type SearchIndexArtifact = {
 
 export type KnowledgeGraphArtifact = {
   graph_id?: string;
-  nodes?: unknown[];
-  edges?: unknown[];
+  nodes?: KnowledgeGraphNode[];
+  edges?: KnowledgeGraphEdge[];
+};
+
+export type KnowledgeGraphNode = {
+  node_id: string;
+  source_chunk_ids?: string[];
+};
+
+export type KnowledgeGraphEdge = {
+  edge_id: string;
+  from_node_id: string;
+  to_node_id: string;
+  source_chunk_ids?: string[];
 };
 
 export type BrowserArtifactState =
@@ -60,15 +72,54 @@ export type BrowserRememberResult = {
   storedPath: string;
 };
 
+export type BrowserAnswerInput = {
+  query: string;
+  conversation_id?: string;
+  artifact_scope?: string[];
+  max_sources?: number;
+};
+
+export type BrowserCitation = {
+  citation_id: string;
+  artifact_id: string;
+  chunk_id: string;
+  source_path: string;
+  excerpt: string;
+};
+
+export type BrowserGraphEvidence = {
+  node_ids: string[];
+  edge_ids: string[];
+  supporting_chunk_ids: string[];
+};
+
+export type BrowserValidation = {
+  status: "valid" | "invalid" | "partial";
+  checks: string[];
+};
+
+export type BrowserAnswerResponse = {
+  answer: string;
+  citations: BrowserCitation[];
+  graph_evidence: BrowserGraphEvidence[];
+  trace_id: string;
+  validation: BrowserValidation;
+};
+
 export type BrowserRuntimeOutput =
+  | { type: "answer"; payload: BrowserAnswerResponse }
   | { type: "search"; results: BrowserSearchResult[] }
   | { type: "remember"; payload: BrowserRememberResult }
   | { type: "recall"; matches: BrowserRecallMatch[] }
   | { type: "connect"; connections: BrowserConnection[] };
 
-export type BrowserToolName = "search" | "remember" | "recall" | "connect";
+export type BrowserToolName = "answer" | "search" | "remember" | "recall" | "connect";
 
 export const BROWSER_TOOL_DESCRIPTORS = [
+  {
+    name: "answer",
+    description: "Temporary Traverse-compatible chat answer harness."
+  },
   {
     name: "search",
     description: "Semantic and keyword hybrid search across indexed knowledge."
@@ -98,9 +149,15 @@ export function isBrowserToolName(value: string): value is BrowserToolName {
 export function callBrowserTool(
   toolName: BrowserToolName,
   input: string,
-  documents: BrowserDocument[] = []
+  documents: BrowserDocument[] = [],
+  graph: KnowledgeGraphArtifact | null = null
 ): BrowserRuntimeOutput {
   switch (toolName) {
+    case "answer":
+      return {
+        type: "answer",
+        payload: temporaryTraverseChatHarness({ query: input }, documents, graph)
+      };
     case "search":
       return {
         type: "search",
@@ -161,6 +218,46 @@ export function browserArtifactState(
     documents,
     graph,
     message: `Loaded ${documents.length} generated knowledge documents.`
+  };
+}
+
+export function temporaryTraverseChatHarness(
+  input: BrowserAnswerInput,
+  documents: BrowserDocument[],
+  graph: KnowledgeGraphArtifact | null = null
+): BrowserAnswerResponse {
+  const query = requireInput(input.query);
+  const limit = Math.min(Math.max(input.max_sources ?? 3, 1), 20);
+  const scopedDocuments =
+    input.artifact_scope && input.artifact_scope.length > 0
+      ? documents.filter((document) => input.artifact_scope?.includes(document.id))
+      : documents;
+  const results = searchDocuments(query, scopedDocuments).slice(0, limit);
+  const citations = results.map((result, index) => ({
+    citation_id: `cite-${index + 1}`,
+    artifact_id: result.id,
+    chunk_id: chunkIdForDocument(result.id),
+    source_path: result.sourcePath,
+    excerpt: result.excerpt
+  }));
+  const graphEvidence = graphEvidenceForCitations(citations, graph);
+
+  return {
+    answer:
+      citations.length > 0
+        ? `Temporary harness answer for "${query}" using ${citations.length} source-backed citation${citations.length === 1 ? "" : "s"}.`
+        : `Temporary harness answer for "${query}" could not find source-backed citations in the generated artifacts.`,
+    citations,
+    graph_evidence: graphEvidence,
+    trace_id: `harness:${slugify(query)}`,
+    validation: {
+      status: citations.length > 0 ? "valid" : "partial",
+      checks: [
+        "temporary-harness",
+        citations.length > 0 ? "citations-present" : "citations-missing",
+        graphEvidence.length > 0 ? "graph-evidence-present" : "graph-evidence-unavailable"
+      ]
+    }
   };
 }
 
@@ -242,6 +339,40 @@ function connectDocuments(
     }));
 }
 
+function graphEvidenceForCitations(
+  citations: BrowserCitation[],
+  graph: KnowledgeGraphArtifact | null
+): BrowserGraphEvidence[] {
+  if (!graph?.edges || citations.length === 0) {
+    return [];
+  }
+
+  const citedChunks = new Set(citations.map((citation) => citation.chunk_id));
+  const edges = graph.edges.filter((edge) =>
+    (edge.source_chunk_ids ?? []).some((chunkId) => citedChunks.has(chunkId))
+  );
+
+  if (edges.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      node_ids: unique(edges.flatMap((edge) => [edge.from_node_id, edge.to_node_id])),
+      edge_ids: unique(edges.map((edge) => edge.edge_id)),
+      supporting_chunk_ids: unique(
+        edges.flatMap((edge) =>
+          (edge.source_chunk_ids ?? []).filter((chunkId) => citedChunks.has(chunkId))
+        )
+      )
+    }
+  ];
+}
+
+function chunkIdForDocument(documentId: string): string {
+  return `${documentId}:chunk:0`;
+}
+
 function findMatchedField(
   document: BrowserDocument,
   terms: string[]
@@ -289,4 +420,8 @@ function slugify(value: string): string {
     .replace(/^-+|-+$/g, "");
 
   return slug || "entry";
+}
+
+function unique(values: string[]): string[] {
+  return Array.from(new Set(values));
 }

@@ -6,7 +6,8 @@ import {
   browserToolNames,
   callBrowserTool,
   documentsFromSearchIndex,
-  isBrowserToolName
+  isBrowserToolName,
+  temporaryTraverseChatHarness
 } from "./browser-runtime";
 
 const searchIndexFixture = {
@@ -33,11 +34,30 @@ const searchIndexFixture = {
 };
 
 const artifactDocuments = documentsFromSearchIndex(searchIndexFixture);
+const graphFixture = {
+  graph_id: "fixture",
+  nodes: [
+    {
+      node_id: "document:knowledge-blog-mvp-fixture-article-index"
+    },
+    {
+      node_id: "chunk:knowledge-blog-mvp-fixture-article-index:chunk:0"
+    }
+  ],
+  edges: [
+    {
+      edge_id: "edge:knowledge-blog-mvp-fixture-article-index:document-source-chunk",
+      from_node_id: "document:knowledge-blog-mvp-fixture-article-index",
+      to_node_id: "chunk:knowledge-blog-mvp-fixture-article-index:chunk:0",
+      source_chunk_ids: ["knowledge-blog-mvp-fixture-article-index:chunk:0"]
+    }
+  ]
+};
 
 describe("browser runtime tool descriptors", () => {
   it("exports the initial browser tool surface", () => {
-    expect(browserToolNames()).toEqual(["search", "remember", "recall", "connect"]);
-    expect(BROWSER_TOOL_DESCRIPTORS).toHaveLength(4);
+    expect(browserToolNames()).toEqual(["answer", "search", "remember", "recall", "connect"]);
+    expect(BROWSER_TOOL_DESCRIPTORS).toHaveLength(5);
     expect(isBrowserToolName("search")).toBe(true);
     expect(isBrowserToolName("status")).toBe(false);
   });
@@ -54,6 +74,37 @@ describe("callBrowserTool", () => {
 
     expect(output.results[0]?.id).toBe("knowledge-blog-mvp-fixture-article-index");
     expect(output.results[0]?.score).toBeGreaterThan(0);
+  });
+
+  it("routes answer requests through the temporary Traverse-compatible harness", () => {
+    const output = callBrowserTool("answer", "portable", artifactDocuments, graphFixture);
+
+    expect(output.type).toBe("answer");
+    if (output.type !== "answer") {
+      throw new Error("expected answer output");
+    }
+
+    expect(output.payload.answer).toContain("Temporary harness answer");
+    expect(output.payload.citations[0]).toEqual({
+      citation_id: "cite-1",
+      artifact_id: "knowledge-blog-mvp-fixture-article-index",
+      chunk_id: "knowledge-blog-mvp-fixture-article-index:chunk:0",
+      source_path: "knowledge/blog/mvp-fixture-article/index.md",
+      excerpt: "Portable knowledge keeps useful context in files a person can inspect."
+    });
+    expect(output.payload.graph_evidence[0]).toEqual({
+      node_ids: [
+        "document:knowledge-blog-mvp-fixture-article-index",
+        "chunk:knowledge-blog-mvp-fixture-article-index:chunk:0"
+      ],
+      edge_ids: ["edge:knowledge-blog-mvp-fixture-article-index:document-source-chunk"],
+      supporting_chunk_ids: ["knowledge-blog-mvp-fixture-article-index:chunk:0"]
+    });
+    expect(output.payload.trace_id).toBe("harness:portable");
+    expect(output.payload.validation).toEqual({
+      status: "valid",
+      checks: ["temporary-harness", "citations-present", "graph-evidence-present"]
+    });
   });
 
   it("returns stable remember metadata", () => {
@@ -105,6 +156,40 @@ describe("callBrowserTool", () => {
     expect(() => callBrowserTool("search", "   ")).toThrow(
       "missing browser runtime input"
     );
+  });
+});
+
+describe("temporaryTraverseChatHarness", () => {
+  it("returns only the knowledge.query.answer contract keys", () => {
+    const output = temporaryTraverseChatHarness(
+      { query: "portable", max_sources: 1 },
+      artifactDocuments,
+      graphFixture
+    );
+
+    expect(Object.keys(output).sort()).toEqual([
+      "answer",
+      "citations",
+      "graph_evidence",
+      "trace_id",
+      "validation"
+    ]);
+  });
+
+  it("returns a partial validation when generated artifacts have no matching citation", () => {
+    const output = temporaryTraverseChatHarness(
+      { query: "not-present" },
+      artifactDocuments,
+      graphFixture
+    );
+
+    expect(output.citations).toEqual([]);
+    expect(output.graph_evidence).toEqual([]);
+    expect(output.trace_id).toBe("harness:not-present");
+    expect(output.validation).toEqual({
+      status: "partial",
+      checks: ["temporary-harness", "citations-missing", "graph-evidence-unavailable"]
+    });
   });
 });
 

@@ -193,6 +193,18 @@ function escapeHtml(value) {
 
 function toolToSummary(toolName, output) {
   switch (toolName) {
+    case "answer":
+      return {
+        prompt: "Traverse-compatible harness: knowledge.query.answer",
+        paragraphs: [
+          output.payload.answer,
+          `Validation: ${output.payload.validation.status} (${output.payload.validation.checks.join(", ")}).`,
+          `Trace: ${output.payload.trace_id}.`,
+          output.payload.graph_evidence.length > 0
+            ? `Graph evidence: ${output.payload.graph_evidence[0].edge_ids.length} edge(s), ${output.payload.graph_evidence[0].node_ids.length} node(s).`
+            : "Graph evidence: none returned for this query."
+        ]
+      };
     case "search":
       return {
         prompt: "Browser runtime tool: search",
@@ -237,6 +249,12 @@ function toolToSummary(toolName, output) {
 
 function toolToSources(toolName, output) {
   switch (toolName) {
+    case "answer":
+      return output.payload.citations.map((citation) => ({
+        label: citation.citation_id,
+        title: citation.artifact_id,
+        detail: `${citation.source_path}#${citation.chunk_id}`
+      }));
     case "search":
       return output.results.map((result) => ({
         label: "Search result",
@@ -522,7 +540,12 @@ function syncShell(toolName, input) {
 
   let output;
   try {
-    output = callBrowserTool(toolName, input, artifactState.documents);
+    output = callBrowserTool(
+      toolName,
+      input,
+      artifactState.documents,
+      artifactState.graph
+    );
   } catch (error) {
     output = {
       type: "search",
