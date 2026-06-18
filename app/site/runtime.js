@@ -1,5 +1,9 @@
 export const TOOL_DESCRIPTORS = [
   {
+    name: "answer",
+    description: "Temporary Traverse-compatible chat answer harness."
+  },
+  {
     name: "search",
     description: "Semantic and keyword hybrid search across indexed knowledge."
   },
@@ -17,8 +21,13 @@ export const TOOL_DESCRIPTORS = [
   }
 ];
 
-export function callBrowserTool(toolName, input, documents = []) {
+export function callBrowserTool(toolName, input, documents = [], graph = null) {
   switch (toolName) {
+    case "answer":
+      return {
+        type: "answer",
+        payload: temporaryTraverseChatHarness({ query: input }, documents, graph)
+      };
     case "search":
       return { type: "search", results: searchDocuments(input, documents) };
     case "remember":
@@ -30,6 +39,42 @@ export function callBrowserTool(toolName, input, documents = []) {
     default:
       throw new Error(`unknown browser tool: ${toolName}`);
   }
+}
+
+export function temporaryTraverseChatHarness(input, documents, graph = null) {
+  const query = requireInput(input.query);
+  const limit = Math.min(Math.max(input.max_sources ?? 3, 1), 20);
+  const scopedDocuments =
+    input.artifact_scope && input.artifact_scope.length > 0
+      ? documents.filter((document) => input.artifact_scope.includes(document.id))
+      : documents;
+  const results = searchDocuments(query, scopedDocuments).slice(0, limit);
+  const citations = results.map((result, index) => ({
+    citation_id: `cite-${index + 1}`,
+    artifact_id: result.id,
+    chunk_id: chunkIdForDocument(result.id),
+    source_path: result.sourcePath,
+    excerpt: result.excerpt
+  }));
+  const graphEvidence = graphEvidenceForCitations(citations, graph);
+
+  return {
+    answer:
+      citations.length > 0
+        ? `Temporary harness answer for "${query}" using ${citations.length} source-backed citation${citations.length === 1 ? "" : "s"}.`
+        : `Temporary harness answer for "${query}" could not find source-backed citations in the generated artifacts.`,
+    citations,
+    graph_evidence: graphEvidence,
+    trace_id: `harness:${slugify(query)}`,
+    validation: {
+      status: citations.length > 0 ? "valid" : "partial",
+      checks: [
+        "temporary-harness",
+        citations.length > 0 ? "citations-present" : "citations-missing",
+        graphEvidence.length > 0 ? "graph-evidence-present" : "graph-evidence-unavailable"
+      ]
+    }
+  };
 }
 
 export function documentsFromSearchIndex(artifact) {
@@ -151,6 +196,37 @@ function connectDocuments(input, documents) {
     }));
 }
 
+function graphEvidenceForCitations(citations, graph) {
+  if (!graph?.edges || citations.length === 0) {
+    return [];
+  }
+
+  const citedChunks = new Set(citations.map((citation) => citation.chunk_id));
+  const edges = graph.edges.filter((edge) =>
+    (edge.source_chunk_ids ?? []).some((chunkId) => citedChunks.has(chunkId))
+  );
+
+  if (edges.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      node_ids: unique(edges.flatMap((edge) => [edge.from_node_id, edge.to_node_id])),
+      edge_ids: unique(edges.map((edge) => edge.edge_id)),
+      supporting_chunk_ids: unique(
+        edges.flatMap((edge) =>
+          (edge.source_chunk_ids ?? []).filter((chunkId) => citedChunks.has(chunkId))
+        )
+      )
+    }
+  ];
+}
+
+function chunkIdForDocument(documentId) {
+  return `${documentId}:chunk:0`;
+}
+
 function findMatchedField(document, terms) {
   if (containsAllTerms(document.title, terms)) {
     return "title";
@@ -195,4 +271,8 @@ function slugify(value) {
     .replace(/^-+|-+$/g, "");
 
   return slug || "entry";
+}
+
+function unique(values) {
+  return Array.from(new Set(values));
 }
