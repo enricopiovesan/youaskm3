@@ -72,9 +72,26 @@ openspec/specs/[capability]/spec.md — [requirement name]
 ## Test coverage
 [confirm: 100% maintained / new tests added for new behaviour]
 
+## Lean ops / minimality
+[confirm: used focused evidence, avoided broad dumps/logs, and applied the Minimality Ladder before adding code]
+
 ## Breaking changes
 [none / describe]
 ```
+
+## Agent and dev workflow discipline
+
+Agent-led work should follow [AGENTS.md](AGENTS.md) and
+[docs/youaskm3-ops.md](docs/youaskm3-ops.md). The short version:
+
+- use filtered issue, PR, Project 3, CI, and log queries before broad dumps
+- summarize passing validation as statuses and counts
+- quote only actionable failure lines when something fails
+- inspect `git diff --stat` and `git diff --name-only` before larger diffs
+- apply the Minimality Ladder before adding code or abstractions
+
+This discipline reduces review cost and token churn without weakening specs,
+contracts, validation, traceability, or governance.
 
 ## Coverage
 
