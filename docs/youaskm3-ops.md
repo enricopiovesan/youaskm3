@@ -89,6 +89,109 @@ Use this lane when a ticket needs application bundle registration, real Traverse
 - Temporary harnesses are allowed only when they mirror the future Traverse contract and are clearly replaceable.
 - If GitHub Project write scope is unavailable, report that clearly and avoid pretending the board was updated.
 
+## Token Discipline
+
+The operating model should stay autonomous without making the transcript carry every byte of evidence. Agents should fetch enough data to decide, patch, and validate, then report concise summaries with links, file paths, or check names that let a human drill in.
+
+### Default Rules
+
+- Start broad with counts and names, then narrow only where something is actionable.
+- Prefer filtered issue, PR, and Project 3 queries for the active lane before full board dumps or full issue exports.
+- Prefer structured filters over raw dumps: `--json`, `--jq`, `jq`, `rg`, exact line ranges, and summary flags.
+- Bound command output whenever the tool supports it. Increase the bound only after a specific failure requires more context.
+- Never paste full passing logs, full generated JSON, full lockfiles, full board exports, or full CI transcripts into chat.
+- Use `git diff --stat` and `git diff --name-only` before reading hunks. Read full diffs only for the files and ranges being reviewed.
+- Progress updates should say: current action, blocker if any, next action. Skip updates that merely restate unchanged state.
+- Final answers should cover PR/branch state, validation results, merged or open PR links, residual risks, and the next recommended action.
+
+### Lean Command Patterns
+
+Use these shapes as the default for common ops work:
+
+```bash
+git status --short --branch
+git diff --stat
+git diff --name-only
+git diff -- path/to/file
+rg -n "pattern" path/to/focused/tree
+sed -n '120,190p' path/to/file
+gh pr checks <pr> --json name,state,conclusion,workflow,detailsUrl --jq '.[] | {name,state,conclusion,workflow,detailsUrl}'
+gh run view <run-id> --json status,conclusion,url,jobs --jq '{status,conclusion,url,jobs:[.jobs[] | {name,status,conclusion}]}'
+gh run view <run-id> --log-failed
+gh project item-list 3 --owner enricopiovesan --format json --limit 100 --jq '[.items[] | {content:.content.title,status:.status,labels:.labels,item:.id}]'
+```
+
+### What To Report
+
+- Project board audits: number of Ready/In Progress/Blocked items, stale ownership conflicts, and the exact issue numbers that need action.
+- PR checks: count by status, failing check names, and the next failing line or URL. Do not paste watch output loops.
+- CI/test failures: failing command, failing test/check name, first actionable error line, and affected file if known.
+- Coverage: package/crate, measured status, threshold, and any uncovered file/function names if the gate fails.
+- Diffs: changed files, risk level, and narrow references to the hunks that matter.
+
+### Exceptions
+
+Large output is acceptable when the output itself is the deliverable, when a schema/log format is being debugged, or when the user explicitly asks for raw logs. Even then, prefer a saved artifact or a focused excerpt first.
+
+## Minimality Ladder
+
+Before adding code or creating a new abstraction, agents must apply this ladder in order:
+
+1. Does this change need to exist for the active issue or request?
+2. Can existing project code, contracts, docs, configs, or tests already satisfy it?
+3. Can the standard library, platform feature, or existing dependency do it?
+4. Can a schema, config, test, or doc change solve it without a new abstraction?
+5. Can one focused function, command branch, or validation rule solve it?
+6. Only then add the minimum new structure needed.
+
+Minimality is a cost-control tool, not permission to cut corners. It must never weaken:
+
+- correctness
+- security
+- accessibility
+- stable errors and failure modes
+- validation and test coverage
+- traceability and source evidence
+- OpenSpec, contract, PR, issue, or Project 3 governance
+
+When the smallest visible change would weaken any of those, choose the next-smallest correct change and call out the tradeoff in the PR.
+
+## Future-Agent Checklist
+
+### Before
+
+- Identify the active issue or request and the governing spec or contract.
+- Check open PRs before claiming new work.
+- Use lean issue/PR/project queries to find only actionable work.
+- Run ownership pre-flight before marking work In Progress.
+- Apply the Minimality Ladder before adding code.
+
+### During
+
+- Read focused file ranges and narrow diffs.
+- Keep status updates to current action, blocker, and next action.
+- Add tests or validation at the smallest level that proves the behavior.
+- Create future tickets for adjacent improvements instead of widening the active slice.
+
+### After
+
+- Report validation as pass/fail counts and named gates.
+- Include PR link/state, issue/project state, branch/status, and residual risk.
+- Quote only actionable failing lines if something failed.
+- Recommend the next Ready issue or PR-finisher action.
+
+## Output Reduction Risks
+
+Lean output can hide important information if used carelessly. Do not reduce output when:
+
+- a failure line is ambiguous without nearby context
+- a schema or generated artifact shape is the thing being reviewed
+- a security, privacy, accessibility, or data-loss risk is present
+- a Project field or GitHub API shape appears to have drifted
+- the user explicitly asks for raw logs, full diffs, or complete generated output
+
+In those cases, fetch the larger evidence, but summarize it first and keep raw excerpts focused.
+
 ## Current MVP Boundary
 
 The first MVP is:

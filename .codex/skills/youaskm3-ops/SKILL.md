@@ -52,6 +52,43 @@ YOUASKM3 OPS
 - Keep the PWA UI-only and the CLI artifact/build-focused.
 - Temporary harnesses are allowed only when they mirror the future Traverse contract and are clearly replaceable.
 
+## Token Discipline
+
+Default to lean, filtered operations. Preserve autonomy and correctness by fetching enough evidence to decide, but do not paste large raw outputs into chat.
+
+- Issue/PR discovery: prefer filtered `gh issue list` / `gh pr list` queries for the active lane before any full board export. Pull a single issue, PR, or project item in detail only after it becomes actionable.
+- Project boards: use `--jq` or `jq` filters that return only issue number, title, labels, status, agent/owner, blocker, and item id. Avoid full Project item JSON unless debugging schema drift.
+- PR checks: prefer `gh pr checks --json name,state,conclusion,workflow,detailsUrl --jq ...` or a one-shot status query. Avoid repeated `gh pr checks --watch` transcripts; report only status changes and failing check names.
+- CI logs: start with check/run summaries. Fetch logs only for failed jobs, and quote only actionable failure lines plus a small amount of surrounding context.
+- Tests and coverage: run the normal commands, but summarize pass/fail counts, failing test names, coverage gate result, and first actionable error. Do not paste full passing test, clippy, coverage, or build logs.
+- Diffs: inspect `git diff --stat` and `git diff --name-only` before any larger diff. Read narrow hunks for files under review instead of dumping full diffs.
+- File reads: use focused `rg` queries and exact `sed -n` ranges. Avoid broad recursive reads, full generated JSON, full lockfiles, and full build artifacts unless the whole file is the artifact being edited.
+- Progress updates: keep updates to current action, blocker if any, and next action. Do not restate unchanged CI, board, or test state.
+- Final reports: include merged/open PR, validation results, current branch/status, and the next recommended action. Keep detailed logs out of the final answer unless the user explicitly asks.
+
+Useful lean command shapes:
+
+```bash
+git diff --stat
+git diff --name-only
+gh pr checks <pr> --json name,state,conclusion,workflow,detailsUrl --jq '.[] | {name,state,conclusion,workflow,detailsUrl}'
+gh run view <run-id> --log-failed
+gh project item-list 3 --owner enricopiovesan --format json --limit 100 --jq '[.items[] | {content:.content.title,status:.status,labels:.labels,item:.id}]'
+```
+
+## Minimality Ladder
+
+Before adding code, apply this ladder in order:
+
+1. Does this change need to exist for the active issue or user request?
+2. Can existing project code, contracts, docs, configs, or tests already satisfy it?
+3. Can the standard library, platform feature, or existing dependency do it?
+4. Can a schema, config, test, or doc change solve it without a new abstraction?
+5. Can one focused function, command branch, or validation rule solve it?
+6. Only then add the minimum new structure needed.
+
+Minimality must never weaken correctness, security, accessibility, stable errors, validation, traceability, required tests, or project governance. If the smallest change would weaken any of those, choose the next-smallest correct change and explain the tradeoff briefly.
+
 ## Validation
 
 Default validation for implementation work:
