@@ -162,18 +162,18 @@
           eyebrow="M3 Browser Runtime"
           title="Client-side MCP shell"
           summary="The browser shell now runs a thin client-side MCP-style adapter over generated search and graph artifacts."
-          tool="search"
+          tool="answer"
           input="portable knowledge"
         >
-          <m3-result prompt="Browser runtime tool: search">
+          <m3-result prompt="Traverse-compatible harness: knowledge.query.answer">
             <p>
-              Portable Knowledge Article is loaded from the generated search index.
+              Ask a question to render a source-backed answer from the temporary Traverse-compatible harness.
             </p>
           </m3-result>
           <m3-source
-            label="Search result"
-            title="Portable Knowledge Article"
-            detail="knowledge/blog/mvp-fixture-article/index.md"
+            label="cite-1"
+            title="knowledge--blog--mvp-fixture-article--index"
+            detail="knowledge/blog/mvp-fixture-article/index.md#knowledge--blog--mvp-fixture-article--index:chunk:0"
           ></m3-source>
         </m3-chat>
 
@@ -184,7 +184,7 @@
             <li>Service worker registers and caches the shell assets.</li>
             <li>Static assets stay compatible with GitHub Pages deployment.</li>
             <li>Custom elements render the conversation and source surfaces.</li>
-            <li>Browser runtime module executes `search`, `remember`, `recall`, and `connect` locally.</li>
+            <li>Browser runtime module executes `answer`, `search`, `remember`, `recall`, and `connect` locally.</li>
             <li>Provider profiles and published author-instance metadata are loaded from static JSON.</li>
             <li>Search and graph evidence load from generated static artifacts.</li>
           </ul>

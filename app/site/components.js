@@ -84,6 +84,35 @@ const styles = `
     gap: 4px;
   }
 
+  .chat-form {
+    display: grid;
+    gap: 12px;
+  }
+
+  .submit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .submit-button {
+    border: 0;
+    border-radius: 14px;
+    background: #17352f;
+    color: #f7f0e3;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    padding: 12px 18px;
+  }
+
+  .submit-button:disabled {
+    cursor: wait;
+    opacity: 0.68;
+  }
+
   .provider-shell {
     display: grid;
     gap: 12px;
@@ -247,6 +276,33 @@ function toolToSummary(toolName, output) {
   }
 }
 
+function loadingSummary(input) {
+  return {
+    prompt: "Traverse-compatible harness: knowledge.query.answer",
+    paragraphs: [`Loading answer for "${input.trim()}".`]
+  };
+}
+
+function errorSummary(error) {
+  return {
+    prompt: "Chat error",
+    paragraphs: [
+      error instanceof Error ? error.message : "Unknown browser runtime error.",
+      "The shell kept the request local and did not call an external service."
+    ]
+  };
+}
+
+function emptyCorpusSummary(message) {
+  return {
+    prompt: "Empty knowledge corpus",
+    paragraphs: [
+      message,
+      "Add processed markdown artifacts and run the build or sync flow before asking a question."
+    ]
+  };
+}
+
 function toolToSources(toolName, output) {
   switch (toolName) {
     case "answer":
@@ -335,7 +391,7 @@ class M3Chat extends HTMLElement {
     const summary = this.getAttribute("summary") ?? "";
     const result = this.querySelector("m3-result");
     const sources = this.querySelectorAll("m3-source");
-    const toolName = this.getAttribute("tool") ?? "search";
+    const toolName = this.getAttribute("tool") ?? "answer";
     const toolDescription =
       TOOL_DESCRIPTORS.find((tool) => tool.name === toolName)?.description ?? "";
     const providerLabel = this.getAttribute("provider-label") ?? "Browser demo";
@@ -347,6 +403,7 @@ class M3Chat extends HTMLElement {
     const instanceTitle =
       this.getAttribute("instance-title") ?? "youaskm3 author instance";
     const instanceUrl = this.getAttribute("instance-url") ?? "";
+    const busy = this.getAttribute("busy") === "true";
 
     root.innerHTML = template(`
       <section class="chat-shell">
@@ -368,10 +425,18 @@ class M3Chat extends HTMLElement {
               <strong>Client-side MCP adapter</strong>
               <div class="tool-description">${escapeHtml(toolDescription)}</div>
             </div>
-            <label>
-              Tool input
-              <textarea id="runtime-input">${escapeHtml(this.getAttribute("input") ?? "")}</textarea>
-            </label>
+            <form class="chat-form" id="chat-form">
+              <label>
+                Question
+                <textarea id="runtime-input">${escapeHtml(this.getAttribute("input") ?? "")}</textarea>
+              </label>
+              <div class="submit-row">
+                <button class="submit-button" type="submit" ${busy ? "disabled" : ""}>
+                  ${busy ? "Answering" : "Ask"}
+                </button>
+                <div class="tool-description">Answers use the temporary Traverse-compatible harness.</div>
+              </div>
+            </form>
             <section class="provider-shell">
               <strong>Provider configuration</strong>
               <div class="provider-grid">
@@ -445,6 +510,18 @@ class M3Chat extends HTMLElement {
       const value = event.target instanceof HTMLTextAreaElement ? event.target.value : "";
       this.dispatchEvent(
         new CustomEvent("runtimeinput", {
+          detail: { value },
+          bubbles: true
+        })
+      );
+    });
+
+    root.querySelector("#chat-form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = root.querySelector("#runtime-input");
+      const value = input instanceof HTMLTextAreaElement ? input.value : "";
+      this.dispatchEvent(
+        new CustomEvent("chatrequest", {
           detail: { value },
           bubbles: true
         })
@@ -533,42 +610,42 @@ function providerSummary(profile) {
   return `${profile.label} uses ${profile.endpoint}, ${authCopy}, and hints ${profile.modelHint}.`;
 }
 
-function syncShell(toolName, input) {
+function syncShell(toolName, input, state = "ready") {
   if (!(shell instanceof HTMLElement)) {
     return;
   }
 
-  let output;
-  try {
-    output = callBrowserTool(
-      toolName,
-      input,
-      artifactState.documents,
-      artifactState.graph
-    );
-  } catch (error) {
-    output = {
-      type: "search",
-      results: [
-        {
-          id: "runtime-error",
-          title: "Browser runtime input error",
-          excerpt: error instanceof Error ? error.message : "Unknown runtime error",
-          sourcePath: "app/site/runtime.js",
-          score: 1
-        }
-      ]
-    };
-    toolName = "search";
+  let summary;
+  let sources = [];
+  if (state === "loading") {
+    summary = loadingSummary(input);
+  } else if (artifactState.status !== "ready" && toolName === "answer") {
+    summary = emptyCorpusSummary(artifactState.message);
+  } else {
+    try {
+      const output = callBrowserTool(
+        toolName,
+        input,
+        artifactState.documents,
+        artifactState.graph
+      );
+      summary = toolToSummary(toolName, output);
+      sources = toolToSources(toolName, output);
+
+      if (toolName === "answer" && output.type === "answer" && output.payload.citations.length === 0) {
+        summary.paragraphs.push("No source-backed citations were returned for this question.");
+      }
+    } catch (error) {
+      summary = errorSummary(error);
+    }
   }
 
-  const summary = toolToSummary(toolName, output);
-  const sources = toolToSources(toolName, output);
   const result = shell.querySelector("m3-result");
   const provider = providerConfig ? activeProvider(providerConfig) : null;
 
   shell.setAttribute("tool", toolName);
   shell.setAttribute("input", input);
+  shell.setAttribute("busy", state === "loading" ? "true" : "false");
   shell.setAttribute("provider-label", provider?.label ?? "Browser demo");
   shell.setAttribute("provider-summary", provider ? providerSummary(provider) : "");
   shell.setAttribute("provider-auth", provider?.auth ?? "none");
@@ -638,7 +715,14 @@ if (shell instanceof HTMLElement) {
   shell.addEventListener("runtimeinput", (event) => {
     const detail = event instanceof CustomEvent ? event.detail : null;
     currentInput = detail?.value ?? currentInput;
-    syncShell(currentTool, currentInput);
+  });
+
+  shell.addEventListener("chatrequest", (event) => {
+    const detail = event instanceof CustomEvent ? event.detail : null;
+    currentInput = detail?.value ?? currentInput;
+    currentTool = "answer";
+    syncShell(currentTool, currentInput, "loading");
+    window.setTimeout(() => syncShell(currentTool, currentInput), 0);
   });
 
   shell.addEventListener("providerchange", (event) => {

@@ -191,6 +191,20 @@ describe("temporaryTraverseChatHarness", () => {
       checks: ["temporary-harness", "citations-missing", "graph-evidence-unavailable"]
     });
   });
+
+  it("returns a partial validation for an empty generated corpus", () => {
+    const output = temporaryTraverseChatHarness({ query: "portable" }, [], graphFixture);
+
+    expect(output.answer).toContain("could not find source-backed citations");
+    expect(output.citations).toEqual([]);
+    expect(output.validation.status).toBe("partial");
+  });
+
+  it("rejects blank answer input for the UI error state", () => {
+    expect(() => temporaryTraverseChatHarness({ query: "   " }, artifactDocuments)).toThrow(
+      "missing browser runtime input"
+    );
+  });
 });
 
 describe("browserArtifactState", () => {
