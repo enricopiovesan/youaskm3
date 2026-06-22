@@ -32,6 +32,21 @@ YOUASKM3 OPS
 8. Use a dedicated `codex/issue-NNN-*` branch.
 9. Keep work scoped to the claimed issue, governing OpenSpec spec, and MVP contract boundary.
 10. Open a dedicated PR with validation evidence.
+11. After a PR merges or an issue is otherwise completed, loop back to step 3 while Project 3 still has Ready work or open PRs needing attention.
+
+## Continuous Ops Rule
+
+`YOUASKM3 OPS` is a continuous operating mode, not a one-ticket command. Do not stop after finishing a single ticket when actionable backlog remains.
+
+Continue cycling through PR finisher and Ready-ticket worker lanes until one of these stopping conditions is true:
+
+- Project 3 has no Ready issues and no open PRs needing attention.
+- All remaining actionable work is blocked, already owned by another agent, or fails ownership pre-flight.
+- The user explicitly says to stop, pause, or switch tasks.
+- A real blocker prevents safe progress, such as missing credentials, unavailable GitHub access, failing required tooling, or an unresolved merge conflict.
+- Context/tool limits require handing off; in that case, leave exact current state, branch, PR, validation, and next issue recommendation.
+
+Between tickets, keep the transition lean: sync `main`, verify clean status, inspect open PRs, inspect Ready Project 3 items, run ownership pre-flight, claim the next issue, and continue.
 
 ## Operating Lanes
 
