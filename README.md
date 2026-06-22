@@ -115,6 +115,7 @@ This repo is intentionally structured so humans and agents can navigate the same
 | Start or resume ops workflow | [docs/youaskm3-ops.md](docs/youaskm3-ops.md) |
 | Inspect the repo command surface | [scripts/m3.sh](scripts/m3.sh) |
 | Run the full validation path | [scripts/smoke.sh](scripts/smoke.sh) |
+| Check Traverse v0.4.0 readiness | [scripts/traverse-readiness.sh](scripts/traverse-readiness.sh) |
 | Review current knowledge layout | [knowledge/index.md](knowledge/index.md) |
 
 ## Command Surface Today
@@ -134,6 +135,14 @@ Available now:
 - `m3 search <query>` queries the generated local search index from the CLI
 - `m3 serve [port]` serves the static PWA shell from `app/site` for local inspection
 - `m3 smoke` runs the full repository validation path
+
+Traverse integration readiness is checked with:
+
+```bash
+bash scripts/traverse-readiness.sh
+```
+
+By default it looks for a sibling Traverse checkout at `../Traverse`. Set `TRAVERSE_REPO=/path/to/Traverse` when the checkout lives somewhere else. Set `TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1` only when the local model provider must be reachable during readiness validation.
 
 ## Project Standards
 
