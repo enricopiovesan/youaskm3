@@ -78,6 +78,8 @@ Important caveat:
 
 Traverse `v0.4.0` proves governed model dependency resolution and includes a local Ollama provider path, but the default conformance suite does not require a reachable live local model. Live local Ollama conformance is separately gated with `TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1`. Also, this baseline does not prove that the model engine itself is WASM-native. The first youaskm3 MVP may proceed as long as `knowledge.infer` is declared, resolved, placed, traced, and failed through Traverse-governed dependency surfaces rather than hardcoded downstream app provider logic.
 
+The downstream local inference policy is defined in [mvp-local-inference-policy.md](mvp-local-inference-policy.md). Default youaskm3 smoke must not require a live local LLM; optional live local conformance remains explicit and opt-in.
+
 ## MVP Runtime Flow
 
 The downstream app needs this end-to-end runtime flow:
@@ -582,10 +584,9 @@ Traverse should only care about these external tools if the downstream app wraps
 
 ## Open Questions for Traverse
 
-1. What is the minimum local inference setup youaskm3 will document for first-MVP users?
+1. What additional evidence should Traverse expose before youaskm3 can claim the model engine itself is WASM-native?
 2. How should large model weights or local indexes be referenced, digested, and placed after the first MVP?
-3. When should the model engine itself become WASM-native, and what readiness evidence will prove that step?
-4. What trace fields are safe for public UI display when inference and private source data are involved?
+3. What trace fields are safe for public UI display when inference and private source data are involved?
 
 ## Recommended Traverse Work Order
 

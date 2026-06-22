@@ -202,6 +202,10 @@ Roadmap work that touches runtime, MCP, browser hosting, model inference, or for
 
 The first-MVP personas, "As a..., I want..., so that..." stories, capability mappings, and demo acceptance path are maintained in [docs/mvp-user-stories.md](docs/mvp-user-stories.md). Runtime and UI work should map back to those stories when defining tickets, smoke tests, and demo evidence.
 
+### Local inference readiness
+
+The first-MVP local inference policy is maintained in [docs/mvp-local-inference-policy.md](docs/mvp-local-inference-policy.md). Default CI and smoke must not require a live local LLM. Live local model conformance is opt-in with `TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1`, and missing inference capability must fail as a Traverse dependency failure rather than as hidden downstream fallback logic.
+
 ### Spec format (OpenSpec)
 
 ```markdown
