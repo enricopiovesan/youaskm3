@@ -1,8 +1,8 @@
 # Traverse Requirements for the First Knowledge-App MVP
 
-Status: Draft for Traverse team review
+Status: Updated for Traverse v0.4.0 first-MVP baseline
 Owner: youaskm3 downstream integration
-Last updated: 2026-06-12
+Last updated: 2026-06-22
 
 ## Purpose
 
@@ -44,27 +44,39 @@ The downstream app should only depend on Traverse public surfaces, not private c
 
 ## Current Baseline Confirmed
 
-As of 2026-06-12, the local Traverse checkout and public GitHub `main` matched commit `b30ff93` (`docs: add youaskm3 v0.3.0 readiness index`).
+As of 2026-06-22, Traverse `v0.4.0` is the minimum approved first-MVP integration baseline for this downstream app.
 
-The following validation passed locally after installing the required Rust toolchain:
+Release:
+
+- Tag: `v0.4.0`
+- URL: https://github.com/enricopiovesan/Traverse/releases/tag/v0.4.0
+- Release date: 2026-06-22
+- Governing Traverse specs: `044-application-bundle-manifest` and `045-governed-model-dependency-resolution`
+
+The exact `v0.4.0` tag conformance path passed locally:
 
 ```bash
-bash scripts/ci/youaskm3_compatibility_conformance.sh
+bash scripts/ci/downstream_app_mvp_conformance.sh
 ```
 
-The current Traverse baseline appears sufficient for a narrow claim:
+Traverse `v0.4.0` covers the first-MVP runtime baseline:
 
-- source-build runtime surface exists
+- application bundle manifests
+- WASM component manifests
+- atomic app bundle registration
+- governed model dependency schema and resolution
+- deterministic selected/rejected model candidate evidence
+- local Ollama inference provider path, opt-in for live local conformance
 - HTTP/JSON app path exists
 - MCP stdio path exists
 - WASM execution via Wasmtime exists
-- stdin/stdout JSON contract exists
-- capability and agent package manifests exist
-- execution traces exist
+- public trace evidence exists
 - programmatic registration exists
-- browser adapter validation exists
+- downstream app MVP conformance exists
 
-The main MVP gap is model/capability dependency handling: current docs say `model_dependencies` are documentation-only and are not resolved or injected by the runtime.
+Important caveat:
+
+Traverse `v0.4.0` proves governed model dependency resolution and includes a local Ollama provider path, but the default conformance suite does not require a reachable live local model. Live local Ollama conformance is separately gated with `TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1`. Also, this baseline does not prove that the model engine itself is WASM-native. The first youaskm3 MVP may proceed as long as `knowledge.infer` is declared, resolved, placed, traced, and failed through Traverse-governed dependency surfaces rather than hardcoded downstream app provider logic.
 
 ## MVP Runtime Flow
 
@@ -200,9 +212,7 @@ Acceptance criteria:
 
 #### TRV-P0-004: Runtime Dependency Resolution for Model Dependencies
 
-Current agent docs describe `model_dependencies` as documentation-only. For this MVP, that is not enough.
-
-Traverse must turn model dependencies into runtime-governed dependencies.
+Traverse `v0.4.0` turns model dependency declarations into runtime-governed dependencies. youaskm3 must consume those public surfaces and must not hardcode an inference provider in product/business logic.
 
 Acceptance criteria:
 
@@ -507,7 +517,7 @@ The downstream app needs stable public APIs for:
 - discovering MCP tools
 - executing MCP entrypoints
 
-Current v0.3.0 surfaces already cover much of this through HTTP/JSON and MCP. The main missing part is runtime-governed model dependency resolution and a clear application manifest story.
+Traverse `v0.4.0` covers the required public API baseline through application manifests, WASM component manifests, atomic registration, governed model dependency resolution, HTTP/JSON trace paths, MCP reporting, and downstream MVP conformance evidence.
 
 ## Required Validation Evidence
 
@@ -522,17 +532,17 @@ Traverse should provide or extend validation scripts that prove:
 7. Browser/PWA consumption works without private Traverse internals.
 8. The conformance suite can run from a pinned release tag.
 
-Suggested validation command shape:
+Required Traverse validation command:
 
 ```bash
-bash scripts/ci/downstream_app_bundle_registration_smoke.sh
-bash scripts/ci/downstream_wasm_workflow_smoke.sh
-bash scripts/ci/downstream_model_dependency_smoke.sh
-bash scripts/ci/downstream_browser_app_smoke.sh
-bash scripts/ci/downstream_mcp_smoke.sh
+bash scripts/ci/downstream_app_mvp_conformance.sh
 ```
 
-The exact names do not matter. The evidence does.
+Optional live local model conformance:
+
+```bash
+TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1 bash scripts/ci/downstream_app_mvp_conformance.sh
+```
 
 ## Non-Goals for Traverse
 
@@ -551,23 +561,20 @@ Traverse should only care about these external tools if the downstream app wraps
 
 ## Open Questions for Traverse
 
-1. Should `model_dependencies` evolve into a first-class dependency resolver, or should model inference be represented as ordinary capability dependencies?
-2. Should model inference implementations be registered as capabilities, connectors, agents, or a new artifact type?
-3. How should large model weights or local indexes be referenced, digested, and placed?
-4. Can a workflow call another capability as a dependency without embedding provider-specific code inside a WASM module?
-5. What is the minimum local inference capability Traverse can prove first?
-6. Should application manifests live in Traverse, downstream apps, or both?
-7. What trace fields are safe for public UI display when inference and private source data are involved?
+1. What is the minimum local inference setup youaskm3 will document for first-MVP users?
+2. How should large model weights or local indexes be referenced, digested, and placed after the first MVP?
+3. When should the model engine itself become WASM-native, and what readiness evidence will prove that step?
+4. What trace fields are safe for public UI display when inference and private source data are involved?
 
 ## Recommended Traverse Work Order
 
-1. Promote model dependency declarations from documentation-only to governed runtime resolution.
-2. Define a minimal inference capability contract and trace shape.
-3. Add a smoke test proving one WASM workflow can depend on one inference capability.
-4. Add a downstream application manifest/bundle example with registration through public HTTP APIs.
-5. Extend MCP discovery/execution evidence to include the downstream workflow.
-6. Extend browser app validation to call the downstream workflow instead of only a demo fixture.
-7. Improve distribution beyond source-build once the contract is stable.
+1. Pin youaskm3 specs and docs to Traverse `v0.4.0`.
+2. Create the youaskm3 application bundle skeleton using v0.4.0 manifest fields.
+3. Add a youaskm3 readiness check that delegates to `downstream_app_mvp_conformance.sh`.
+4. Implement the MVP WASM capabilities and component manifests.
+5. Register the youaskm3 app bundle through Traverse public APIs.
+6. Wire the PWA and MCP paths to the same registered workflow.
+7. Add optional live local model conformance after the default no-paid-service path is stable.
 
 ## MVP Readiness Definition
 
@@ -579,12 +586,15 @@ Traverse is ready for this downstream MVP when the downstream app can honestly s
 
 Traverse already has a strong foundation for the first integration:
 
+- application bundle manifests
+- WASM component manifests
+- atomic app bundle registration
+- governed model dependency resolution
 - public HTTP/JSON app path
 - public MCP path
 - WASM execution
 - programmatic registration
-- traces
-- browser adapter validation
-- source-build conformance evidence
+- trace evidence
+- downstream app MVP conformance evidence
 
-The critical missing piece for the MVP is not generic runtime execution. It is governed dependency/model resolution for LLM inference and the ability for a downstream app to register and execute its full business workflow as a Traverse application bundle.
+The critical missing piece has moved to the downstream app: youaskm3 must now build and register its own Traverse v0.4.0 application bundle, implement the MVP WASM capabilities, wire the PWA/MCP paths to the registered workflow, and document the local inference caveat clearly.
