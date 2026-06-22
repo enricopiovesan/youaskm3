@@ -374,7 +374,7 @@ bash scripts/smoke.sh
 
 Create a strict local test harness that mimics the future Traverse response shape.
 
-This allows the PWA chat UI to be developed while Traverse implements missing runtime/model dependency features.
+This allowed the PWA chat UI to be developed before the Traverse-backed runtime path was ready. After Traverse `v0.4.0`, the harness remains a replaceable development fallback while youaskm3 implements its real bundle, WASM capabilities, and Traverse adapter.
 
 ### Scope
 
@@ -461,21 +461,24 @@ PYTHON=/opt/homebrew/bin/python3.14 \
 bash scripts/smoke.sh
 ```
 
-## Ticket MVP-010: Create Traverse Application Bundle Skeleton
+## Ticket MVP-010: Create Traverse v0.4.0 Application Bundle Skeleton
 
 ### Objective
 
-Create the repo structure for the future Traverse application bundle without requiring Traverse to support all missing features yet.
+Create the repo structure and checked-in manifest files for the first youaskm3 Traverse application bundle, aligned to Traverse `v0.4.0` public manifest surfaces.
+
+This is no longer a placeholder for missing Traverse manifest/model features. Traverse `v0.4.0` provides application bundle manifests, WASM component manifests, governed model dependency declarations, atomic registration, and downstream conformance evidence.
 
 ### Scope
 
 Add:
 
-- bundle manifest placeholder
+- bundle manifest
 - capability contract references
 - workflow references
-- README explaining how it maps to Traverse
-- TODO markers for fields blocked by Traverse requirements
+- README explaining how it maps to Traverse `v0.4.0`
+- model dependency declaration for `knowledge.infer`
+- placement policy and permitted target metadata suitable for local-first MVP execution
 
 Suggested path:
 
@@ -487,14 +490,15 @@ Suggested path:
 
 - Executable WASM capabilities
 - real Traverse registration
-- model dependency resolution
+- live local model/Ollama proof
 
 ### Definition of Done
 
 - Bundle skeleton exists.
 - Bundle references the capability contracts from MVP-002.
-- README explains which Traverse requirements block full registration.
-- Manifest avoids pretending unsupported Traverse features already exist.
+- Manifest names Traverse `v0.4.0` as the minimum tested runtime baseline.
+- README explains which fields depend on real WASM binaries from later tickets.
+- Manifest includes governed model dependency metadata without hardcoding an inference provider in downstream app logic.
 - `bash scripts/smoke.sh` passes.
 
 ### Validation

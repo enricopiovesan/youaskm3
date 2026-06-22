@@ -44,7 +44,7 @@ Anyone can fork it, fill it with their own knowledge, and run their own instance
 |---|---|---|
 | Business logic | **Rust → WASM** | Portable, safe, fast. Runs anywhere. |
 | WASM runtime | **Wasmtime** (CLI/server) / **browser native** | Same module, different host |
-| Runtime model | **Traverse v0.3 baseline / UMA** | Contract-driven, governed, explainable release surface for portable capabilities |
+| Runtime model | **Traverse v0.4.0 baseline / UMA** | Contract-driven, governed, explainable release surface for portable capabilities |
 | MCP interface | **WASM MCP module** | Portable MCP server compiled to WASM |
 | Runtime integration | **Traverse app bundle** | Registers capability contracts, event contracts, workflows, WASM packages, and model dependencies |
 
@@ -183,15 +183,18 @@ idea → /openspec:proposal → proposal.md + design.md + tasks.md + spec delta
 
 ### Traverse integration baseline
 
-youaskm3 integrates with Traverse through documented public release surfaces instead of private Traverse internals. The current working baseline is the Traverse v0.3 readiness path described in [docs/traverse-mvp-requirements.md](docs/traverse-mvp-requirements.md):
+youaskm3 integrates with Traverse through documented public release surfaces instead of private Traverse internals. The minimum approved first-MVP integration baseline is Traverse `v0.4.0`, released on 2026-06-22, as described in [docs/traverse-mvp-requirements.md](docs/traverse-mvp-requirements.md):
 
 - governed application bundle registration
+- WASM component manifest validation
 - WASM business capability execution
+- atomic bundle registration
 - evented workflow composition
 - app-facing HTTP/JSON execution path
 - MCP-facing execution path
 - public traces for answer grounding
 - local/server placement and model dependency resolution
+- downstream app MVP conformance evidence through `bash scripts/ci/downstream_app_mvp_conformance.sh`
 
 Roadmap work that touches runtime, MCP, browser hosting, model inference, or fork-and-run setup must pin an approved Traverse release pairing and include the relevant Traverse validation path.
 
@@ -334,9 +337,10 @@ Dual-licensed: **MIT** and **Apache-2.0**. Users choose.
 
 ### MVP-6 — Local-First Inference Through Traverse
 - [ ] `knowledge.infer` declares inference needs by contract instead of hardcoding a provider.
-- [ ] Traverse can run a compatible local WASM inference capability when available.
+- [ ] Traverse can resolve and run a compatible governed local inference capability or provider when available.
 - [ ] Traverse can choose a server-side inference capability when allowed and available.
 - [ ] Missing inference capability fails clearly before user-facing execution begins.
+- [ ] If the model engine itself is not yet WASM-native, the release notes and readiness checks state that caveat explicitly while preserving the Traverse-governed dependency boundary.
 
 ### Later — Fork, Federation, and Network Effects
 - [ ] One-command setup documented in README with a target under 15 minutes.
