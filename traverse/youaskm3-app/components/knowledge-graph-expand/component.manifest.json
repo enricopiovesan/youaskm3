@@ -1,0 +1,30 @@
+{
+  "component_id": "youaskm3.knowledge.graph-expand-component",
+  "version": "0.1.0",
+  "schema_version": "1.0.0",
+  "capability_id": "knowledge.graph.expand",
+  "capability_version": "0.1.0",
+  "contract_path": "../../../../contracts/capabilities/knowledge.graph.expand.json",
+  "wasm_binary_path": "../../../../target/wasm32-wasip1/release/youaskm3_knowledge_graph_expand.wasm",
+  "wasm_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "implementation_status": "pending_wasm_binary",
+  "runtime_constraints": {
+    "host_api_access": "none",
+    "network_access": "forbidden",
+    "filesystem_access": "none"
+  },
+  "permitted_targets": [
+    "local",
+    "server",
+    "mcp"
+  ],
+  "dependencies": [],
+  "connector_requirements": [],
+  "validation_evidence": [
+    {
+      "evidence_type": "skeleton_manifest",
+      "status": "pending_real_wasm",
+      "tracked_by": "MVP-023"
+    }
+  ]
+}

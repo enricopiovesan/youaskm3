@@ -1,0 +1,230 @@
+{
+  "kind": "workflow_definition",
+  "schema_version": "1.0.0",
+  "id": "youaskm3.knowledge.query-answer",
+  "name": "knowledge-query-answer",
+  "version": "0.1.0",
+  "lifecycle": "mvp-skeleton",
+  "owner": {
+    "team": "youaskm3",
+    "contact": "enrico.piovesan10@gmail.com"
+  },
+  "summary": "Answer a user prompt from prepared knowledge artifacts with citations, graph evidence, governed inference, validation, formatting, and public trace evidence.",
+  "inputs": {
+    "schema": {
+      "type": "object",
+      "required": [
+        "query"
+      ],
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "conversation_id": {
+          "type": "string"
+        },
+        "artifact_scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "max_sources": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "outputs": {
+    "schema": {
+      "type": "object",
+      "required": [
+        "answer",
+        "citations",
+        "graph_evidence",
+        "trace_id",
+        "validation"
+      ],
+      "properties": {
+        "answer": {
+          "type": "string"
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "graph_evidence": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "trace_id": {
+          "type": "string"
+        },
+        "validation": {
+          "type": "object"
+        },
+        "failure": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "nodes": [
+    {
+      "node_id": "retrieve_sources",
+      "capability_id": "knowledge.retrieve",
+      "capability_version": "0.1.0",
+      "input": {
+        "from_workflow_input": [
+          "query",
+          "artifact_scope",
+          "max_sources"
+        ]
+      },
+      "output": {
+        "to_workflow_state": [
+          "retrieved_chunks"
+        ]
+      }
+    },
+    {
+      "node_id": "expand_graph_context",
+      "capability_id": "knowledge.graph.expand",
+      "capability_version": "0.1.0",
+      "input": {
+        "from_workflow_input": [
+          "retrieved_chunks"
+        ]
+      },
+      "output": {
+        "to_workflow_state": [
+          "graph_evidence"
+        ]
+      }
+    },
+    {
+      "node_id": "pack_context",
+      "capability_id": "knowledge.context.pack",
+      "capability_version": "0.1.0",
+      "input": {
+        "from_workflow_input": [
+          "query",
+          "retrieved_chunks",
+          "graph_evidence"
+        ]
+      },
+      "output": {
+        "to_workflow_state": [
+          "context_package"
+        ]
+      }
+    },
+    {
+      "node_id": "run_inference",
+      "capability_id": "knowledge.infer",
+      "capability_version": "0.1.0",
+      "input": {
+        "from_workflow_input": [
+          "query",
+          "context_package"
+        ]
+      },
+      "output": {
+        "to_workflow_state": [
+          "raw_answer",
+          "selected_inference_capability",
+          "inference_placement"
+        ]
+      }
+    },
+    {
+      "node_id": "validate_grounding",
+      "capability_id": "knowledge.answer.validate",
+      "capability_version": "0.1.0",
+      "input": {
+        "from_workflow_input": [
+          "raw_answer",
+          "retrieved_chunks",
+          "graph_evidence"
+        ]
+      },
+      "output": {
+        "to_workflow_state": [
+          "validation"
+        ]
+      }
+    },
+    {
+      "node_id": "format_answer",
+      "capability_id": "knowledge.answer.format",
+      "capability_version": "0.1.0",
+      "input": {
+        "from_workflow_input": [
+          "raw_answer",
+          "retrieved_chunks",
+          "graph_evidence",
+          "validation"
+        ]
+      },
+      "output": {
+        "to_workflow_state": [
+          "answer",
+          "citations",
+          "graph_evidence",
+          "trace_id",
+          "validation"
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "retrieve_sources",
+      "to": "expand_graph_context",
+      "type": "direct"
+    },
+    {
+      "from": "expand_graph_context",
+      "to": "pack_context",
+      "type": "direct"
+    },
+    {
+      "from": "pack_context",
+      "to": "run_inference",
+      "type": "direct"
+    },
+    {
+      "from": "run_inference",
+      "to": "validate_grounding",
+      "type": "direct"
+    },
+    {
+      "from": "validate_grounding",
+      "to": "format_answer",
+      "type": "direct"
+    }
+  ],
+  "start_nodes": [
+    "retrieve_sources"
+  ],
+  "terminal_nodes": [
+    "format_answer"
+  ],
+  "tags": [
+    "youaskm3",
+    "mvp",
+    "knowledge",
+    "answer",
+    "traverse-v0.4.0"
+  ],
+  "governing_spec": "openspec/specs/traverse-integration/spec.md"
+}

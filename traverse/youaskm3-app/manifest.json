@@ -1,0 +1,158 @@
+{
+  "app_id": "youaskm3.knowledge-app",
+  "version": "0.1.0",
+  "schema_version": "1.0.0",
+  "minimum_traverse_version": "v0.4.0",
+  "integration_status": "skeleton_pending_wasm_components",
+  "workspace_defaults": {
+    "workspace_id": "youaskm3-local",
+    "registry_scope": "private"
+  },
+  "components": [
+    {
+      "component_id": "youaskm3.knowledge.query-answer-component",
+      "version": "0.1.0",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "manifest_path": "components/knowledge-query-answer/component.manifest.json",
+      "implementation_status": "pending_wasm_binary"
+    },
+    {
+      "component_id": "youaskm3.knowledge.retrieve-component",
+      "version": "0.1.0",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "manifest_path": "components/knowledge-retrieve/component.manifest.json",
+      "implementation_status": "pending_wasm_binary"
+    },
+    {
+      "component_id": "youaskm3.knowledge.graph-expand-component",
+      "version": "0.1.0",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "manifest_path": "components/knowledge-graph-expand/component.manifest.json",
+      "implementation_status": "pending_wasm_binary"
+    },
+    {
+      "component_id": "youaskm3.knowledge.context-pack-component",
+      "version": "0.1.0",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "manifest_path": "components/knowledge-context-pack/component.manifest.json",
+      "implementation_status": "pending_wasm_binary"
+    },
+    {
+      "component_id": "youaskm3.knowledge.infer-component",
+      "version": "0.1.0",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "manifest_path": "components/knowledge-infer/component.manifest.json",
+      "implementation_status": "pending_wasm_or_agent_binary"
+    },
+    {
+      "component_id": "youaskm3.knowledge.answer-validate-component",
+      "version": "0.1.0",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "manifest_path": "components/knowledge-answer-validate/component.manifest.json",
+      "implementation_status": "pending_wasm_binary"
+    },
+    {
+      "component_id": "youaskm3.knowledge.answer-format-component",
+      "version": "0.1.0",
+      "digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "manifest_path": "components/knowledge-answer-format/component.manifest.json",
+      "implementation_status": "pending_wasm_binary"
+    }
+  ],
+  "workflows": [
+    {
+      "workflow_id": "youaskm3.knowledge.query-answer",
+      "workflow_version": "0.1.0",
+      "path": "workflows/knowledge-query-answer.workflow.json"
+    }
+  ],
+  "model_dependencies": [
+    {
+      "interface_id": "traverse.inference.generate",
+      "version_range": "^1.0",
+      "selection_policy": {
+        "strategy": "priority",
+        "allow_fallback": true
+      },
+      "required_capabilities": [
+        "text_generation"
+      ],
+      "minimum_context_window": 8192,
+      "candidates": [
+        {
+          "candidate_id": "local-ollama-llama-3-2",
+          "provider_capability_id": "traverse.inference.generate",
+          "provider_implementation_id": "ollama.local.generate",
+          "model_identifier": "llama3.2:3b",
+          "placement_target": "local",
+          "priority": 10,
+          "required_provider_config_keys": [
+            "ollama_base_url"
+          ],
+          "metadata": {
+            "implementation_kind": "real_local_provider",
+            "provider": "ollama",
+            "model_context_window": 8192,
+            "supports_streaming": true,
+            "live_conformance": "optional_TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE"
+          }
+        }
+      ]
+    }
+  ],
+  "config_schema": {
+    "type": "object",
+    "required": [
+      "workspace_id",
+      "artifact_index_path",
+      "graph_path"
+    ],
+    "properties": {
+      "workspace_id": {
+        "type": "string"
+      },
+      "artifact_index_path": {
+        "type": "string"
+      },
+      "graph_path": {
+        "type": "string"
+      },
+      "default_max_sources": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 20
+      },
+      "ollama_base_url": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  },
+  "default_config": {
+    "workspace_id": "youaskm3-local",
+    "artifact_index_path": "app/site/search-index.json",
+    "graph_path": "app/site/knowledge-graph.json",
+    "default_max_sources": 5,
+    "ollama_base_url": "http://127.0.0.1:11434"
+  },
+  "placement_policy": {
+    "preferred_targets": [
+      "local"
+    ],
+    "permitted_targets": [
+      "local",
+      "server",
+      "mcp"
+    ],
+    "allow_fallback": true,
+    "fallback_order": [
+      "local",
+      "server"
+    ],
+    "default_inference_target": "local"
+  },
+  "public_surfaces": [
+    "http_json",
+    "mcp"
+  ]
+}
