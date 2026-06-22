@@ -1,0 +1,29 @@
+{
+  "component_id": "youaskm3.knowledge.infer-component",
+  "version": "0.1.0",
+  "schema_version": "1.0.0",
+  "capability_id": "knowledge.infer",
+  "capability_version": "0.1.0",
+  "contract_path": "../../../../contracts/capabilities/knowledge.infer.json",
+  "wasm_binary_path": "../../../../target/wasm32-wasip1/release/youaskm3_knowledge_infer.wasm",
+  "wasm_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "implementation_status": "pending_wasm_or_agent_binary",
+  "runtime_constraints": {
+    "host_api_access": "none",
+    "network_access": "forbidden",
+    "filesystem_access": "none"
+  },
+  "permitted_targets": [
+    "local",
+    "server"
+  ],
+  "dependencies": [],
+  "connector_requirements": [],
+  "validation_evidence": [
+    {
+      "evidence_type": "skeleton_manifest",
+      "status": "pending_real_wasm_or_agent",
+      "tracked_by": "MVP-021"
+    }
+  ]
+}
