@@ -198,6 +198,10 @@ youaskm3 integrates with Traverse through documented public release surfaces ins
 
 Roadmap work that touches runtime, MCP, browser hosting, model inference, or fork-and-run setup must pin an approved Traverse release pairing and include the relevant Traverse validation path.
 
+### First-MVP user stories
+
+The first-MVP personas, "As a..., I want..., so that..." stories, capability mappings, and demo acceptance path are maintained in [docs/mvp-user-stories.md](docs/mvp-user-stories.md). Runtime and UI work should map back to those stories when defining tickets, smoke tests, and demo evidence.
+
 ### Spec format (OpenSpec)
 
 ```markdown
