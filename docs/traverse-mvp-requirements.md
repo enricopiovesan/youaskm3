@@ -538,11 +538,32 @@ Required Traverse validation command:
 bash scripts/ci/downstream_app_mvp_conformance.sh
 ```
 
+Downstream readiness wrapper:
+
+```bash
+bash scripts/traverse-readiness.sh
+```
+
+The wrapper looks for a local Traverse checkout at `../Traverse` by default. Use `TRAVERSE_REPO=/path/to/Traverse` or `TRAVERSE_CHECKOUT=/path/to/Traverse` when the checkout is elsewhere. It verifies that the checkout contains the `v0.4.0` baseline, reports the active tag and commit, delegates to Traverse's public downstream conformance script, and summarizes the capability areas instead of printing full passing logs:
+
+```text
+Traverse readiness passed.
+Capability areas:
+- application bundle registration: passed
+- WASM workflow execution: passed
+- model dependency resolution: passed
+- HTTP/JSON app path: passed
+- MCP parity path: passed
+- live local model conformance: optional skipped
+```
+
 Optional live local model conformance:
 
 ```bash
-TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1 bash scripts/ci/downstream_app_mvp_conformance.sh
+TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1 bash scripts/traverse-readiness.sh
 ```
+
+Normal repository smoke does not require Traverse to be installed. Run `scripts/traverse-readiness.sh` when validating the Traverse pairing for integration work, release evidence, or a ticket that touches the Traverse runtime boundary.
 
 ## Non-Goals for Traverse
 
