@@ -100,6 +100,12 @@ TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1 bash scripts/ci/downstream_app_mvp_confo
 The current baseline proves governed model dependency resolution. It does not
 prove that the model engine itself is WASM-native.
 
+The downstream first-MVP policy for this boundary lives in
+[`docs/mvp-local-inference-policy.md`](../../docs/mvp-local-inference-policy.md).
+Missing local inference must fail as `MISSING_MODEL_DEPENDENCY` or a more
+specific inference dependency error, not as a hidden fallback to downstream
+provider logic.
+
 ## Registration Status
 
 This skeleton should fail real Traverse registration until later tickets provide
