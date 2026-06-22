@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -6,7 +9,9 @@ import {
   browserToolNames,
   callBrowserTool,
   documentsFromSearchIndex,
+  isMissingInferenceDependency,
   isBrowserToolName,
+  mapTraverseAnswerFailure,
   temporaryTraverseChatHarness
 } from "./browser-runtime";
 
@@ -204,6 +209,129 @@ describe("temporaryTraverseChatHarness", () => {
     expect(() => temporaryTraverseChatHarness({ query: "   " }, artifactDocuments)).toThrow(
       "missing browser runtime input"
     );
+  });
+});
+
+describe("Traverse inference dependency failures", () => {
+  it("maps missing inference dependency failures into the answer envelope", () => {
+    const output = mapTraverseAnswerFailure("portable", {
+      code: "MISSING_MODEL_DEPENDENCY",
+      message:
+        "Inference dependency unavailable. Traverse could not resolve a compatible local or allowed server inference capability for this workspace.",
+      recoverable: true,
+      trace_id: "trace-missing-model"
+    });
+
+    expect(output).toEqual({
+      answer:
+        "Inference dependency unavailable. Traverse could not resolve a compatible local or allowed server inference capability for this workspace.",
+      citations: [],
+      graph_evidence: [],
+      trace_id: "trace-missing-model",
+      validation: {
+        status: "invalid",
+        checks: [
+          "traverse-runtime-failure",
+          "missing-inference-dependency",
+          "MISSING_MODEL_DEPENDENCY"
+        ]
+      },
+      failure: {
+        code: "MISSING_MODEL_DEPENDENCY",
+        message:
+          "Inference dependency unavailable. Traverse could not resolve a compatible local or allowed server inference capability for this workspace.",
+        recoverable: true
+      }
+    });
+  });
+
+  it("keeps generic Traverse execution failures separate from missing inference", () => {
+    const output = mapTraverseAnswerFailure("portable", {
+      code: "WASM_EXECUTION_FAILED",
+      message: "Traverse execution failed before answer completion.",
+      recoverable: false
+    });
+
+    expect(output.trace_id).toBe("traverse-failure:portable");
+    expect(output.validation).toEqual({
+      status: "invalid",
+      checks: ["traverse-runtime-failure", "execution-failure", "WASM_EXECUTION_FAILED"]
+    });
+    expect(output.failure?.code).toBe("WASM_EXECUTION_FAILED");
+  });
+
+  it("recognizes the first-MVP missing inference failure code set", () => {
+    expect(isMissingInferenceDependency("MISSING_MODEL_DEPENDENCY")).toBe(true);
+    expect(isMissingInferenceDependency("INFERENCE_PROVIDER_UNAVAILABLE")).toBe(true);
+    expect(isMissingInferenceDependency("INFERENCE_PLACEMENT_UNSATISFIED")).toBe(true);
+    expect(isMissingInferenceDependency("INFERENCE_DEPENDENCY_REJECTED")).toBe(true);
+    expect(isMissingInferenceDependency("WASM_EXECUTION_FAILED")).toBe(false);
+  });
+
+  it("keeps provider identifiers out of browser runtime business logic", () => {
+    const runtimeSource = readFileSync(
+      path.resolve(process.cwd(), "app", "components", "browser-runtime.ts"),
+      "utf8"
+    );
+
+    expect(runtimeSource).not.toMatch(/\bOllama\b|\bWebLLM\b|llama\.cpp|openai|anthropic/i);
+  });
+
+  it("pins the Traverse manifest model dependency evidence fixture", () => {
+    const appManifest = JSON.parse(
+      readFileSync(
+        path.resolve(process.cwd(), "traverse", "youaskm3-app", "manifest.json"),
+        "utf8"
+      )
+    ) as {
+      model_dependencies: Array<{
+        candidates: Array<{
+          candidate_id: string;
+          metadata: Record<string, unknown>;
+          placement_target: string;
+          provider_implementation_id: string;
+        }>;
+        interface_id: string;
+      }>;
+    };
+    const dependency = appManifest.model_dependencies.find(
+      (modelDependency) => modelDependency.interface_id === "traverse.inference.generate"
+    );
+
+    expect(dependency).toBeDefined();
+    expect(dependency?.candidates[0]).toMatchObject({
+      candidate_id: "local-ollama-llama-3-2",
+      provider_implementation_id: "ollama.local.generate",
+      placement_target: "local",
+      metadata: {
+        live_conformance: "optional_TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE"
+      }
+    });
+  });
+
+  it("requires knowledge.infer to expose Traverse-owned dependency failure shape", () => {
+    const inferContract = JSON.parse(
+      readFileSync(
+        path.resolve(
+          process.cwd(),
+          "contracts",
+          "capabilities",
+          "knowledge.infer.json"
+        ),
+        "utf8"
+      )
+    ) as {
+      $defs: { failure: { required: string[] } };
+      model_dependencies: Array<{ notes: string; required: boolean }>;
+    };
+
+    expect(inferContract.model_dependencies[0]?.required).toBe(true);
+    expect(inferContract.model_dependencies[0]?.notes).toContain("Traverse resolves");
+    expect(inferContract.$defs.failure.required).toEqual([
+      "code",
+      "message",
+      "recoverable"
+    ]);
   });
 });
 
