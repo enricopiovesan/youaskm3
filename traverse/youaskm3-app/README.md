@@ -71,8 +71,18 @@ fields are placeholders until the corresponding WASM or agent artifacts exist:
 - `validation_evidence`
 
 Placeholder digests are all-zero SHA-256 values and must not be treated as
-real registration evidence. MVP-027 replaces them with generated component
-manifests and real binary digests.
+real registration evidence. The manifest generator keeps these placeholders
+only when explicitly run in skeleton mode:
+
+```bash
+bash scripts/traverse-component-manifests.sh --skeleton
+bash scripts/traverse-component-manifests.sh --skeleton --check
+```
+
+When real capability WASM binaries are expected, omit `--skeleton`. The command
+then fails on any missing `wasm_binary_path` and writes SHA-256 digests from the
+actual `.wasm` files into each component manifest and the app manifest component
+entries.
 
 ## Model Dependency
 
@@ -112,6 +122,7 @@ For this skeleton slice:
 
 ```bash
 rg -n "v0.4.0|model_dependencies|knowledge.query.answer|knowledge.retrieve|knowledge.infer" traverse/youaskm3-app
+bash scripts/traverse-component-manifests.sh --skeleton --check
 PATH=/Users/enricopiovesan/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH \
 PYTHON=/opt/homebrew/bin/python3.14 \
 bash scripts/smoke.sh

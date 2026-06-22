@@ -70,6 +70,9 @@ bash ./scripts/m3-command-surface-smoke.sh
 echo "Validating MVP contracts..."
 bash ./scripts/mvp-contracts-smoke.sh
 
+echo "Validating Traverse component manifests..."
+bash ./scripts/traverse-component-manifests-smoke.sh
+
 echo "Validating MVP fixture corpus..."
 bash ./scripts/mvp-fixture-corpus-smoke.sh
 

@@ -116,6 +116,7 @@ This repo is intentionally structured so humans and agents can navigate the same
 | Inspect the repo command surface | [scripts/m3.sh](scripts/m3.sh) |
 | Run the full validation path | [scripts/smoke.sh](scripts/smoke.sh) |
 | Check Traverse v0.4.0 readiness | [scripts/traverse-readiness.sh](scripts/traverse-readiness.sh) |
+| Update Traverse component manifests | [scripts/traverse-component-manifests.sh](scripts/traverse-component-manifests.sh) |
 | Review current knowledge layout | [knowledge/index.md](knowledge/index.md) |
 
 ## Command Surface Today
@@ -143,6 +144,14 @@ bash scripts/traverse-readiness.sh
 ```
 
 By default it looks for a sibling Traverse checkout at `../Traverse`. Set `TRAVERSE_REPO=/path/to/Traverse` when the checkout lives somewhere else. Set `TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1` only when the local model provider must be reachable during readiness validation.
+
+Traverse component manifests are checked with:
+
+```bash
+bash scripts/traverse-component-manifests.sh --skeleton --check
+```
+
+Omit `--skeleton` when real capability WASM binaries are expected. In that mode the command fails if a referenced binary is missing and writes SHA-256 digests from the actual `.wasm` files.
 
 ## Project Standards
 
