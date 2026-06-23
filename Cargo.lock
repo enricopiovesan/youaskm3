@@ -15,6 +15,10 @@ name = "youaskm3-knowledge-answer-format"
 version = "0.1.0"
 
 [[package]]
+name = "youaskm3-knowledge-answer-validate"
+version = "0.1.0"
+
+[[package]]
 name = "youaskm3-knowledge-context-pack"
 version = "0.1.0"
 
