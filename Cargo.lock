@@ -11,6 +11,10 @@ name = "youaskm3-ingest"
 version = "0.1.0"
 
 [[package]]
+name = "youaskm3-knowledge-answer-format"
+version = "0.1.0"
+
+[[package]]
 name = "youaskm3-mcp"
 version = "0.1.0"
 dependencies = [

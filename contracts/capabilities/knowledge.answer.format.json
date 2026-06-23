@@ -20,9 +20,10 @@
         "citations": { "type": "array", "items": { "type": "object" } },
         "graph_evidence": { "type": "array", "items": { "type": "object" } },
         "validation": { "type": "object" },
-        "target": { "type": "string", "enum": ["chat", "mcp"] }
+        "target": { "type": "string", "enum": ["chat", "mcp"] },
+        "trace_id": { "type": "string", "minLength": 1 }
       },
-      "required": ["raw_answer", "citations", "graph_evidence", "validation", "target"],
+      "required": ["raw_answer", "citations", "graph_evidence", "validation", "target", "trace_id"],
       "additionalProperties": false
     }
   },

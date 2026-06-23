@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGES=(
   "youaskm3-core"
   "youaskm3-ingest"
+  "youaskm3-knowledge-answer-format"
   "youaskm3-search"
 )
 
