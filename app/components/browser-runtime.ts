@@ -98,13 +98,31 @@ export type BrowserValidation = {
   checks: string[];
 };
 
+export type BrowserFailure = {
+  code: string;
+  message: string;
+  recoverable: boolean;
+};
+
 export type BrowserAnswerResponse = {
   answer: string;
   citations: BrowserCitation[];
   graph_evidence: BrowserGraphEvidence[];
   trace_id: string;
   validation: BrowserValidation;
+  failure?: BrowserFailure;
 };
+
+export type TraverseAnswerFailure = BrowserFailure & {
+  trace_id?: string;
+};
+
+export const MISSING_INFERENCE_DEPENDENCY_CODES = [
+  "MISSING_MODEL_DEPENDENCY",
+  "INFERENCE_PROVIDER_UNAVAILABLE",
+  "INFERENCE_PLACEMENT_UNSATISFIED",
+  "INFERENCE_DEPENDENCY_REJECTED"
+] as const;
 
 export type BrowserRuntimeOutput =
   | { type: "answer"; payload: BrowserAnswerResponse }
@@ -188,6 +206,39 @@ export function documentsFromSearchIndex(artifact: SearchIndexArtifact): Browser
     excerpt: document.excerpt,
     sourcePath: document.source_path
   }));
+}
+
+export function isMissingInferenceDependency(code: string): boolean {
+  return MISSING_INFERENCE_DEPENDENCY_CODES.includes(
+    code as (typeof MISSING_INFERENCE_DEPENDENCY_CODES)[number]
+  );
+}
+
+export function mapTraverseAnswerFailure(
+  query: string,
+  failure: TraverseAnswerFailure
+): BrowserAnswerResponse {
+  const missingInference = isMissingInferenceDependency(failure.code);
+
+  return {
+    answer: failure.message,
+    citations: [],
+    graph_evidence: [],
+    trace_id: failure.trace_id ?? `traverse-failure:${slugify(query)}`,
+    validation: {
+      status: "invalid",
+      checks: [
+        "traverse-runtime-failure",
+        missingInference ? "missing-inference-dependency" : "execution-failure",
+        failure.code
+      ]
+    },
+    failure: {
+      code: failure.code,
+      message: failure.message,
+      recoverable: failure.recoverable
+    }
+  };
 }
 
 export function browserArtifactState(
