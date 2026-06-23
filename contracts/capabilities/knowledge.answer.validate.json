@@ -19,9 +19,10 @@
         "answer": { "type": "string" },
         "citations": { "type": "array", "items": { "type": "object" } },
         "retrieved_chunks": { "type": "array", "items": { "type": "object" } },
-        "graph_evidence": { "type": "array", "items": { "type": "object" } }
+        "graph_evidence": { "type": "array", "items": { "type": "object" } },
+        "trace_id": { "type": "string", "minLength": 1 }
       },
-      "required": ["answer", "citations", "retrieved_chunks", "graph_evidence"],
+      "required": ["answer", "citations", "retrieved_chunks", "graph_evidence", "trace_id"],
       "additionalProperties": false
     }
   },
