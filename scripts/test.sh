@@ -20,6 +20,7 @@ PACKAGES=(
   "youaskm3-ingest"
   "youaskm3-knowledge-answer-format"
   "youaskm3-knowledge-context-pack"
+  "youaskm3-knowledge-graph-expand"
   "youaskm3-search"
 )
 
