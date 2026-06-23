@@ -4,7 +4,7 @@
   "id": "youaskm3.knowledge.query-answer",
   "name": "knowledge-query-answer",
   "version": "0.1.0",
-  "lifecycle": "mvp-skeleton",
+  "lifecycle": "mvp",
   "owner": {
     "team": "youaskm3",
     "contact": "enrico.piovesan10@gmail.com"
@@ -86,8 +86,10 @@
       "input": {
         "from_workflow_input": [
           "query",
-          "artifact_scope",
           "max_sources"
+        ],
+        "from_app_config": [
+          "artifact_index_path"
         ]
       },
       "output": {
@@ -101,8 +103,14 @@
       "capability_id": "knowledge.graph.expand",
       "capability_version": "0.1.0",
       "input": {
-        "from_workflow_input": [
-          "retrieved_chunks"
+        "from_workflow_state": [
+          "retrieved_chunks.results[].chunk_id"
+        ],
+        "from_app_config": [
+          "graph_path"
+        ],
+        "from_workflow_trace": [
+          "trace_id"
         ]
       },
       "output": {
@@ -117,9 +125,17 @@
       "capability_version": "0.1.0",
       "input": {
         "from_workflow_input": [
-          "query",
+          "query"
+        ],
+        "from_workflow_state": [
           "retrieved_chunks",
           "graph_evidence"
+        ],
+        "literal": {
+          "token_budget": 4096
+        },
+        "from_workflow_trace": [
+          "trace_id"
         ]
       },
       "output": {
@@ -134,9 +150,14 @@
       "capability_version": "0.1.0",
       "input": {
         "from_workflow_input": [
-          "query",
+          "query"
+        ],
+        "from_workflow_state": [
           "context_package"
-        ]
+        ],
+        "literal": {
+          "max_output_tokens": 1024
+        }
       },
       "output": {
         "to_workflow_state": [
@@ -151,10 +172,13 @@
       "capability_id": "knowledge.answer.validate",
       "capability_version": "0.1.0",
       "input": {
-        "from_workflow_input": [
+        "from_workflow_state": [
           "raw_answer",
           "retrieved_chunks",
           "graph_evidence"
+        ],
+        "from_workflow_trace": [
+          "trace_id"
         ]
       },
       "output": {
@@ -168,11 +192,17 @@
       "capability_id": "knowledge.answer.format",
       "capability_version": "0.1.0",
       "input": {
-        "from_workflow_input": [
+        "from_workflow_state": [
           "raw_answer",
           "retrieved_chunks",
           "graph_evidence",
           "validation"
+        ],
+        "literal": {
+          "target": "chat"
+        },
+        "from_workflow_trace": [
+          "trace_id"
         ]
       },
       "output": {
@@ -219,6 +249,32 @@
   "terminal_nodes": [
     "format_answer"
   ],
+  "trace": {
+    "required": true,
+    "evidence": [
+      "capability_ids",
+      "placement",
+      "source_evidence",
+      "graph_evidence",
+      "model_dependency",
+      "validation_outcome",
+      "failure_reasons"
+    ]
+  },
+  "failure_policy": {
+    "missing_child_capability": {
+      "code": "MISSING_CHILD_CAPABILITY",
+      "recoverable": true
+    },
+    "missing_model_dependency": {
+      "code": "MISSING_INFERENCE_DEPENDENCY",
+      "recoverable": true
+    },
+    "validation_failure": {
+      "code": "ANSWER_VALIDATION_FAILED",
+      "recoverable": true
+    }
+  },
   "tags": [
     "youaskm3",
     "mvp",
