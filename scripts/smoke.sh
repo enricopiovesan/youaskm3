@@ -73,6 +73,9 @@ bash ./scripts/mvp-contracts-smoke.sh
 echo "Validating Traverse component manifests..."
 bash ./scripts/traverse-component-manifests-smoke.sh
 
+echo "Validating query answer workflow..."
+bash ./scripts/query-answer-workflow-smoke.sh
+
 echo "Validating local inference policy..."
 bash ./scripts/local-inference-policy-smoke.sh
 
