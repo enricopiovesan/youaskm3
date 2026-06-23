@@ -4,6 +4,7 @@ members = [
   "crates/youaskm3-ingest",
   "crates/youaskm3-search",
   "crates/youaskm3-mcp",
+  "crates/youaskm3-knowledge-answer-format",
 ]
 resolver = "3"
 
