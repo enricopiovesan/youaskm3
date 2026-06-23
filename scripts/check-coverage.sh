@@ -6,6 +6,7 @@ PACKAGES=(
   "youaskm3-core"
   "youaskm3-ingest"
   "youaskm3-knowledge-answer-format"
+  "youaskm3-knowledge-context-pack"
   "youaskm3-search"
 )
 

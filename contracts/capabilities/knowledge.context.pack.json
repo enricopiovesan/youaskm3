@@ -19,9 +19,10 @@
         "query": { "type": "string", "minLength": 1 },
         "retrieved_chunks": { "type": "array", "items": { "type": "object" } },
         "graph_evidence": { "type": "array", "items": { "type": "object" } },
-        "token_budget": { "type": "integer", "minimum": 256, "maximum": 32768 }
+        "token_budget": { "type": "integer", "minimum": 256, "maximum": 32768 },
+        "trace_id": { "type": "string", "minLength": 1 }
       },
-      "required": ["query", "retrieved_chunks", "graph_evidence", "token_budget"],
+      "required": ["query", "retrieved_chunks", "graph_evidence", "token_budget", "trace_id"],
       "additionalProperties": false
     }
   },
