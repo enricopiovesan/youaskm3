@@ -73,6 +73,9 @@ bash ./scripts/mvp-contracts-smoke.sh
 echo "Validating Traverse component manifests..."
 bash ./scripts/traverse-component-manifests-smoke.sh
 
+echo "Validating Traverse app registration command..."
+bash ./scripts/register-traverse-app-smoke.sh
+
 echo "Validating query answer workflow..."
 bash ./scripts/query-answer-workflow-smoke.sh
 
