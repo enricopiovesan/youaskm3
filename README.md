@@ -73,6 +73,10 @@ npm install
 bash scripts/smoke.sh
 ```
 
+For the exact local toolchain, including Rust `1.94.0`, `wasm32-wasip1`,
+`cargo-llvm-cov`, Python 3.10+ for MarkItDown, and the known-good smoke command,
+see [docs/local-development-toolchain.md](docs/local-development-toolchain.md).
+
 If you want a smaller first pass:
 
 ```bash
@@ -112,6 +116,7 @@ This repo is intentionally structured so humans and agents can navigate the same
 | Review active capability specs | [openspec/specs/](openspec/specs/) |
 | Review current MCP contracts | [contracts/mcp-tools.json](contracts/mcp-tools.json) |
 | Review MVP capability contracts | [contracts/capabilities/](contracts/capabilities/) |
+| Set up local validation tools | [docs/local-development-toolchain.md](docs/local-development-toolchain.md) |
 | Start or resume ops workflow | [docs/youaskm3-ops.md](docs/youaskm3-ops.md) |
 | Inspect the repo command surface | [scripts/m3.sh](scripts/m3.sh) |
 | Run the full validation path | [scripts/smoke.sh](scripts/smoke.sh) |
