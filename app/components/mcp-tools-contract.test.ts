@@ -11,11 +11,16 @@ type JsonSchema = {
 };
 
 type ToolContract = {
+  capability_id?: string;
+  contract_path?: string;
   description: string;
   error_schema: JsonSchema;
   input_schema: JsonSchema;
   name: string;
   output_schema: JsonSchema;
+  surface?: string;
+  workflow_id?: string;
+  workflow_path?: string;
 };
 
 type ContractDocument = {
@@ -38,6 +43,7 @@ describe("mcp-tools contracts", () => {
     const contracts = readContracts();
 
     expect(contracts.tools.map((tool) => tool.name)).toEqual([
+      "knowledge.query.answer",
       "search",
       "remember",
       "recall",
@@ -68,12 +74,30 @@ describe("mcp-tools contracts", () => {
 
   it("pins the richer contract details for the first execution slice", () => {
     const contracts = readContracts();
+    const answerContract = contracts.tools.find(
+      (tool) => tool.name === "knowledge.query.answer"
+    );
     const searchContract = contracts.tools.find((tool) => tool.name === "search");
     const rememberContract = contracts.tools.find(
       (tool) => tool.name === "remember"
     );
     const statusContract = contracts.tools.find((tool) => tool.name === "status");
 
+    expect(answerContract).toMatchObject({
+      capability_id: "knowledge.query.answer",
+      contract_path: "contracts/capabilities/knowledge.query.answer.json",
+      surface: "traverse_mcp",
+      workflow_id: "youaskm3.knowledge.query-answer",
+      workflow_path:
+        "traverse/youaskm3-app/workflows/knowledge-query-answer.workflow.json"
+    });
+    expect(answerContract?.output_schema.required).toEqual([
+      "answer",
+      "citations",
+      "graph_evidence",
+      "trace_id",
+      "validation"
+    ]);
     expect(searchContract).toBeDefined();
     expect(searchContract?.output_schema.properties).toHaveProperty("results");
     expect(rememberContract?.input_schema.required).toEqual([

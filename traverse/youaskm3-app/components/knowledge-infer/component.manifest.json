@@ -15,7 +15,8 @@
   },
   "permitted_targets": [
     "local",
-    "server"
+    "server",
+    "mcp"
   ],
   "dependencies": [],
   "connector_requirements": [],

@@ -145,6 +145,20 @@ execution is blocked by `SKELETON_PENDING_WASM_COMPONENTS`; once real component
 WASM artifacts are available, the same gate should be tightened to expect live
 `knowledge.query.answer` execution evidence.
 
+The MCP parity gate is:
+
+```bash
+bash scripts/traverse-mcp-answer-workflow-smoke.sh
+TRAVERSE_REPO=/path/to/Traverse bash scripts/traverse-mcp-answer-workflow-smoke.sh
+```
+
+Without `TRAVERSE_REPO`, it proves the MCP tool contract maps to the same
+registered `knowledge.query.answer` workflow, capability contract, component
+manifests, trace evidence, failure policies, and model dependency metadata as
+the app-facing path. With `TRAVERSE_REPO`, it also runs Traverse's public
+downstream MCP smoke so the release pairing proves MCP model-resolution
+evidence through Traverse-owned surfaces.
+
 Follow-up tickets:
 
 - MVP-013: first `knowledge.retrieve` WASM capability

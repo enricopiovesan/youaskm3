@@ -82,6 +82,9 @@ bash ./scripts/query-answer-workflow-smoke.sh
 echo "Validating Traverse answer workflow integration gate..."
 bash ./scripts/traverse-answer-workflow-smoke.sh
 
+echo "Validating Traverse MCP answer workflow parity..."
+bash ./scripts/traverse-mcp-answer-workflow-smoke.sh
+
 echo "Validating local inference policy..."
 bash ./scripts/local-inference-policy-smoke.sh
 
