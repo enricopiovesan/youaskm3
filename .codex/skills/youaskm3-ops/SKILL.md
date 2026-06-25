@@ -56,6 +56,12 @@ Between tickets, keep the transition lean: sync `main`, verify clean status, ins
 - **Spec/contracts gardener:** align `README.md`, `SPEC.md`, `openspec/specs/`, `contracts/`, and smoke validation with the approved MVP direction.
 - **Traverse dependency checker:** verify whether blocked youaskm3 tickets depend on Traverse runtime requirements in `docs/traverse-mvp-requirements.md`.
 
+When focused evidence shows a missing Traverse public surface, follow
+`docs/traverse-blocker-escalation.md`: keep the youaskm3 issue Blocked, link an
+upstream Traverse requirement or issue, and do not add downstream provider or
+runtime shortcuts, Browser demo acceptance, placeholders, stubs, or fake
+workflow steps.
+
 ## Project Guardrails
 
 - Do not mark work `In Progress` unless a real dev thread has started it.

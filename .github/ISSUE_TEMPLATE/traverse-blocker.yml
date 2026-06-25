@@ -1,0 +1,86 @@
+name: Traverse blocker
+description: Escalate a confirmed missing Traverse public surface from youaskm3 evidence.
+title: "traverse blocker: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the missing Traverse surface or behavior and why it blocks youaskm3.
+    validations:
+      required: true
+  - type: input
+    id: downstream_issue
+    attributes:
+      label: Blocked youaskm3 issue or PR
+      description: Link the downstream issue or PR that cannot satisfy its DoD.
+      placeholder: https://github.com/enricopiovesan/youaskm3/issues/120
+    validations:
+      required: true
+  - type: input
+    id: affected_surface
+    attributes:
+      label: Affected capability or public surface
+      description: Name the capability, workflow, API, CLI, MCP path, or trace surface.
+      placeholder: knowledge.query.answer app registration through Traverse HTTP/JSON
+    validations:
+      required: true
+  - type: textarea
+    id: expected_surface
+    attributes:
+      label: Expected Traverse behavior
+      description: State the public surface or governed runtime behavior youaskm3 needs.
+    validations:
+      required: true
+  - type: textarea
+    id: observed_failure
+    attributes:
+      label: Observed failure
+      description: Include the stable failure code and a short actionable error excerpt.
+      placeholder: MISSING_PUBLIC_APP_REGISTRATION_SURFACE - no public external app-register CLI for this manifest shape.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Focused reproduction command
+      description: Provide the smallest local command that demonstrates the blocker, or explain why no focused command exists.
+      placeholder: TRAVERSE_REPO=/path/to/Traverse bash scripts/register-traverse-app.sh --json
+    validations:
+      required: true
+  - type: input
+    id: traverse_version
+    attributes:
+      label: Traverse version or commit
+      description: Include the release tag, describe output, or commit used for the reproduction.
+      placeholder: v0.4.0-5-g755da626860a
+    validations:
+      required: true
+  - type: input
+    id: youaskm3_version
+    attributes:
+      label: youaskm3 branch or commit
+      description: Include the downstream branch or commit used for the reproduction.
+      placeholder: main @ a6ea7be
+    validations:
+      required: true
+  - type: textarea
+    id: downstream_impact
+    attributes:
+      label: Downstream impact
+      description: Explain which youaskm3 DoD item remains blocked and why downstream shortcuts are not acceptable.
+    validations:
+      required: true
+  - type: checkboxes
+    id: guardrails
+    attributes:
+      label: Guardrails
+      options:
+        - label: The blocked youaskm3 issue is linked from this report.
+          required: true
+        - label: The blocked youaskm3 issue is or will be set to Blocked in Project 3.
+          required: true
+        - label: This report does not request a downstream provider/runtime shortcut, Browser demo acceptance, placeholder digest, contract stub, or fake workflow step.
+          required: true

@@ -97,6 +97,12 @@ For release-pinned Traverse evidence, use the checklist in
 rely on release prose alone when `scripts/traverse-readiness.sh` can run against
 a local Traverse checkout.
 
+When focused evidence shows a missing Traverse public surface, follow
+`docs/traverse-blocker-escalation.md`: keep the youaskm3 issue Blocked, link an
+upstream Traverse requirement or issue, and do not add downstream provider or
+runtime shortcuts, Browser demo acceptance, placeholders, stubs, or fake
+workflow steps.
+
 ## Guardrails
 
 - Do not mark work `In Progress` unless a real dev thread has started it.
