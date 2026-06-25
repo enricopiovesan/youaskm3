@@ -161,13 +161,13 @@
         <m3-chat
           eyebrow="M3 Browser Runtime"
           title="Client-side MCP shell"
-          summary="The browser shell now runs a thin client-side MCP-style adapter over generated search and graph artifacts."
+          summary="The browser shell delegates answer execution to the configured Traverse HTTP/JSON runtime, with a visible browser fallback for development."
           tool="answer"
           input="portable knowledge"
         >
-          <m3-result prompt="Traverse-compatible harness: knowledge.query.answer">
+          <m3-result prompt="Traverse HTTP: knowledge.query.answer">
             <p>
-              Ask a question to render a source-backed answer from the temporary Traverse-compatible harness.
+              Ask a question to render a source-backed answer through the configured Traverse runtime.
             </p>
           </m3-result>
           <m3-source

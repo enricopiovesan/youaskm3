@@ -23,7 +23,7 @@ export type AuthorInstanceManifest = {
 };
 
 export const DEFAULT_PROVIDER_CONFIG: ProviderConfig = {
-  activeProviderId: "browser-demo",
+  activeProviderId: "traverse-local",
   profiles: [
     {
       id: "browser-demo",

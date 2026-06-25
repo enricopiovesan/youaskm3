@@ -77,7 +77,7 @@ TARGET_DIR="."
 INSTANCE_NAME=""
 SHELL_URL=""
 INSTANCE_ID=""
-ACTIVE_PROVIDER="browser-demo"
+ACTIVE_PROVIDER="traverse-local"
 ASSUME_YES=false
 
 while [[ "$#" -gt 0 ]]; do

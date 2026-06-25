@@ -11,21 +11,24 @@ import {
 
 describe("provider config", () => {
   it("exposes a default publishable provider set", () => {
-    expect(DEFAULT_PROVIDER_CONFIG.activeProviderId).toBe("browser-demo");
+    expect(DEFAULT_PROVIDER_CONFIG.activeProviderId).toBe("traverse-local");
     expect(providerOptionLabels(DEFAULT_PROVIDER_CONFIG)).toEqual([
       "Browser demo",
       "Traverse local",
       "Claude API",
       "OpenAI API"
     ]);
-    expect(activeProvider(DEFAULT_PROVIDER_CONFIG)?.publishable).toBe(true);
+    expect(activeProvider(DEFAULT_PROVIDER_CONFIG)).toMatchObject({
+      id: "traverse-local",
+      runtime: "traverse-http"
+    });
   });
 
   it("updates the active provider when the profile exists", () => {
-    const updated = updateActiveProvider(DEFAULT_PROVIDER_CONFIG, "openai-api");
+    const updated = updateActiveProvider(DEFAULT_PROVIDER_CONFIG, "browser-demo");
 
-    expect(updated.activeProviderId).toBe("openai-api");
-    expect(activeProvider(updated)?.label).toBe("OpenAI API");
+    expect(updated.activeProviderId).toBe("browser-demo");
+    expect(activeProvider(updated)?.runtime).toBe("browser-harness");
   });
 
   it("rejects unknown provider ids", () => {
@@ -36,7 +39,7 @@ describe("provider config", () => {
 
   it("formats a provider summary for the active profile", () => {
     expect(providerSummary(DEFAULT_PROVIDER_CONFIG)).toContain(
-      "Browser demo uses local://browser-runtime"
+      "Traverse local uses http://127.0.0.1:8787"
     );
   });
 });
