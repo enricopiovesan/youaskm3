@@ -79,6 +79,31 @@ export type BrowserAnswerInput = {
   max_sources?: number;
 };
 
+export type TraverseHttpConfig = {
+  baseUrl: string;
+  workspaceId?: string;
+  capabilityId?: string;
+  capabilityVersion?: string;
+  requestId?: string;
+  requestedTarget?: "local" | "server" | "mcp";
+  fetchTrace?: boolean;
+};
+
+export type TraverseFetchResponse = {
+  ok: boolean;
+  status: number;
+  json: () => Promise<unknown>;
+};
+
+export type TraverseFetch = (
+  input: string,
+  init?: {
+    method?: string;
+    headers?: Record<string, string>;
+    body?: string;
+  }
+) => Promise<TraverseFetchResponse>;
+
 export type BrowserCitation = {
   citation_id: string;
   artifact_id: string;
@@ -115,6 +140,26 @@ export type BrowserAnswerResponse = {
 
 export type TraverseAnswerFailure = BrowserFailure & {
   trace_id?: string;
+};
+
+export type TraverseRuntimeRequest = {
+  kind: "runtime_request";
+  schema_version: "1.0.0";
+  request_id: string;
+  intent: {
+    capability_id: string;
+    capability_version: string;
+  };
+  input: BrowserAnswerInput;
+  lookup: {
+    scope: "prefer_private";
+    allow_ambiguity: false;
+  };
+  context: {
+    requested_target: "local" | "server" | "mcp";
+    caller: "youaskm3-pwa";
+  };
+  governing_spec: "openspec/specs/traverse-integration/spec.md";
 };
 
 export const MISSING_INFERENCE_DEPENDENCY_CODES = [
@@ -241,6 +286,77 @@ export function mapTraverseAnswerFailure(
   };
 }
 
+export function buildTraverseRuntimeRequest(
+  input: BrowserAnswerInput,
+  config: TraverseHttpConfig
+): TraverseRuntimeRequest {
+  const query = requireInput(input.query);
+  const requestId = config.requestId ?? `youaskm3-${slugify(query)}`;
+
+  return {
+    kind: "runtime_request",
+    schema_version: "1.0.0",
+    request_id: requestId,
+    intent: {
+      capability_id: config.capabilityId ?? "knowledge.query.answer",
+      capability_version: config.capabilityVersion ?? "0.1.0"
+    },
+    input: {
+      ...input,
+      query
+    },
+    lookup: {
+      scope: "prefer_private",
+      allow_ambiguity: false
+    },
+    context: {
+      requested_target: config.requestedTarget ?? "local",
+      caller: "youaskm3-pwa"
+    },
+    governing_spec: "openspec/specs/traverse-integration/spec.md"
+  };
+}
+
+export async function executeTraverseAnswerHttp(
+  input: BrowserAnswerInput,
+  config: TraverseHttpConfig,
+  fetchImpl: TraverseFetch = globalThis.fetch as TraverseFetch
+): Promise<BrowserAnswerResponse> {
+  const query = requireInput(input.query);
+  const workspaceId = encodeURIComponent(config.workspaceId ?? "local-default");
+  const executeUrl = joinUrl(config.baseUrl, `/v1/workspaces/${workspaceId}/execute`);
+  const request = buildTraverseRuntimeRequest({ ...input, query }, config);
+  const response = await fetchImpl(executeUrl, {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify(request)
+  });
+  const body = await response.json();
+
+  if (!response.ok) {
+    return mapTraverseAnswerFailure(query, problemToFailure(body, response.status));
+  }
+
+  const completedBody = await resolveAcceptedExecution(
+    body,
+    config,
+    fetchImpl
+  );
+  const answer = traverseBodyToAnswer(query, completedBody);
+  const traceUrl = traceLink(completedBody);
+  if (traceUrl && config.fetchTrace !== false) {
+    const trace = await fetchPublicTrace(config.baseUrl, traceUrl, fetchImpl);
+    if (trace) {
+      answer.validation.checks = [...answer.validation.checks, "public-trace-fetched"];
+    }
+  }
+
+  return answer;
+}
+
 export function browserArtifactState(
   searchIndex: SearchIndexArtifact | null,
   graph: KnowledgeGraphArtifact | null = null
@@ -270,6 +386,129 @@ export function browserArtifactState(
     graph,
     message: `Loaded ${documents.length} generated knowledge documents.`
   };
+}
+
+async function resolveAcceptedExecution(
+  body: unknown,
+  config: TraverseHttpConfig,
+  fetchImpl: TraverseFetch
+): Promise<unknown> {
+  const record = asRecord(body);
+  if (record?.status !== "accepted") {
+    return body;
+  }
+
+  const executionUrl = linkFrom(record, "execution");
+  if (!executionUrl) {
+    return body;
+  }
+
+  const response = await fetchImpl(joinUrl(config.baseUrl, executionUrl), {
+    method: "GET",
+    headers: {
+      accept: "application/json"
+    }
+  });
+
+  return response.ok ? response.json() : body;
+}
+
+async function fetchPublicTrace(
+  baseUrl: string,
+  tracePath: string,
+  fetchImpl: TraverseFetch
+): Promise<unknown | null> {
+  const response = await fetchImpl(joinUrl(baseUrl, tracePath), {
+    method: "GET",
+    headers: {
+      accept: "application/json"
+    }
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return response.json();
+}
+
+function traverseBodyToAnswer(query: string, body: unknown): BrowserAnswerResponse {
+  const record = asRecord(body);
+  const error = asRecord(record?.error);
+  if (error) {
+    return mapTraverseAnswerFailure(query, {
+      code: stringValue(error.code, "TRAVERSE_EXECUTION_FAILED"),
+      message: stringValue(error.message, "Traverse execution failed."),
+      recoverable: false,
+      trace_id: stringValue(record?.execution_id, `traverse-failure:${slugify(query)}`)
+    });
+  }
+
+  if (record?.status === "accepted") {
+    return mapTraverseAnswerFailure(query, {
+      code: "TRAVERSE_EXECUTION_ACCEPTED",
+      message: "Traverse accepted the request but did not return a completed answer yet.",
+      recoverable: true,
+      trace_id: stringValue(record.execution_id, `traverse-pending:${slugify(query)}`)
+    });
+  }
+
+  const output = asRecord(record?.output) ?? record;
+  return {
+    answer: stringValue(output?.answer, "Traverse returned an empty answer."),
+    citations: arrayValue(output?.citations) as BrowserCitation[],
+    graph_evidence: arrayValue(output?.graph_evidence) as BrowserGraphEvidence[],
+    trace_id: stringValue(
+      output?.trace_id,
+      stringValue(record?.execution_id, `traverse:${slugify(query)}`)
+    ),
+    validation:
+      (asRecord(output?.validation) as BrowserValidation | null) ?? {
+        status: "partial",
+        checks: ["traverse-http-response", "validation-missing"]
+      }
+  };
+}
+
+function problemToFailure(body: unknown, status: number): TraverseAnswerFailure {
+  const record = asRecord(body);
+  return {
+    code: stringValue(record?.code, `HTTP_${status}`),
+    message: stringValue(
+      record?.detail,
+      stringValue(record?.message, stringValue(record?.title, "Traverse request failed."))
+    ),
+    recoverable: status >= 500
+  };
+}
+
+function traceLink(body: unknown): string | null {
+  const record = asRecord(body);
+  return linkFrom(record, "trace");
+}
+
+function linkFrom(record: Record<string, unknown> | null, key: string): string | null {
+  const links = asRecord(record?.links);
+  const value = links?.[key];
+  return typeof value === "string" && value.length > 0 ? value : null;
+}
+
+function joinUrl(baseUrl: string, path: string): string {
+  return `${baseUrl.replace(/\/+$/u, "")}/${path.replace(/^\/+/u, "")}`;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function stringValue(value: unknown, fallback: string): string {
+  return typeof value === "string" && value.length > 0 ? value : fallback;
+}
+
+function arrayValue(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : [];
 }
 
 export function temporaryTraverseChatHarness(

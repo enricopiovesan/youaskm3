@@ -5,6 +5,8 @@ export type ProviderProfile = {
   auth: "none" | "api-key";
   modelHint: string;
   publishable: boolean;
+  runtime?: "browser-harness" | "traverse-http";
+  workspaceId?: string;
 };
 
 export type ProviderConfig = {
@@ -29,7 +31,18 @@ export const DEFAULT_PROVIDER_CONFIG: ProviderConfig = {
       endpoint: "local://browser-runtime",
       auth: "none",
       modelHint: "contract-shaped local adapter",
-      publishable: true
+      publishable: true,
+      runtime: "browser-harness"
+    },
+    {
+      id: "traverse-local",
+      label: "Traverse local",
+      endpoint: "http://127.0.0.1:8787",
+      auth: "none",
+      modelHint: "knowledge.query.answer through Traverse HTTP/JSON",
+      publishable: false,
+      runtime: "traverse-http",
+      workspaceId: "youaskm3-local"
     },
     {
       id: "claude-api",
@@ -54,7 +67,7 @@ export const DEFAULT_AUTHOR_INSTANCE: AuthorInstanceManifest = {
   instanceId: "youaskm3-author",
   title: "youaskm3 author instance",
   shellUrl: "https://enricopiovesan.github.io/youaskm3/",
-  providerProfiles: ["browser-demo", "claude-api", "openai-api"],
+  providerProfiles: ["browser-demo", "traverse-local", "claude-api", "openai-api"],
   knowledgeBase: "knowledge/"
 };
 

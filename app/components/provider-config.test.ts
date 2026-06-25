@@ -14,6 +14,7 @@ describe("provider config", () => {
     expect(DEFAULT_PROVIDER_CONFIG.activeProviderId).toBe("browser-demo");
     expect(providerOptionLabels(DEFAULT_PROVIDER_CONFIG)).toEqual([
       "Browser demo",
+      "Traverse local",
       "Claude API",
       "OpenAI API"
     ]);
@@ -45,5 +46,6 @@ describe("author instance manifest", () => {
     expect(DEFAULT_AUTHOR_INSTANCE.instanceId).toBe("youaskm3-author");
     expect(DEFAULT_AUTHOR_INSTANCE.shellUrl).toContain("github.io/youaskm3");
     expect(DEFAULT_AUTHOR_INSTANCE.providerProfiles).toContain("browser-demo");
+    expect(DEFAULT_AUTHOR_INSTANCE.providerProfiles).toContain("traverse-local");
   });
 });

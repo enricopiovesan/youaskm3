@@ -1,6 +1,6 @@
 {
   "instanceId": "youaskm3-author",
-  "sourceFingerprint": "ca954af000101d3b1fc170b193fa54e7f6f63ddeb7f8b18c759c5b1a4db8321e",
+  "sourceFingerprint": "13264bac965e20bbb85e13da0dce40db75961dbcb48a44afb41f702b1ff7d048",
   "knowledgeDocumentCount": 3,
   "pendingInputCount": 0,
   "trackedSourcePaths": [
@@ -13,7 +13,7 @@
     {
       "path": "app/site/author-instance.json",
       "kind": "instance-manifest",
-      "sha256": "d2651ae376fbcd980d521b1da60930b92d9cfa7f325796595c916bdda03fd483"
+      "sha256": "0a045d9c35c48f8e3ebb198ca872c0bb275eab35368e5777dda196e8c6d56702"
     },
     {
       "path": "knowledge/blog/mvp-fixture-article/index.md",

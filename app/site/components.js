@@ -1,4 +1,9 @@
-import { callBrowserTool, loadBrowserArtifacts, TOOL_DESCRIPTORS } from "./runtime.js";
+import {
+  callBrowserTool,
+  executeTraverseAnswerHttp,
+  loadBrowserArtifacts,
+  TOOL_DESCRIPTORS
+} from "./runtime.js";
 
 const PROVIDER_STORAGE_KEY = "youaskm3.provider-config";
 
@@ -607,10 +612,38 @@ function providerSummary(profile) {
       ? "expects a user-supplied API key"
       : "runs without a remote API key";
 
-  return `${profile.label} uses ${profile.endpoint}, ${authCopy}, and hints ${profile.modelHint}.`;
+  const runtimeCopy =
+    profile.runtime === "traverse-http"
+      ? ` Traverse workspace: ${profile.workspaceId ?? "local-default"}.`
+      : "";
+
+  return `${profile.label} uses ${profile.endpoint}, ${authCopy}, and hints ${profile.modelHint}.${runtimeCopy}`;
 }
 
-function syncShell(toolName, input, state = "ready") {
+async function runBrowserTool(toolName, input) {
+  const provider = providerConfig ? activeProvider(providerConfig) : null;
+  if (toolName === "answer" && provider?.runtime === "traverse-http") {
+    return {
+      type: "answer",
+      payload: await executeTraverseAnswerHttp(
+        { query: input },
+        {
+          baseUrl: provider.endpoint,
+          workspaceId: provider.workspaceId
+        }
+      )
+    };
+  }
+
+  return callBrowserTool(
+    toolName,
+    input,
+    artifactState.documents,
+    artifactState.graph
+  );
+}
+
+async function syncShell(toolName, input, state = "ready") {
   if (!(shell instanceof HTMLElement)) {
     return;
   }
@@ -623,12 +656,7 @@ function syncShell(toolName, input, state = "ready") {
     summary = emptyCorpusSummary(artifactState.message);
   } else {
     try {
-      const output = callBrowserTool(
-        toolName,
-        input,
-        artifactState.documents,
-        artifactState.graph
-      );
+      const output = await runBrowserTool(toolName, input);
       summary = toolToSummary(toolName, output);
       sources = toolToSources(toolName, output);
 
@@ -699,17 +727,17 @@ if (shell instanceof HTMLElement) {
       providerConfig = config;
       authorInstance = manifest;
       artifactState = artifacts;
-      syncShell(currentTool, currentInput);
+      void syncShell(currentTool, currentInput);
     })
     .catch((error) => {
       console.error("Failed to load browser shell config", error);
-      syncShell(currentTool, currentInput);
+      void syncShell(currentTool, currentInput);
     });
 
   shell.addEventListener("toolchange", (event) => {
     const detail = event instanceof CustomEvent ? event.detail : null;
     currentTool = detail?.tool ?? currentTool;
-    syncShell(currentTool, currentInput);
+    void syncShell(currentTool, currentInput);
   });
 
   shell.addEventListener("runtimeinput", (event) => {
@@ -721,8 +749,8 @@ if (shell instanceof HTMLElement) {
     const detail = event instanceof CustomEvent ? event.detail : null;
     currentInput = detail?.value ?? currentInput;
     currentTool = "answer";
-    syncShell(currentTool, currentInput, "loading");
-    window.setTimeout(() => syncShell(currentTool, currentInput), 0);
+    void syncShell(currentTool, currentInput, "loading");
+    window.setTimeout(() => void syncShell(currentTool, currentInput), 0);
   });
 
   shell.addEventListener("providerchange", (event) => {
@@ -737,6 +765,6 @@ if (shell instanceof HTMLElement) {
         JSON.stringify({ activeProviderId: detail.providerId })
       );
     }
-    syncShell(currentTool, currentInput);
+    void syncShell(currentTool, currentInput);
   });
 }

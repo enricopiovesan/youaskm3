@@ -7,8 +7,10 @@ import {
   BROWSER_TOOL_DESCRIPTORS,
   browserArtifactState,
   browserToolNames,
+  buildTraverseRuntimeRequest,
   callBrowserTool,
   documentsFromSearchIndex,
+  executeTraverseAnswerHttp,
   isMissingInferenceDependency,
   isBrowserToolName,
   mapTraverseAnswerFailure,
@@ -332,6 +334,133 @@ describe("Traverse inference dependency failures", () => {
       "message",
       "recoverable"
     ]);
+  });
+});
+
+describe("Traverse HTTP answer adapter", () => {
+  it("builds the public workspace execute runtime request", () => {
+    const request = buildTraverseRuntimeRequest(
+      { query: "portable", max_sources: 2 },
+      {
+        baseUrl: "http://127.0.0.1:8787",
+        workspaceId: "youaskm3-local",
+        requestId: "req-test"
+      }
+    );
+
+    expect(request).toMatchObject({
+      kind: "runtime_request",
+      request_id: "req-test",
+      intent: {
+        capability_id: "knowledge.query.answer",
+        capability_version: "0.1.0"
+      },
+      input: {
+        query: "portable",
+        max_sources: 2
+      },
+      context: {
+        caller: "youaskm3-pwa",
+        requested_target: "local"
+      }
+    });
+  });
+
+  it("maps Traverse HTTP success and public trace evidence into the answer envelope", async () => {
+    const calls: Array<{ url: string; body?: string; method?: string }> = [];
+    const fetchImpl = async (url: string, init?: { method?: string; body?: string }) => {
+      calls.push({
+        url,
+        ...(init?.body ? { body: init.body } : {}),
+        ...(init?.method ? { method: init.method } : {})
+      });
+      if (url.endsWith("/traces/exec-1")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ trace_id: "trace-1", public: true })
+        };
+      }
+
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          status: "succeeded",
+          execution_id: "exec-1",
+          output: {
+            answer: "Traverse answer",
+            citations: [
+              {
+                citation_id: "cite-1",
+                artifact_id: "artifact-1",
+                chunk_id: "artifact-1:chunk:0",
+                source_path: "knowledge/papers/source.md",
+                excerpt: "Evidence"
+              }
+            ],
+            graph_evidence: [
+              {
+                node_ids: ["node-1"],
+                edge_ids: ["edge-1"],
+                supporting_chunk_ids: ["artifact-1:chunk:0"]
+              }
+            ],
+            trace_id: "trace-1",
+            validation: { status: "valid", checks: ["traverse-http-response"] }
+          },
+          links: {
+            trace: "/v1/workspaces/youaskm3-local/traces/exec-1"
+          }
+        })
+      };
+    };
+
+    const output = await executeTraverseAnswerHttp(
+      { query: "portable" },
+      {
+        baseUrl: "http://127.0.0.1:8787",
+        workspaceId: "youaskm3-local",
+        requestId: "req-test"
+      },
+      fetchImpl
+    );
+
+    expect(calls[0]?.url).toBe("http://127.0.0.1:8787/v1/workspaces/youaskm3-local/execute");
+    expect(JSON.parse(calls[0]?.body ?? "{}")).toMatchObject({
+      request_id: "req-test",
+      intent: { capability_id: "knowledge.query.answer" }
+    });
+    expect(calls[1]?.url).toBe("http://127.0.0.1:8787/v1/workspaces/youaskm3-local/traces/exec-1");
+    expect(output.answer).toBe("Traverse answer");
+    expect(output.citations[0]?.source_path).toBe("knowledge/papers/source.md");
+    expect(output.graph_evidence[0]?.edge_ids).toEqual(["edge-1"]);
+    expect(output.validation.checks).toContain("public-trace-fetched");
+  });
+
+  it("maps Traverse problem details into a stable UI failure envelope", async () => {
+    const fetchImpl = async () => ({
+      ok: false,
+      status: 503,
+      json: async () => ({
+        code: "MISSING_MODEL_DEPENDENCY",
+        title: "Service Unavailable",
+        detail: "No compatible inference provider is available."
+      })
+    });
+
+    const output = await executeTraverseAnswerHttp(
+      { query: "portable" },
+      { baseUrl: "http://127.0.0.1:8787" },
+      fetchImpl
+    );
+
+    expect(output.failure).toEqual({
+      code: "MISSING_MODEL_DEPENDENCY",
+      message: "No compatible inference provider is available.",
+      recoverable: true
+    });
+    expect(output.validation.checks).toContain("missing-inference-dependency");
   });
 });
 
