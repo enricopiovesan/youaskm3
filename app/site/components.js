@@ -229,7 +229,9 @@ function toolToSummary(toolName, output) {
   switch (toolName) {
     case "answer":
       return {
-        prompt: "Traverse-compatible harness: knowledge.query.answer",
+        prompt: output.payload.trace_id.startsWith("harness:")
+          ? "Explicit browser fallback: knowledge.query.answer"
+          : "Traverse HTTP: knowledge.query.answer",
         paragraphs: [
           output.payload.answer,
           `Validation: ${output.payload.validation.status} (${output.payload.validation.checks.join(", ")}).`,
@@ -283,7 +285,7 @@ function toolToSummary(toolName, output) {
 
 function loadingSummary(input) {
   return {
-    prompt: "Traverse-compatible harness: knowledge.query.answer",
+    prompt: "Traverse HTTP: knowledge.query.answer",
     paragraphs: [`Loading answer for "${input.trim()}".`]
   };
 }
@@ -293,7 +295,7 @@ function errorSummary(error) {
     prompt: "Chat error",
     paragraphs: [
       error instanceof Error ? error.message : "Unknown browser runtime error.",
-      "The shell kept the request local and did not call an external service."
+      "The shell did not fall back to the temporary harness automatically."
     ]
   };
 }
@@ -439,7 +441,7 @@ class M3Chat extends HTMLElement {
                 <button class="submit-button" type="submit" ${busy ? "disabled" : ""}>
                   ${busy ? "Answering" : "Ask"}
                 </button>
-                <div class="tool-description">Answers use the temporary Traverse-compatible harness.</div>
+                <div class="tool-description">Answers use the selected runtime provider. Browser demo is an explicit fallback.</div>
               </div>
             </form>
             <section class="provider-shell">
@@ -475,6 +477,7 @@ class M3Chat extends HTMLElement {
           <slot name="result"></slot>
           <div class="runtime-note">
             Browser shell runtime is executing locally through the contract-shaped tool adapter in <code>runtime.js</code>.
+            Traverse mode delegates answer execution to the configured HTTP/JSON runtime.
           </div>
         </article>
         <aside class="panel">

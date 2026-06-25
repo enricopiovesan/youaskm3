@@ -68,6 +68,14 @@ export function buildTraverseRuntimeRequest(input, config) {
 
 export async function executeTraverseAnswerHttp(input, config, fetchImpl = globalThis.fetch) {
   const query = requireInput(input.query);
+  if (config.baseUrl.trim().length === 0) {
+    return mapTraverseAnswerFailure(query, {
+      code: "TRAVERSE_ENDPOINT_MISSING",
+      message: "Traverse runtime endpoint is not configured.",
+      recoverable: true
+    });
+  }
+
   const workspaceId = encodeURIComponent(config.workspaceId ?? "local-default");
   const executeUrl = joinUrl(config.baseUrl, `/v1/workspaces/${workspaceId}/execute`);
   const request = buildTraverseRuntimeRequest({ ...input, query }, config);
@@ -78,7 +86,19 @@ export async function executeTraverseAnswerHttp(input, config, fetchImpl = globa
       "content-type": "application/json"
     },
     body: JSON.stringify(request)
-  });
+  }).catch((error) =>
+    Promise.resolve({
+      ok: false,
+      status: 503,
+      json: async () => ({
+        code: "TRAVERSE_UNAVAILABLE",
+        detail:
+          error instanceof Error
+            ? error.message
+            : "Traverse runtime endpoint is unavailable."
+      })
+    })
+  );
   const body = await response.json();
 
   if (!response.ok) {

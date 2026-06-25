@@ -462,6 +462,40 @@ describe("Traverse HTTP answer adapter", () => {
     });
     expect(output.validation.checks).toContain("missing-inference-dependency");
   });
+
+  it("does not fall back to the harness when a configured Traverse endpoint fails", async () => {
+    const fetchImpl = async () => {
+      throw new Error("connection refused");
+    };
+
+    const output = await executeTraverseAnswerHttp(
+      { query: "portable" },
+      { baseUrl: "http://127.0.0.1:8787" },
+      fetchImpl
+    );
+
+    expect(output.answer).toBe("connection refused");
+    expect(output.failure?.code).toBe("TRAVERSE_UNAVAILABLE");
+    expect(output.trace_id).toBe("traverse-failure:portable");
+    expect(output.validation.checks).toEqual([
+      "traverse-runtime-failure",
+      "execution-failure",
+      "TRAVERSE_UNAVAILABLE"
+    ]);
+  });
+
+  it("reports missing Traverse endpoint configuration separately", async () => {
+    const output = await executeTraverseAnswerHttp(
+      { query: "portable" },
+      { baseUrl: "   " }
+    );
+
+    expect(output.failure).toEqual({
+      code: "TRAVERSE_ENDPOINT_MISSING",
+      message: "Traverse runtime endpoint is not configured.",
+      recoverable: true
+    });
+  });
 });
 
 describe("browserArtifactState", () => {
