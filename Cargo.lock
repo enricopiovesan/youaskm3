@@ -27,6 +27,10 @@ name = "youaskm3-knowledge-graph-expand"
 version = "0.1.0"
 
 [[package]]
+name = "youaskm3-knowledge-retrieve"
+version = "0.1.0"
+
+[[package]]
 name = "youaskm3-mcp"
 version = "0.1.0"
 dependencies = [
