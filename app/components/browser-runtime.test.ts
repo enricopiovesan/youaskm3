@@ -484,6 +484,27 @@ describe("Traverse HTTP answer adapter", () => {
     ]);
   });
 
+  it("keeps the temporary harness out of the Traverse HTTP adapter", () => {
+    const runtimeSource = readFileSync(
+      path.resolve(process.cwd(), "app", "components", "browser-runtime.ts"),
+      "utf8"
+    );
+    const httpAdapter = sourceSection(
+      runtimeSource,
+      "export async function executeTraverseAnswerHttp",
+      "export function browserArtifactState"
+    );
+    const browserToolAdapter = sourceSection(
+      runtimeSource,
+      "export function callBrowserTool",
+      "export function documentsFromSearchIndex"
+    );
+
+    expect(httpAdapter).toContain("mapTraverseAnswerFailure");
+    expect(httpAdapter).not.toContain("temporaryTraverseChatHarness");
+    expect(browserToolAdapter.match(/temporaryTraverseChatHarness/gu)).toHaveLength(1);
+  });
+
   it("reports missing Traverse endpoint configuration separately", async () => {
     const output = await executeTraverseAnswerHttp(
       { query: "portable" },
@@ -497,6 +518,16 @@ describe("Traverse HTTP answer adapter", () => {
     });
   });
 });
+
+function sourceSection(source: string, startMarker: string, endMarker: string): string {
+  const start = source.indexOf(startMarker);
+  const end = source.indexOf(endMarker);
+
+  expect(start).toBeGreaterThanOrEqual(0);
+  expect(end).toBeGreaterThan(start);
+
+  return source.slice(start, end);
+}
 
 describe("browserArtifactState", () => {
   it("loads generated search-index documents", () => {

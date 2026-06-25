@@ -24,3 +24,9 @@ graph expansion, context packing, inference selection, answer validation, and
 answer formatting remain Traverse-run capability responsibilities. Configured
 Traverse failures must be surfaced as runtime errors; the PWA must not silently
 fall back to this harness when Traverse mode is selected.
+
+Retire this harness for MVP runtime acceptance once the local Traverse
+`knowledge.query.answer` workflow can register and execute with real WASM
+microservice or WASM agent components, source citations, graph evidence,
+validation status, and a public trace reference. Until then, harness output is
+developer/demo evidence only and cannot satisfy MVP runtime tickets.
