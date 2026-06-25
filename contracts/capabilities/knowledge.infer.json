@@ -9,7 +9,7 @@
   "execution": {
     "runtime": "traverse",
     "business_logic": "wasm_or_agent",
-    "permitted_targets": ["local", "server"],
+    "permitted_targets": ["local", "server", "mcp"],
     "requires_trace": true
   },
   "model_dependencies": [
