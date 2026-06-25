@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The traverse-integration capability defines how youaskm3 hands product/business execution to Traverse while keeping the PWA as a UI-only application and the CLI as an artifact builder and bundle registrar.
+The traverse-integration capability defines how youaskm3 hands product/business execution to Traverse while keeping the PWA as a UI-only application and the CLI as an artifact builder and bundle registrar. MVP runtime acceptance requires real WASM microservice capabilities for deterministic business logic and real WASM agent capabilities for judgement, generation, planning, or model-use behavior.
 
 ## Requirements
 
@@ -16,15 +16,16 @@ The system SHALL register the youaskm3 application bundle through documented Tra
 - WHEN it registers the application with Traverse
 - THEN Traverse returns machine-readable bundle ids, versions, digests, and validation status without relying on private Traverse internals
 
-### Requirement: Execute the chat workflow through Traverse
+### Requirement: Execute the chat workflow through real Traverse capabilities
 
-The system SHALL execute the first user-facing chat workflow through Traverse or a temporary harness that exactly mirrors the Traverse request and response contract.
+The system SHALL execute the first user-facing chat workflow through Traverse using real registered WASM microservice capabilities or real WASM agent capabilities. Temporary harnesses, contract stubs, fake workflow steps, placeholder component manifests, and Browser demo paths SHALL NOT satisfy MVP runtime acceptance.
 
 #### Scenario: Answer a user prompt
 
 - GIVEN a user submits a prompt in the PWA
 - WHEN the runtime workflow starts
 - THEN the workflow composes retrieval, graph expansion, context packing, inference, validation, and formatting capabilities behind the Traverse boundary
+- AND each product/business step is a real registered WASM microservice or WASM agent capability
 
 #### Scenario: Prove the local Traverse-backed happy path
 
@@ -64,15 +65,27 @@ The system SHALL expose enough trace evidence for the UI, MCP clients, and audit
 
 ### Requirement: Generate real component evidence for implemented WASM capabilities
 
-The system SHALL generate real WASM artifacts and component manifest digests for implemented youaskm3 capabilities instead of treating implemented capabilities as skeleton placeholders.
+The system SHALL generate real WASM artifacts and component manifest digests for every MVP capability before that capability can satisfy runtime acceptance.
 
 #### Scenario: Build implemented capability artifacts
 
-- GIVEN one or more MVP capability crates build for `wasm32-wasip1`
+- GIVEN the MVP capability crates build for `wasm32-wasip1`
 - WHEN the Traverse bundle manifest generator runs without skeleton mode
-- THEN implemented components reference real `.wasm` artifacts
-- AND implemented component manifests include real SHA-256 digests
-- AND placeholder digests remain only for capabilities that have no implemented artifact yet
+- THEN each MVP component references a real `.wasm` artifact or a real WASM agent artifact
+- AND each MVP component manifest includes a real SHA-256 digest
+- AND placeholder digests, skeleton status, and pending implementation markers fail MVP acceptance
+
+### Requirement: Treat inference as a real WASM agent capability
+
+The system SHALL implement `knowledge.infer` as a real Traverse-governed WASM agent capability when the workflow needs judgement, generation, planning, semantic interpretation, or model use.
+
+#### Scenario: Execute inference through a governed agent
+
+- GIVEN the answer workflow needs to generate an answer from packed context
+- WHEN Traverse executes `knowledge.infer`
+- THEN Traverse invokes a real registered WASM agent capability
+- AND model dependency selection, placement, success, or failure is captured in governed trace evidence
+- AND deterministic microservice logic is not used as a fake replacement for the agent behavior
 
 ### Requirement: Escalate confirmed Traverse blockers upstream
 

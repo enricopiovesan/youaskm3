@@ -16,8 +16,8 @@ The MVP target is:
 - Each ticket must be independently understandable.
 - Each ticket must include a clear definition of done.
 - Each ticket must keep `bash scripts/smoke.sh` green.
-- Runtime/product business logic must move toward Traverse-compatible contracts and WASM capability boundaries.
-- Temporary harnesses are allowed only when they mimic the future Traverse boundary and are clearly marked as replaceable.
+- MVP runtime/product business logic must run through Traverse as real WASM microservice capabilities or real WASM agent capabilities.
+- Temporary harnesses, Browser demo, skeleton manifests, contract stubs, placeholder digests, and fake workflow steps are developer aids only; they never count as MVP acceptance evidence.
 - The CLI may own mechanical build/setup tasks.
 - The PWA may own rendering and interaction only.
 
@@ -737,19 +737,23 @@ bash scripts/smoke.sh
 
 ### Objective
 
-Make the primary local demo path use Traverse for `knowledge.query.answer` instead of relying on the explicit browser demo fallback.
+Make the primary local demo path use real Traverse workflow composition for `knowledge.query.answer` instead of relying on the explicit browser demo fallback.
 
-This ticket validates the product-led integration loop: the PWA remains UI-only, product/business behavior runs behind Traverse-compatible runtime boundaries, and missing local services fail visibly instead of silently falling back.
+This ticket validates the product-led integration loop: the PWA remains UI-only, product/business behavior runs as real Traverse-governed WASM microservices or WASM agents, and missing runtime capability fails visibly instead of silently falling back.
 
 ### Scope
 
 Add or update the smallest set of scripts, docs, fixtures, and tests needed to prove:
 
 - a local Traverse HTTP/JSON runtime can be started or targeted for the youaskm3 app workflow
+- `knowledge.query.answer` is a Traverse workflow composed from separate real capabilities
+- deterministic steps run as real WASM microservice capabilities
+- judgement, generation, planning, semantic interpretation, or model-use steps run as real WASM agent capabilities
 - the PWA provider configuration points to that runtime as the default local provider
 - a local question reaches `knowledge.query.answer` through the Traverse app-facing boundary
 - the response includes answer text, citations or source references, graph evidence, validation status, and a trace reference
 - unavailable Traverse runtime returns a stable visible failure such as `TRAVERSE_UNAVAILABLE`
+- any missing Traverse support is captured as a detailed Traverse requirement and the ticket is marked blocked rather than completed with placeholders
 
 ### Out of Scope
 
@@ -758,17 +762,22 @@ Add or update the smallest set of scripts, docs, fixtures, and tests needed to p
 - adding new model providers in downstream UI or CLI code
 - changing Traverse internals except by creating a separate upstream Traverse issue for a confirmed blocker
 - removing the explicit browser demo fallback
+- accepting Browser demo, temporary harnesses, contract stubs, fake workflow steps, skeleton manifests, or placeholder digests as completion evidence
 
 ### Definition of Done
 
 - A documented command starts or targets the local Traverse-backed youaskm3 answer path.
 - A focused smoke test verifies a successful Traverse-backed answer when the local Traverse runtime is available.
+- The smoke test proves `knowledge.query.answer` executes as a Traverse-composed workflow, not as a monolithic fake capability.
+- Each workflow step is backed by a real registered WASM microservice or real registered WASM agent capability.
+- `knowledge.infer` is backed by a real WASM agent capability when generation, judgement, planning, semantic interpretation, or model use is required.
 - The smoke test verifies that source citations or source references are non-empty.
 - The smoke test verifies that graph evidence is non-empty.
 - The smoke test verifies that the response includes validation status and a trace reference.
 - The smoke test verifies that missing Traverse runtime fails with a stable user-visible error and does not auto-fallback to Browser demo.
 - The PWA default local provider remains Traverse-backed.
 - Browser demo remains available only as an explicit user-selected fallback.
+- Browser demo, temporary harnesses, skeleton manifests, contract stubs, fake workflow steps, and placeholder digests do not satisfy this ticket.
 - `docs/mvp-user-stories.md` demo acceptance path references the local Traverse-backed happy path.
 - `bash scripts/smoke.sh` passes without requiring a live Traverse runtime.
 - A separate live validation command is documented for machines that have Traverse available.
@@ -791,16 +800,16 @@ bash scripts/traverse-answer-workflow-smoke.sh
 
 ### Objective
 
-Move the checked-in Traverse app bundle from skeleton confidence toward real registration evidence by building the MVP WASM capability artifacts and generating real component digests wherever capability crates already exist.
+Move the checked-in Traverse app bundle from skeleton confidence to real registration evidence by building every MVP runtime capability artifact and generating real component digests.
 
 ### Scope
 
-Update the bundle generation path so implemented capabilities can produce real `.wasm` artifacts and real SHA-256 digests in:
+Update the bundle generation path so every MVP runtime capability can produce real WASM artifacts or real WASM agent artifacts and real SHA-256 digests in:
 
 - `traverse/youaskm3-app/manifest.json`
 - `traverse/youaskm3-app/components/*/component.manifest.json`
 
-The first pass should cover all capability crates currently implemented in the workspace and leave only genuinely unimplemented capabilities marked as pending.
+The MVP acceptance pass must cover every runtime capability required by `knowledge.query.answer`; no required capability may remain pending, skeleton-only, or all-zero-digest.
 
 ### Out of Scope
 
@@ -808,16 +817,17 @@ The first pass should cover all capability crates currently implemented in the w
 - inference model quality
 - hosted artifact publishing
 - changing Traverse manifest fields without a confirmed Traverse requirement
+- accepting partial bundle evidence for MVP runtime completion
 
 ### Definition of Done
 
-- A documented command builds implemented capability crates for `wasm32-wasip1`.
-- `scripts/traverse-component-manifests.sh` or the equivalent generator can run without `--skeleton` for implemented capabilities.
-- Implemented component manifests contain real `wasm_digest` values, not all-zero placeholder digests.
-- App manifest component entries contain real digests for implemented capabilities.
-- Pending markers remain only for capabilities that truly have no buildable WASM artifact yet.
-- Registration validation distinguishes between "pending unimplemented capability" and "implemented artifact failed validation."
-- Smoke or a focused script fails if an implemented capability keeps a placeholder digest.
+- A documented command builds all MVP runtime capability crates or WASM agent artifacts for `wasm32-wasip1`.
+- `scripts/traverse-component-manifests.sh` or the equivalent generator runs without `--skeleton` for the MVP runtime bundle.
+- Every MVP runtime component manifest contains a real `wasm_digest`, not an all-zero placeholder digest.
+- App manifest component entries contain real digests for every MVP runtime capability.
+- Pending markers, skeleton status, all-zero digests, and placeholder validation evidence fail MVP runtime acceptance.
+- Registration validation distinguishes environment/setup failure from real invalid bundle evidence.
+- Smoke or a focused script fails if any required MVP runtime capability keeps placeholder evidence.
 - `cargo build --locked --workspace --target wasm32-wasip1` passes.
 - `bash scripts/smoke.sh` passes.
 
@@ -838,7 +848,7 @@ bash scripts/smoke.sh
 
 ### Objective
 
-Prove the first MVP against a realistic local user flow: import or normalize a source document, build artifacts, ask one question, and verify answer evidence.
+Prove the first MVP against a realistic local user flow: import or normalize a source document, build artifacts, ask one question through the real Traverse-composed workflow, and verify answer evidence.
 
 ### Scope
 
@@ -848,7 +858,7 @@ Create an acceptance smoke that uses repo-safe fixture content and exercises:
 - artifact sync/build
 - search index generation
 - graph artifact availability
-- runtime answer request through the configured local path
+- runtime answer request through the real Traverse-composed local path
 - answer text with source-backed citations
 - graph evidence
 - validation status
@@ -859,16 +869,19 @@ Create an acceptance smoke that uses repo-safe fixture content and exercises:
 - large copyrighted documents
 - benchmark-quality retrieval scoring
 - mandatory live local LLM availability in default CI
+- accepting Browser demo, temporary harnesses, contract stubs, fake workflow steps, skeleton manifests, or placeholder digests as completion evidence
 
 ### Definition of Done
 
 - The test starts from fixture input that represents an imported document, not only a prebuilt `app/site/search-index.json`.
 - The test rebuilds or refreshes the relevant markdown/search/graph artifacts.
 - The test asks a concrete user question with an expected source-backed answer path.
+- The answer path uses the real Traverse-composed `knowledge.query.answer` workflow.
+- Every runtime business step is a real WASM microservice or real WASM agent capability.
 - The test asserts at least one cited source or source reference from the imported fixture.
 - The test asserts at least one graph node or edge from the imported fixture.
 - The test asserts a validation status and trace reference.
-- The default smoke path can run without a live local LLM by using the existing governed fallback/test harness rules.
+- If model-backed inference is required, it runs through a real Traverse-governed WASM agent capability or fails with governed missing-dependency evidence.
 - A live Traverse variant is documented when a local Traverse checkout/runtime is available.
 - `bash scripts/smoke.sh` passes.
 
@@ -889,7 +902,7 @@ bash scripts/traverse-readiness.sh
 
 Prevent regressions where the PWA silently falls back to browser-side product/business behavior when Traverse is unavailable.
 
-The Browser demo is useful for local no-server inspection, but it must remain an explicit provider choice and must not become a hidden alternate runtime.
+The Browser demo is useful for local no-server inspection, but it must remain an explicit developer-only provider choice and must not become a hidden alternate runtime or MVP acceptance path.
 
 ### Scope
 
@@ -899,7 +912,7 @@ Add tests and documentation that enforce:
 - Browser demo is visible and selectable
 - Browser demo is not selected automatically after a Traverse failure
 - Traverse failures remain visible with stable status, reason, and trace evidence
-- UI code does not duplicate hidden retrieval, graph traversal, context packing, inference selection, validation, or formatting outside the documented temporary harness boundary
+- UI code does not duplicate hidden retrieval, graph traversal, context packing, inference selection, validation, or formatting outside the explicit Browser demo developer aid
 
 ### Out of Scope
 
@@ -913,7 +926,8 @@ Add tests and documentation that enforce:
 - Tests prove that a Traverse failure does not switch the selected provider to Browser demo.
 - Tests prove Browser demo only runs after explicit provider selection.
 - The visible UI status distinguishes Traverse failure from Browser demo success.
-- The temporary harness documentation states the retirement condition.
+- Browser demo output is clearly marked as developer/demo evidence and not MVP runtime acceptance evidence.
+- The temporary harness documentation states the retirement condition and says it cannot satisfy MVP runtime tickets.
 - Placeholder/fallback scans do not find undocumented fallback paths in PWA runtime code.
 - `bash scripts/smoke.sh` passes.
 

@@ -8,7 +8,9 @@ Last updated: 2026-06-25
 
 This document names the first-MVP personas and user-facing stories that guide specs, tickets, tests, and demos.
 
-The first MVP is a local-first PWA chat experience over user-owned knowledge artifacts. The CLI prepares markdown, search, graph, and bundle artifacts. Traverse executes product/business behavior as governed portable WASM capabilities or agents. The UI renders the experience and must not contain alternate retrieval, graph traversal, context packing, inference selection, answer validation, or answer formatting logic.
+The first MVP is a local-first PWA chat experience over user-owned knowledge artifacts. The CLI prepares markdown, search, graph, and bundle artifacts. Traverse executes product/business behavior as governed portable WASM microservice capabilities or WASM agent capabilities. The UI renders the experience and must not contain alternate retrieval, graph traversal, context packing, inference selection, answer validation, or answer formatting logic.
+
+MVP runtime acceptance requires the real implementation. Browser demo, temporary harnesses, contract stubs, fake workflow steps, skeleton manifests, placeholder digests, and all-zero component evidence are developer aids only and do not count as acceptance evidence.
 
 ## MVP Boundary
 
@@ -58,6 +60,7 @@ Acceptance criteria:
 - AND the answer includes citations or source references from local artifacts
 - AND the UI does not run hidden retrieval, ranking, context packing, inference selection, validation, or formatting logic
 - AND Browser demo is used only when explicitly selected as a fallback provider
+- AND Browser demo output does not count as MVP runtime acceptance evidence
 
 ### Fork-And-Run Developer
 
@@ -81,7 +84,8 @@ Acceptance criteria:
 - THEN the repo reports pass/fail status with actionable setup messages
 - AND normal smoke does not require Traverse to be installed
 - AND Traverse-specific validation is available when a local Traverse checkout is configured
-- AND implemented capability manifests use real WASM digests rather than skeleton placeholders where artifacts exist
+- AND MVP runtime capability manifests use real WASM or WASM agent digests rather than skeleton placeholders
+- AND pending markers or all-zero digests block MVP runtime acceptance
 
 ### Source-Grounded Researcher
 
@@ -131,6 +135,7 @@ Acceptance criteria:
 - AND no downstream UI or CLI code hardcodes Ollama, WebLLM, llama.cpp, cloud APIs, or a fallback provider
 - AND missing local inference capability fails clearly before or during governed execution
 - AND Traverse runtime failures remain visible instead of automatically switching to Browser demo
+- AND generation, judgement, planning, semantic interpretation, or model-use behavior is handled by a real Traverse-governed WASM agent capability
 
 ### MCP And Agent User
 
@@ -187,11 +192,12 @@ The first MVP demo is acceptable when these steps pass from a clean local setup:
 1. Prepare or refresh markdown, search, and graph artifacts from local knowledge files.
 2. Validate normal repo health with `bash scripts/smoke.sh`.
 3. Validate Traverse pairing with `bash scripts/traverse-readiness.sh` when a local Traverse checkout is available.
-4. Generate or check component manifests with real WASM digests for implemented capabilities; use skeleton mode only for capabilities that genuinely do not have artifacts yet.
+4. Generate or check component manifests with real WASM or WASM agent digests for every MVP runtime capability; skeleton mode is not acceptable for MVP runtime acceptance.
 5. Register the youaskm3 app bundle through Traverse public APIs.
 6. Ask one question through the PWA.
 7. Inspect answer text, citations, graph/source evidence, selected inference dependency, and trace.
 8. Exercise the same answer workflow through MCP parity validation.
 9. Explicitly select Browser demo only when validating the documented no-server fallback path.
+10. Treat any missing real Traverse workflow/capability support as a blocked youaskm3 ticket plus an upstream Traverse requirement, not as permission to add placeholders.
 
 The demo must not require a hosted account, hosted database, paid external model service, or product/business logic outside Traverse-governed capabilities.
