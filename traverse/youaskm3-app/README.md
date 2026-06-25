@@ -111,6 +111,24 @@ provider logic.
 This skeleton should fail real Traverse registration until later tickets provide
 real component artifacts and digests. That is expected.
 
+The youaskm3-side registration entrypoint is:
+
+```bash
+bash scripts/register-traverse-app.sh --validate-only --allow-skeleton --json
+TRAVERSE_REPO=/path/to/Traverse bash scripts/register-traverse-app.sh --allow-skeleton --json
+```
+
+`--validate-only` is CI-safe and does not require a Traverse checkout. Real
+registration requires Traverse `v0.4.0` or newer and real WASM component
+artifacts. While the checked-in bundle remains a skeleton, the command emits
+machine-readable `SKELETON_PENDING_WASM_COMPONENTS` evidence instead of
+pretending the bundle registered.
+
+If real component artifacts are present but Traverse does not yet expose a
+public external app-register CLI for this application manifest shape, the
+command fails with `MISSING_PUBLIC_APP_REGISTRATION_SURFACE`. That is a
+Traverse integration requirement, not a downstream hidden fallback.
+
 Follow-up tickets:
 
 - MVP-013: first `knowledge.retrieve` WASM capability
