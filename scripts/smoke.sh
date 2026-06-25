@@ -88,6 +88,9 @@ bash ./scripts/traverse-mcp-answer-workflow-smoke.sh
 echo "Validating local inference policy..."
 bash ./scripts/local-inference-policy-smoke.sh
 
+echo "Validating MVP local product loop..."
+bash ./scripts/mvp-local-loop-smoke.sh
+
 echo "Validating MVP fixture corpus..."
 bash ./scripts/mvp-fixture-corpus-smoke.sh
 
