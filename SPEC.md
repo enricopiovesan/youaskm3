@@ -202,6 +202,18 @@ Roadmap work that touches runtime, MCP, browser hosting, model inference, or for
 
 The first-MVP personas, "As a..., I want..., so that..." stories, capability mappings, and demo acceptance path are maintained in [docs/mvp-user-stories.md](docs/mvp-user-stories.md). Runtime and UI work should map back to those stories when defining tickets, smoke tests, and demo evidence.
 
+### Next product-led MVP tranche
+
+After Traverse `v0.4.0` readiness and the first youaskm3 WASM capability tranche, the next highest-ROI work is tracked as MVP-031 through MVP-035 in [docs/mvp-ticket-backlog.md](docs/mvp-ticket-backlog.md):
+
+- prove the local Traverse-backed chat happy path
+- wire real WASM artifacts and component digests for implemented capabilities
+- add a real imported-document question acceptance test
+- enforce explicit Browser demo fallback semantics
+- create a Traverse blocker escalation template for confirmed upstream gaps
+
+These tickets keep youaskm3 product-led while using concrete app evidence to drive Traverse requirements. They must not add downstream runtime/provider shortcuts that bypass Traverse-governed WASM capability execution.
+
 ### Local inference readiness
 
 The first-MVP local inference policy is maintained in [docs/mvp-local-inference-policy.md](docs/mvp-local-inference-policy.md). Default CI and smoke must not require a live local LLM. Live local model conformance is opt-in with `TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1`, and missing inference capability must fail as a Traverse dependency failure rather than as hidden downstream fallback logic.

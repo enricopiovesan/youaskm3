@@ -26,6 +26,22 @@ The system SHALL execute the first user-facing chat workflow through Traverse or
 - WHEN the runtime workflow starts
 - THEN the workflow composes retrieval, graph expansion, context packing, inference, validation, and formatting capabilities behind the Traverse boundary
 
+#### Scenario: Prove the local Traverse-backed happy path
+
+- GIVEN a local Traverse runtime is available for the youaskm3 app bundle
+- WHEN the PWA sends a `knowledge.query.answer` request through the configured Traverse HTTP/JSON endpoint
+- THEN the response includes answer text, source evidence, graph evidence, validation status, and a trace reference
+- AND the PWA does not execute hidden product/business logic outside the Traverse boundary
+
+#### Scenario: Report unavailable Traverse without hidden fallback
+
+- GIVEN Traverse local is selected as the runtime provider
+- AND the configured Traverse endpoint is unavailable
+- WHEN the user asks a question
+- THEN the UI reports a stable Traverse runtime failure
+- AND the selected provider remains Traverse local
+- AND Browser demo execution does not run unless the user explicitly selects it
+
 ### Requirement: Delegate inference selection and placement
 
 The system SHALL declare inference needs by contract and allow Traverse to choose a compatible local or server-side implementation based on availability, constraints, and placement policy.
@@ -45,3 +61,26 @@ The system SHALL expose enough trace evidence for the UI, MCP clients, and audit
 - GIVEN an answer workflow completed or failed validation
 - WHEN a client fetches the public trace reference
 - THEN the trace includes executed capability ids, versions, placement, source artifacts, graph evidence, inference dependency, validation outcome, and failure reasons where applicable
+
+### Requirement: Generate real component evidence for implemented WASM capabilities
+
+The system SHALL generate real WASM artifacts and component manifest digests for implemented youaskm3 capabilities instead of treating implemented capabilities as skeleton placeholders.
+
+#### Scenario: Build implemented capability artifacts
+
+- GIVEN one or more MVP capability crates build for `wasm32-wasip1`
+- WHEN the Traverse bundle manifest generator runs without skeleton mode
+- THEN implemented components reference real `.wasm` artifacts
+- AND implemented component manifests include real SHA-256 digests
+- AND placeholder digests remain only for capabilities that have no implemented artifact yet
+
+### Requirement: Escalate confirmed Traverse blockers upstream
+
+The system SHALL capture confirmed missing Traverse public surfaces as upstream Traverse requirements instead of adding downstream runtime shortcuts.
+
+#### Scenario: Open a Traverse blocker from youaskm3 evidence
+
+- GIVEN a youaskm3 ticket cannot satisfy its DoD through existing Traverse public surfaces
+- WHEN a focused validation command demonstrates the blocker
+- THEN the blocked youaskm3 issue links to a Traverse requirement or issue with affected capability, expected public surface, observed failure, Traverse version, and reproduction evidence
+- AND youaskm3 does not add non-portable downstream provider, placement, or runtime logic to hide the blocker
