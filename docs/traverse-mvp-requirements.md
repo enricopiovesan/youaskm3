@@ -567,6 +567,59 @@ TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1 bash scripts/traverse-readiness.sh
 
 Normal repository smoke does not require Traverse to be installed. Run `scripts/traverse-readiness.sh` when validating the Traverse pairing for integration work, release evidence, or a ticket that touches the Traverse runtime boundary.
 
+### Release-Pinned Evidence Checklist
+
+Use this checklist when a PR, release note, ticket, or agent handoff claims that
+the first-MVP Traverse baseline is satisfied:
+
+1. Confirm the local Traverse checkout path:
+
+   ```bash
+   test -d ../Traverse/.git || test -d "$TRAVERSE_REPO/.git"
+   ```
+
+2. Confirm the checkout contains and is not older than the pinned baseline:
+
+   ```bash
+   git -C "${TRAVERSE_REPO:-../Traverse}" rev-parse --verify v0.4.0^{commit}
+   git -C "${TRAVERSE_REPO:-../Traverse}" merge-base --is-ancestor v0.4.0 HEAD
+   ```
+
+3. Run the public downstream conformance path from youaskm3, not a private
+   Traverse helper or a release-note-only inspection:
+
+   ```bash
+   TRAVERSE_REPO="${TRAVERSE_REPO:-../Traverse}" bash scripts/traverse-readiness.sh
+   ```
+
+4. Verify the summary reports these areas as passed:
+
+   - application bundle registration
+   - WASM workflow execution
+   - model dependency resolution
+   - HTTP/JSON app path
+   - MCP parity path
+
+5. Treat live local Ollama model conformance as opt-in evidence only:
+
+   ```bash
+   TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1 \
+   TRAVERSE_REPO="${TRAVERSE_REPO:-../Traverse}" \
+   bash scripts/traverse-readiness.sh
+   ```
+
+The Traverse-side `scripts/ci/downstream_app_mvp_conformance.sh` suite is the
+source of truth for release-pinned runtime evidence. It covers bundle
+registration, WASM workflow execution, model dependency evidence, HTTP/JSON
+trace behavior, and MCP reporting. It intentionally does not require a live
+local LLM by default and does not prove that the model engine itself is
+WASM-native.
+
+Future agents must not rely on release prose alone when a local Traverse
+checkout and the public conformance script are available. Release notes explain
+what should be true; the conformance script proves what is true for the checked
+out release.
+
 ## Non-Goals for Traverse
 
 Traverse does not need to own:

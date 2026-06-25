@@ -92,6 +92,11 @@ Verify whether blocked youaskm3 tickets depend on Traverse runtime requirements 
 
 Use this lane when a ticket needs application bundle registration, real Traverse execution, inference dependency resolution, MCP parity, runtime placement, or public traces.
 
+For release-pinned Traverse evidence, use the checklist in
+`docs/traverse-mvp-requirements.md#release-pinned-evidence-checklist`. Do not
+rely on release prose alone when `scripts/traverse-readiness.sh` can run against
+a local Traverse checkout.
+
 ## Guardrails
 
 - Do not mark work `In Progress` unless a real dev thread has started it.
