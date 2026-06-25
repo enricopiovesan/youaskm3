@@ -41,9 +41,9 @@ validate_shell_url() {
 
 validate_active_provider() {
   case "$1" in
-    browser-demo|claude-api|openai-api) ;;
+    browser-demo|traverse-local|claude-api|openai-api) ;;
     *)
-      echo "Invalid active provider: choose browser-demo, claude-api, or openai-api." >&2
+      echo "Invalid active provider: choose browser-demo, traverse-local, claude-api, or openai-api." >&2
       exit 1
       ;;
   esac
@@ -187,7 +187,7 @@ instance = {
   "instanceId" => ENV.fetch("INSTANCE_ID"),
   "title" => ENV.fetch("INSTANCE_NAME"),
   "shellUrl" => ENV.fetch("SHELL_URL"),
-  "providerProfiles" => ["browser-demo", "claude-api", "openai-api"],
+  "providerProfiles" => ["browser-demo", "traverse-local", "claude-api", "openai-api"],
   "knowledgeBase" => "knowledge/"
 }
 
@@ -200,7 +200,18 @@ provider_config = {
       "endpoint" => "local://browser-runtime",
       "auth" => "none",
       "modelHint" => "contract-shaped local adapter",
-      "publishable" => true
+      "publishable" => true,
+      "runtime" => "browser-harness"
+    },
+    {
+      "id" => "traverse-local",
+      "label" => "Traverse local",
+      "endpoint" => "http://127.0.0.1:8787",
+      "auth" => "none",
+      "modelHint" => "knowledge.query.answer through Traverse HTTP/JSON",
+      "publishable" => false,
+      "runtime" => "traverse-http",
+      "workspaceId" => "youaskm3-local"
     },
     {
       "id" => "claude-api",
