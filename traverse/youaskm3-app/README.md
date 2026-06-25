@@ -129,6 +129,22 @@ public external app-register CLI for this application manifest shape, the
 command fails with `MISSING_PUBLIC_APP_REGISTRATION_SURFACE`. That is a
 Traverse integration requirement, not a downstream hidden fallback.
 
+The end-to-end answer workflow integration gate is:
+
+```bash
+bash scripts/traverse-answer-workflow-smoke.sh
+TRAVERSE_REPO=/path/to/Traverse bash scripts/traverse-answer-workflow-smoke.sh
+```
+
+The gate validates prepared search artifacts, graph source evidence, public
+trace requirements, model dependency policy, Traverse `v0.4.0` readiness, and
+the app registration boundary. Without `TRAVERSE_REPO`, it validates local
+youaskm3 artifacts and skips the live Traverse step so default smoke remains
+CI-safe. In the current skeleton state, the live Traverse step passes only when
+execution is blocked by `SKELETON_PENDING_WASM_COMPONENTS`; once real component
+WASM artifacts are available, the same gate should be tightened to expect live
+`knowledge.query.answer` execution evidence.
+
 Follow-up tickets:
 
 - MVP-013: first `knowledge.retrieve` WASM capability

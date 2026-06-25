@@ -79,6 +79,9 @@ bash ./scripts/register-traverse-app-smoke.sh
 echo "Validating query answer workflow..."
 bash ./scripts/query-answer-workflow-smoke.sh
 
+echo "Validating Traverse answer workflow integration gate..."
+bash ./scripts/traverse-answer-workflow-smoke.sh
+
 echo "Validating local inference policy..."
 bash ./scripts/local-inference-policy-smoke.sh
 
