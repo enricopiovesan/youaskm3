@@ -202,6 +202,29 @@ Roadmap work that touches runtime, MCP, browser hosting, model inference, or for
 
 The first-MVP personas, "As a..., I want..., so that..." stories, capability mappings, and demo acceptance path are maintained in [docs/mvp-user-stories.md](docs/mvp-user-stories.md). Runtime and UI work should map back to those stories when defining tickets, smoke tests, and demo evidence.
 
+### Next product-led MVP tranche
+
+After Traverse `v0.4.0` readiness and the first youaskm3 WASM capability tranche, the next highest-ROI work is tracked as MVP-031 through MVP-035 in [docs/mvp-ticket-backlog.md](docs/mvp-ticket-backlog.md):
+
+- prove the local Traverse-backed chat happy path
+- wire real WASM artifacts and component digests for implemented capabilities
+- add a real imported-document question acceptance test
+- enforce explicit Browser demo fallback semantics
+- create a Traverse blocker escalation template for confirmed upstream gaps
+
+These tickets keep youaskm3 product-led while using concrete app evidence to drive Traverse requirements. They must not add downstream runtime/provider shortcuts that bypass Traverse-governed WASM capability execution.
+
+### Real runtime implementation rule
+
+First-MVP runtime acceptance requires the real product/business implementation, not placeholders:
+
+- deterministic product/business logic runs as real Rust/WASM microservice capabilities through Traverse
+- judgement, generation, model-use, or planning behavior runs as real WASM agent capabilities through Traverse
+- `knowledge.query.answer` is Traverse workflow composition, not a monolithic fake capability
+- Browser demo and temporary harnesses are allowed only as explicit developer aids and never count as MVP acceptance evidence
+- placeholder component manifests, all-zero digests, contract stubs, fake workflow steps, or skeleton runtime paths must fail acceptance
+- when Traverse cannot run the required real workflow, the youaskm3 ticket is blocked and a detailed Traverse requirement is created instead of adding downstream workaround logic
+
 ### Local inference readiness
 
 The first-MVP local inference policy is maintained in [docs/mvp-local-inference-policy.md](docs/mvp-local-inference-policy.md). Default CI and smoke must not require a live local LLM. Live local model conformance is opt-in with `TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1`, and missing inference capability must fail as a Traverse dependency failure rather than as hidden downstream fallback logic.
@@ -334,7 +357,7 @@ Dual-licensed: **MIT** and **Apache-2.0**. Users choose.
 ### MVP-4 — UI-Only PWA Chat
 - [ ] The PWA provides the first user-facing product: a local-first chat interface.
 - [ ] Web Components render chat messages, source cards, graph evidence, and execution status.
-- [ ] The PWA can call a temporary local harness that exactly mirrors the Traverse app-facing contract.
+- [ ] The PWA can call the real Traverse app-facing workflow for MVP acceptance.
 - [ ] The PWA contains no retrieval, ranking, graph traversal, prompt construction, inference selection, or answer validation logic.
 
 ### MVP-5 — Traverse Runtime Integration
@@ -384,7 +407,7 @@ The first chat workflow is composed from these product-level capability contract
 | `knowledge.answer.validate` | Grounding, citation, and failure validation |
 | `knowledge.answer.format` | Final response shaping for chat and MCP clients |
 
-All seven capabilities must run as governed WASM capabilities or agents through Traverse for the production MVP. Temporary local harnesses are allowed only when they implement the same contract envelopes and are marked as replaceable.
+All seven capabilities must run as governed WASM capabilities or WASM agents through Traverse for the MVP runtime. Temporary local harnesses and Browser demo paths are developer aids only and do not count as MVP acceptance evidence.
 
 ---
 
