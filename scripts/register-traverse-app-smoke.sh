@@ -10,16 +10,17 @@ missing_traverse_dir="$(mktemp -d "${TMPDIR:-/tmp}/youaskm3-missing-traverse.XXX
 rmdir "$missing_traverse_dir"
 trap 'rm -f "$json_file"; rm -rf "$missing_traverse_dir"' EXIT
 
-bash scripts/register-traverse-app.sh --validate-only --allow-skeleton --json >"$json_file"
+bash scripts/register-traverse-app.sh --validate-only --json >"$json_file"
 
 ruby -rjson -e '
 payload = JSON.parse(File.read(ARGV.fetch(0)))
-abort "expected validated_skeleton status" unless payload.fetch("status") == "validated_skeleton"
-abort "expected skeleton code" unless payload.fetch("code") == "SKELETON_PENDING_WASM_COMPONENTS"
+abort "expected validated status" unless payload.fetch("status") == "validated"
+abort "expected validated code" unless payload.fetch("code") == "VALIDATED"
 abort "expected youaskm3 app id" unless payload.dig("app", "app_id") == "youaskm3.knowledge-app"
 abort "expected 7 components" unless payload.dig("app", "component_count") == 7
 abort "expected 1 workflow" unless payload.dig("app", "workflow_count") == 1
-abort "expected missing WASM evidence" unless payload.dig("evidence", "missing_wasm_count") == 7
+abort "expected real WASM evidence" unless payload.dig("evidence", "missing_wasm_count") == 0
+abort "expected real digest evidence" unless payload.dig("evidence", "zero_digest_component_count") == 0
 ' "$json_file"
 
 set +e

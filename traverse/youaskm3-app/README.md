@@ -1,12 +1,13 @@
 # youaskm3 Traverse Application Bundle
 
-This directory contains the first youaskm3 application bundle skeleton for
-Traverse `v0.4.0`.
+This directory contains the first youaskm3 application bundle for Traverse
+`v0.4.0`.
 
 It is the checked-in target shape for registering the first MVP chat workflow
-through Traverse public application-bundle surfaces. It is intentionally not a
-complete, registerable production bundle yet because the real WASM capability
-binaries and binary digests are created by later MVP tickets.
+through Traverse public application-bundle surfaces. The checked-in component
+manifests now carry real release WASM binary digests for the MVP capability
+artifacts; live app registration still depends on Traverse exposing the
+external registration surface for this manifest shape.
 
 ## Baseline
 
@@ -59,30 +60,24 @@ The first workflow composes them in this order:
 5. validate grounding
 6. format the final answer envelope
 
-## Pending Implementation Fields
+## Component Artifact Evidence
 
-The component manifests use Traverse v0.4.0 field names now, but the following
-fields are placeholders until the corresponding WASM or agent artifacts exist:
-
-- `wasm_binary_path`
-- `wasm_digest`
-- component `digest` entries in `manifest.json`
-- `implementation_status`
-- `validation_evidence`
-
-Placeholder digests are all-zero SHA-256 values and must not be treated as
-real registration evidence. The manifest generator keeps these placeholders
-only when explicitly run in skeleton mode:
+The component manifests use Traverse v0.4.0 field names and reference release
+WASM artifacts under `target/wasm32-wasip1/release`. Generate or verify real
+component evidence with:
 
 ```bash
-bash scripts/traverse-component-manifests.sh --skeleton
-bash scripts/traverse-component-manifests.sh --skeleton --check
+PATH=/Users/enricopiovesan/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH \
+cargo build --locked --workspace --target wasm32-wasip1 --release
+
+bash scripts/traverse-component-manifests.sh
+bash scripts/traverse-component-manifests.sh --check
 ```
 
-When real capability WASM binaries are expected, omit `--skeleton`. The command
-then fails on any missing `wasm_binary_path` and writes SHA-256 digests from the
-actual `.wasm` files into each component manifest and the app manifest component
-entries.
+The generator fails when a referenced WASM binary is missing unless it is
+explicitly run with `--skeleton` for future placeholder-only development. MVP
+runtime acceptance must not use skeleton mode, all-zero digests, pending
+implementation markers, or placeholder validation evidence.
 
 ## Model Dependency
 
@@ -108,21 +103,20 @@ provider logic.
 
 ## Registration Status
 
-This skeleton should fail real Traverse registration until later tickets provide
-real component artifacts and digests. That is expected.
+The bundle has real component artifact digests and passes local validation.
+Real Traverse registration can still fail when Traverse does not expose a
+public external app-register CLI for this checked-in manifest shape.
 
 The youaskm3-side registration entrypoint is:
 
 ```bash
-bash scripts/register-traverse-app.sh --validate-only --allow-skeleton --json
-TRAVERSE_REPO=/path/to/Traverse bash scripts/register-traverse-app.sh --allow-skeleton --json
+bash scripts/register-traverse-app.sh --validate-only --json
+TRAVERSE_REPO=/path/to/Traverse bash scripts/register-traverse-app.sh --json
 ```
 
 `--validate-only` is CI-safe and does not require a Traverse checkout. Real
 registration requires Traverse `v0.4.0` or newer and real WASM component
-artifacts. While the checked-in bundle remains a skeleton, the command emits
-machine-readable `SKELETON_PENDING_WASM_COMPONENTS` evidence instead of
-pretending the bundle registered.
+artifacts.
 
 If real component artifacts are present but Traverse does not yet expose a
 public external app-register CLI for this application manifest shape, the
@@ -140,10 +134,9 @@ The gate validates prepared search artifacts, graph source evidence, public
 trace requirements, model dependency policy, Traverse `v0.4.0` readiness, and
 the app registration boundary. Without `TRAVERSE_REPO`, it validates local
 youaskm3 artifacts and skips the live Traverse step so default smoke remains
-CI-safe. In the current skeleton state, the live Traverse step passes only when
-execution is blocked by `SKELETON_PENDING_WASM_COMPONENTS`; once real component
-WASM artifacts are available, the same gate should be tightened to expect live
-`knowledge.query.answer` execution evidence.
+CI-safe. With real component artifacts available, the live Traverse step should
+either validate/register through Traverse or return a stable upstream Traverse
+surface gap such as `MISSING_PUBLIC_APP_REGISTRATION_SURFACE`.
 
 The MCP parity gate is:
 
@@ -161,22 +154,19 @@ evidence through Traverse-owned surfaces.
 
 Follow-up tickets:
 
-- MVP-013: first `knowledge.retrieve` WASM capability
-- MVP-014: `knowledge.answer.validate`
-- MVP-023: `knowledge.graph.expand`
-- MVP-024: `knowledge.context.pack`
-- MVP-025: `knowledge.answer.format`
-- MVP-026: `knowledge.query.answer` workflow entrypoint
-- MVP-027: generated component manifests and binary digests
-- MVP-018: real bundle registration with Traverse v0.4.0
+- MVP-031: local Traverse-backed chat happy path
+- MVP-033: imported-document answer acceptance test
+- MVP-035: Traverse blocker escalation process
 
 ## Local Validation
 
-For this skeleton slice:
+For this bundle slice:
 
 ```bash
 rg -n "v0.4.0|model_dependencies|knowledge.query.answer|knowledge.retrieve|knowledge.infer" traverse/youaskm3-app
-bash scripts/traverse-component-manifests.sh --skeleton --check
+PATH=/Users/enricopiovesan/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH \
+cargo build --locked --workspace --target wasm32-wasip1 --release
+bash scripts/traverse-component-manifests.sh --check
 PATH=/Users/enricopiovesan/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH \
 PYTHON=/opt/homebrew/bin/python3.14 \
 bash scripts/smoke.sh

@@ -6,8 +6,8 @@
   "capability_version": "0.1.0",
   "contract_path": "../../../../contracts/capabilities/knowledge.infer.json",
   "wasm_binary_path": "../../../../target/wasm32-wasip1/release/youaskm3_knowledge_infer.wasm",
-  "wasm_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-  "implementation_status": "pending_wasm_or_agent_binary",
+  "wasm_digest": "sha256:e4ad1417c2b9b059a4f3db48f6368c801b115a974533e72cdd63ab0f54a42340",
+  "implementation_status": "wasm_binary_ready",
   "runtime_constraints": {
     "host_api_access": "none",
     "network_access": "forbidden",
@@ -22,9 +22,10 @@
   "connector_requirements": [],
   "validation_evidence": [
     {
-      "evidence_type": "skeleton_manifest",
-      "status": "pending_real_wasm_or_agent",
-      "tracked_by": "MVP-021"
+      "evidence_type": "wasm_binary_digest",
+      "status": "verified",
+      "path": "../../../../target/wasm32-wasip1/release/youaskm3_knowledge_infer.wasm",
+      "digest": "sha256:e4ad1417c2b9b059a4f3db48f6368c801b115a974533e72cdd63ab0f54a42340"
     }
   ]
 }

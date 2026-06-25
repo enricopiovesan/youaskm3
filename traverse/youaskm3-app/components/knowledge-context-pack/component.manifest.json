@@ -6,8 +6,8 @@
   "capability_version": "0.1.0",
   "contract_path": "../../../../contracts/capabilities/knowledge.context.pack.json",
   "wasm_binary_path": "../../../../target/wasm32-wasip1/release/youaskm3_knowledge_context_pack.wasm",
-  "wasm_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-  "implementation_status": "pending_wasm_binary",
+  "wasm_digest": "sha256:0a99fd6ac7664dbfdc3e913ff5f85e141bdc6ded9bceec24c64737066008d9bf",
+  "implementation_status": "wasm_binary_ready",
   "runtime_constraints": {
     "host_api_access": "none",
     "network_access": "forbidden",
@@ -22,9 +22,10 @@
   "connector_requirements": [],
   "validation_evidence": [
     {
-      "evidence_type": "skeleton_manifest",
-      "status": "pending_real_wasm",
-      "tracked_by": "MVP-024"
+      "evidence_type": "wasm_binary_digest",
+      "status": "verified",
+      "path": "../../../../target/wasm32-wasip1/release/youaskm3_knowledge_context_pack.wasm",
+      "digest": "sha256:0a99fd6ac7664dbfdc3e913ff5f85e141bdc6ded9bceec24c64737066008d9bf"
     }
   ]
 }
