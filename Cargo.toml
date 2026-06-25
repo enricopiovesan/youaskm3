@@ -9,6 +9,8 @@ members = [
   "crates/youaskm3-knowledge-answer-validate",
   "crates/youaskm3-knowledge-context-pack",
   "crates/youaskm3-knowledge-graph-expand",
+  "crates/youaskm3-knowledge-infer",
+  "crates/youaskm3-knowledge-query-answer",
 ]
 resolver = "3"
 
