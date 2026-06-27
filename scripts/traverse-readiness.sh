@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-MIN_TRAVERSE_TAG="${MIN_TRAVERSE_TAG:-v0.4.0}"
+MIN_TRAVERSE_TAG="${MIN_TRAVERSE_TAG:-v0.5.0}"
 TRAVERSE_REPO="${TRAVERSE_REPO:-${TRAVERSE_CHECKOUT:-}}"
 
 if [[ -z "$TRAVERSE_REPO" ]]; then

@@ -44,7 +44,7 @@ Anyone can fork it, fill it with their own knowledge, and run their own instance
 |---|---|---|
 | Business logic | **Rust → WASM** | Portable, safe, fast. Runs anywhere. |
 | WASM runtime | **Wasmtime** (CLI/server) / **browser native** | Same module, different host |
-| Runtime model | **Traverse v0.4.0 baseline / UMA** | Contract-driven, governed, explainable release surface for portable capabilities |
+| Runtime model | **Traverse v0.5.0 baseline / UMA** | Contract-driven, governed, explainable release surface for portable capabilities |
 | MCP interface | **WASM MCP module** | Portable MCP server compiled to WASM |
 | Runtime integration | **Traverse app bundle** | Registers capability contracts, event contracts, workflows, WASM packages, and model dependencies |
 
@@ -183,7 +183,7 @@ idea → /openspec:proposal → proposal.md + design.md + tasks.md + spec delta
 
 ### Traverse integration baseline
 
-youaskm3 integrates with Traverse through documented public release surfaces instead of private Traverse internals. The minimum approved first-MVP integration baseline is Traverse `v0.4.0`, released on 2026-06-22, as described in [docs/traverse-mvp-requirements.md](docs/traverse-mvp-requirements.md):
+youaskm3 integrates with Traverse through documented public release surfaces instead of private Traverse internals. The minimum approved first-MVP integration baseline for MVP-031 onward is Traverse `v0.5.0`, released on 2026-06-26, as described in [docs/traverse-mvp-requirements.md](docs/traverse-mvp-requirements.md):
 
 - governed application bundle registration
 - WASM component manifest validation
@@ -195,6 +195,8 @@ youaskm3 integrates with Traverse through documented public release surfaces ins
 - public traces for answer grounding
 - local/server placement and model dependency resolution
 - downstream app MVP conformance evidence through `bash scripts/ci/downstream_app_mvp_conformance.sh`
+- public CLI app validation with `traverse-cli app validate --manifest <path> --json`
+- public CLI local workspace app registration with `traverse-cli app register --manifest <path> --workspace <workspace-id> --json`
 
 Roadmap work that touches runtime, MCP, browser hosting, model inference, or fork-and-run setup must pin an approved Traverse release pairing and include the relevant Traverse validation path.
 
@@ -204,13 +206,14 @@ The first-MVP personas, "As a..., I want..., so that..." stories, capability map
 
 ### Next product-led MVP tranche
 
-After Traverse `v0.4.0` readiness and the first youaskm3 WASM capability tranche, the next highest-ROI work is tracked as MVP-031 through MVP-035 in [docs/mvp-ticket-backlog.md](docs/mvp-ticket-backlog.md):
+After Traverse `v0.5.0` readiness and the first youaskm3 WASM capability tranche, the next highest-ROI work is tracked as MVP-031 through MVP-038 in [docs/mvp-ticket-backlog.md](docs/mvp-ticket-backlog.md):
 
 - prove the local Traverse-backed chat happy path
 - wire real WASM artifacts and component digests for implemented capabilities
 - add a real imported-document question acceptance test
 - enforce explicit Browser demo fallback semantics
 - create a Traverse blocker escalation template for confirmed upstream gaps
+- adopt the v0.5.0 public CLI app validation/registration baseline
 
 These tickets keep youaskm3 product-led while using concrete app evidence to drive Traverse requirements. They must not add downstream runtime/provider shortcuts that bypass Traverse-governed WASM capability execution.
 

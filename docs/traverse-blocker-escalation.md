@@ -95,9 +95,9 @@ When a blocker belongs upstream:
 
 ## Current Example
 
-After MVP-032, `scripts/register-traverse-app.sh --json` can prove real
-youaskm3 component evidence with `missing_wasm_count: 0` and
-`zero_digest_component_count: 0`. If the same command fails with
-`MISSING_PUBLIC_APP_REGISTRATION_SURFACE`, the remaining gap is a Traverse
-blocker: youaskm3 has real component artifacts, but Traverse still needs a
-public external app-registration surface for this manifest shape.
+After MVP-037, `scripts/register-traverse-app.sh --json` should consume
+Traverse v0.5.0 public `traverse-cli app validate` and `traverse-cli app
+register` surfaces. If a valid youaskm3 bundle with real component evidence
+then fails because Traverse cannot execute the registered real workflow,
+real WASM microservice, or real WASM agent capability through public surfaces,
+the remaining gap is a Traverse blocker.

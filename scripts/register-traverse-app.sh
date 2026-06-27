@@ -13,7 +13,7 @@ require "set"
 ROOT = Pathname.new(Dir.pwd)
 APP_MANIFEST = ROOT.join("traverse/youaskm3-app/manifest.json")
 ZERO_DIGEST = "sha256:#{"0" * 64}"
-MIN_TRAVERSE_TAG = ENV.fetch("MIN_TRAVERSE_TAG", "v0.4.0")
+MIN_TRAVERSE_TAG = ENV.fetch("MIN_TRAVERSE_TAG", "v0.5.0")
 
 options = {
   json: false,
@@ -300,7 +300,7 @@ payload["status"] = "failed"
 payload["code"] = "MISSING_PUBLIC_APP_REGISTRATION_SURFACE"
 payload["errors"] << {
   "code" => "MISSING_PUBLIC_APP_REGISTRATION_SURFACE",
-  "message" => "Traverse #{MIN_TRAVERSE_TAG} exposes application registration through traverse-registry but no public external app-register CLI for this checked-in manifest. Add that Traverse surface before real youaskm3 registration can complete."
+  "message" => "Traverse #{MIN_TRAVERSE_TAG} exposes public app validation and local workspace registration through traverse-cli. Wire scripts/register-traverse-app.sh to invoke traverse-cli app validate/register before real youaskm3 registration can complete."
 }
 finish(payload, options, 5)
 RUBY

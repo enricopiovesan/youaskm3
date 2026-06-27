@@ -39,7 +39,7 @@ body:
     attributes:
       label: Observed failure
       description: Include the stable failure code and a short actionable error excerpt.
-      placeholder: MISSING_PUBLIC_APP_REGISTRATION_SURFACE - no public external app-register CLI for this manifest shape.
+      placeholder: MISSING_REAL_WASM_AGENT_EXECUTION - Traverse cannot execute knowledge.infer as a real WASM agent capability.
     validations:
       required: true
   - type: textarea
@@ -55,7 +55,7 @@ body:
     attributes:
       label: Traverse version or commit
       description: Include the release tag, describe output, or commit used for the reproduction.
-      placeholder: v0.4.0-5-g755da626860a
+      placeholder: v0.5.0
     validations:
       required: true
   - type: input
