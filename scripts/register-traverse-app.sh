@@ -7,6 +7,7 @@ cd "$ROOT_DIR"
 
 ruby - "$@" <<'RUBY'
 require "json"
+require "open3"
 require "pathname"
 require "set"
 
@@ -19,7 +20,8 @@ options = {
   json: false,
   validate_only: false,
   allow_skeleton: false,
-  traverse_repo: ENV["TRAVERSE_REPO"] || ENV["TRAVERSE_CHECKOUT"]
+  traverse_repo: ENV["TRAVERSE_REPO"] || ENV["TRAVERSE_CHECKOUT"],
+  workspace_id: ENV["TRAVERSE_WORKSPACE_ID"]
 }
 
 until ARGV.empty?
@@ -34,15 +36,19 @@ until ARGV.empty?
   when "--traverse-repo"
     options[:traverse_repo] = ARGV.shift
     abort "--traverse-repo requires a path" if options[:traverse_repo].nil? || options[:traverse_repo].empty?
+  when "--workspace"
+    options[:workspace_id] = ARGV.shift
+    abort "--workspace requires a workspace id" if options[:workspace_id].nil? || options[:workspace_id].empty?
   when "--help", "-h"
     puts <<~HELP
-      Usage: bash scripts/register-traverse-app.sh [--json] [--validate-only] [--allow-skeleton] [--traverse-repo PATH]
+      Usage: bash scripts/register-traverse-app.sh [--json] [--validate-only] [--allow-skeleton] [--traverse-repo PATH] [--workspace ID]
 
       Validates and registers the checked-in youaskm3 Traverse application manifest.
 
       --validate-only   Validate local manifest/component/workflow shape without requiring Traverse.
       --allow-skeleton  Treat missing WASM binaries as an expected MVP skeleton state.
       --traverse-repo   Local Traverse checkout. Defaults to TRAVERSE_REPO, TRAVERSE_CHECKOUT, or ../Traverse.
+      --workspace       Workspace id for Traverse CLI registration. Defaults to TRAVERSE_WORKSPACE_ID or manifest workspace_defaults.workspace_id.
       --json            Emit machine-readable evidence.
     HELP
     exit 0
@@ -70,6 +76,32 @@ end
 def git(repo, *args)
   output = IO.popen(["git", "-C", repo.to_s, *args], err: [:child, :out], &:read)
   [$?.exitstatus, output.strip]
+end
+
+def run_traverse_cli(repo, *args)
+  command = ["cargo", "run", "-p", "traverse-cli", "--", *args]
+  stdout, stderr, status = Open3.capture3(*command, chdir: repo.to_s)
+  parsed = JSON.parse(stdout)
+  {
+    "command" => ["traverse-cli", *args],
+    "exit_status" => status.exitstatus,
+    "stdout" => parsed,
+    "stderr_excerpt" => stderr.lines.last(12).join.strip
+  }
+rescue Errno::ENOENT
+  {
+    "command" => ["traverse-cli", *args],
+    "exit_status" => 127,
+    "stdout" => nil,
+    "stderr_excerpt" => "missing required command: cargo"
+  }
+rescue JSON::ParserError
+  {
+    "command" => ["traverse-cli", *args],
+    "exit_status" => status && status.exitstatus,
+    "stdout" => nil,
+    "stderr_excerpt" => [stderr, stdout].join("\n").lines.last(20).join.strip
+  }
 end
 
 def default_traverse_repo
@@ -217,6 +249,8 @@ payload = {
     "zero_digest_components" => zero_digest_components
   },
   "traverse" => {},
+  "cli" => {},
+  "registration" => {},
   "warnings" => warnings,
   "errors" => errors
 }
@@ -244,7 +278,7 @@ if options[:validate_only]
 end
 
 traverse_repo = options[:traverse_repo] || default_traverse_repo
-unless traverse_repo && File.directory?(File.join(traverse_repo, ".git"))
+unless traverse_repo && git(traverse_repo, "rev-parse", "--is-inside-work-tree").first.zero?
   payload["status"] = "failed"
   payload["code"] = "MISSING_TRAVERSE_CHECKOUT"
   payload["errors"] << {
@@ -296,11 +330,81 @@ if missing_wasm.any? && options[:allow_skeleton]
   finish(payload, options, 0)
 end
 
-payload["status"] = "failed"
-payload["code"] = "MISSING_PUBLIC_APP_REGISTRATION_SURFACE"
-payload["errors"] << {
-  "code" => "MISSING_PUBLIC_APP_REGISTRATION_SURFACE",
-  "message" => "Traverse #{MIN_TRAVERSE_TAG} exposes public app validation and local workspace registration through traverse-cli. Wire scripts/register-traverse-app.sh to invoke traverse-cli app validate/register before real youaskm3 registration can complete."
+validate = run_traverse_cli(
+  traverse_repo,
+  "app", "validate",
+  "--manifest", APP_MANIFEST.realpath.to_s,
+  "--json"
+)
+payload["cli"]["validate"] = validate
+
+if validate.fetch("exit_status") != 0 || validate["stdout"].nil? || validate.dig("stdout", "status") != "validated"
+  payload["status"] = "failed"
+  payload["code"] = validate["exit_status"] == 127 ? "MISSING_TRAVERSE_CLI" : "TRAVERSE_CLI_VALIDATION_FAILED"
+  payload["errors"] << {
+    "code" => payload["code"],
+    "message" => "Traverse CLI app validation failed.",
+    "details" => validate["stdout"] || validate["stderr_excerpt"]
+  }
+  finish(payload, options, 5)
+end
+
+workspace_id = options[:workspace_id] || app.dig("workspace_defaults", "workspace_id")
+if workspace_id.nil? || workspace_id.empty?
+  payload["status"] = "failed"
+  payload["code"] = "MISSING_WORKSPACE_ID"
+  payload["errors"] << {
+    "code" => "MISSING_WORKSPACE_ID",
+    "message" => "Provide --workspace, TRAVERSE_WORKSPACE_ID, or workspace_defaults.workspace_id in the app manifest."
+  }
+  finish(payload, options, 5)
+end
+
+register = run_traverse_cli(
+  traverse_repo,
+  "app", "register",
+  "--manifest", APP_MANIFEST.realpath.to_s,
+  "--workspace", workspace_id,
+  "--json"
+)
+payload["cli"]["register"] = register
+
+if register.fetch("exit_status") != 0 || register["stdout"].nil?
+  payload["status"] = "failed"
+  payload["code"] = register["exit_status"] == 127 ? "MISSING_TRAVERSE_CLI" : "TRAVERSE_CLI_REGISTRATION_FAILED"
+  payload["errors"] << {
+    "code" => payload["code"],
+    "message" => "Traverse CLI app registration failed.",
+    "details" => register["stdout"] || register["stderr_excerpt"]
+  }
+  finish(payload, options, 5)
+end
+
+registration_status = register.dig("stdout", "status")
+unless %w[registered already_registered].include?(registration_status)
+  payload["status"] = "failed"
+  payload["code"] = "TRAVERSE_CLI_REGISTRATION_FAILED"
+  payload["errors"] << {
+    "code" => "TRAVERSE_CLI_REGISTRATION_FAILED",
+    "message" => "Traverse CLI app registration returned #{registration_status.inspect}.",
+    "details" => register["stdout"]
+  }
+  finish(payload, options, 5)
+end
+
+payload["status"] = registration_status
+payload["code"] = registration_status == "already_registered" ? "ALREADY_REGISTERED" : "REGISTERED"
+payload["registration"] = {
+  "workspace_id" => register.dig("stdout", "workspace_id"),
+  "app_id" => register.dig("stdout", "app_id"),
+  "app_version" => register.dig("stdout", "app_version"),
+  "state_scope" => register.dig("stdout", "state_scope"),
+  "state_path" => register.dig("stdout", "state_path"),
+  "component_ids" => register.dig("stdout", "component_ids"),
+  "workflow_ids" => register.dig("stdout", "workflow_ids"),
+  "digest_verification" => register.dig("stdout", "digest_verification"),
+  "model_readiness" => register.dig("stdout", "model_readiness"),
+  "links" => register.dig("stdout", "links")
 }
-finish(payload, options, 5)
+finish(payload, options, 0)
 RUBY

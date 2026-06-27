@@ -95,9 +95,9 @@ When a blocker belongs upstream:
 
 ## Current Example
 
-After MVP-037, `scripts/register-traverse-app.sh --json` should consume
-Traverse v0.5.0 public `traverse-cli app validate` and `traverse-cli app
-register` surfaces. If a valid youaskm3 bundle with real component evidence
-then fails because Traverse cannot execute the registered real workflow,
-real WASM microservice, or real WASM agent capability through public surfaces,
-the remaining gap is a Traverse blocker.
+`scripts/register-traverse-app.sh --json` consumes Traverse v0.5.0 public
+`traverse-cli app validate` and `traverse-cli app register` surfaces. If a
+valid youaskm3 bundle with real component evidence validates/registers and then
+fails because Traverse cannot execute the registered real workflow, real WASM
+microservice, or real WASM agent capability through public surfaces, the
+remaining gap is a Traverse blocker.

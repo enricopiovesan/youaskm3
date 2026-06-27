@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 cd "$ROOT_DIR"
 
-json_file="$(mktemp "${TMPDIR:-/tmp}/youaskm3-register-traverse-app.XXXXXX.json")"
+json_file="$(mktemp "${TMPDIR:-/tmp}/youaskm3-register-traverse-app.XXXXXX")"
 missing_traverse_dir="$(mktemp -d "${TMPDIR:-/tmp}/youaskm3-missing-traverse.XXXXXX")"
 rmdir "$missing_traverse_dir"
 trap 'rm -f "$json_file"; rm -rf "$missing_traverse_dir"' EXIT

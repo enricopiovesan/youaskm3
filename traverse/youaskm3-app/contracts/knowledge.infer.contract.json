@@ -1,0 +1,115 @@
+{
+  "kind": "capability_contract",
+  "schema_version": "1.0.0",
+  "id": "knowledge.infer",
+  "namespace": "knowledge",
+  "name": "infer",
+  "version": "0.1.0",
+  "lifecycle": "active",
+  "owner": {
+    "team": "youaskm3",
+    "contact": "maintainers@youaskm3.com"
+  },
+  "summary": "Inference dependency resolved and placed by Traverse.",
+  "description": "Declares model inference as a governed capability so youaskm3 does not hardcode local, server, or external providers.",
+  "inputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context": {
+          "type": "string"
+        },
+        "max_output_tokens": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8192
+        }
+      },
+      "required": [
+        "prompt",
+        "context"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "outputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "selected_inference_capability": {
+          "type": "string"
+        },
+        "placement": {
+          "type": "string",
+          "enum": [
+            "local",
+            "server"
+          ]
+        },
+        "trace_id": {
+          "type": "string"
+        },
+        "failure": {
+          "$ref": "#/$defs/failure"
+        }
+      },
+      "required": [
+        "text",
+        "selected_inference_capability",
+        "placement",
+        "trace_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "preconditions": [],
+  "postconditions": [],
+  "side_effects": [
+    {
+      "kind": "none",
+      "description": "Pure governed WASM capability execution."
+    }
+  ],
+  "emits": [],
+  "consumes": [],
+  "permissions": [],
+  "execution": {
+    "binary_format": "wasm",
+    "entrypoint": {
+      "kind": "wasi-command",
+      "command": "run"
+    },
+    "preferred_targets": [
+      "local"
+    ],
+    "constraints": {
+      "host_api_access": "none",
+      "network_access": "forbidden",
+      "filesystem_access": "none"
+    }
+  },
+  "policies": [],
+  "dependencies": [],
+  "provenance": {
+    "source": "greenfield",
+    "author": "youaskm3",
+    "created_at": "2026-06-26T00:00:00Z",
+    "spec_ref": "openspec/specs/traverse-integration/spec.md",
+    "adr_refs": [],
+    "exception_refs": []
+  },
+  "evidence": [],
+  "service_type": "stateless",
+  "permitted_targets": [
+    "local",
+    "cloud"
+  ],
+  "artifact_type": "native"
+}
