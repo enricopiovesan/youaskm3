@@ -1151,6 +1151,125 @@ PYTHON=/opt/homebrew/bin/python3.14 \
 bash scripts/smoke.sh
 ```
 
+## Ticket MVP-039: Implement `knowledge.infer` as a Real Traverse-Governed WASM Agent
+
+### Objective
+
+Replace the current recording/validation-only inference behavior with a real Traverse-governed WASM agent capability for `knowledge.infer`.
+
+The first MVP requires real agent behavior for judgement, generation, planning, semantic interpretation, or model use. A capability that only records pre-generated model output is useful plumbing, but it does not satisfy MVP runtime acceptance.
+
+### Scope
+
+Implement or wire `knowledge.infer` so it can execute as a real WASM agent capability through Traverse:
+
+- accepts packed context and inference request data from the Traverse workflow
+- uses Traverse-governed model/capability dependency selection
+- performs the agent execution required to produce answer text
+- returns structured output matching `contracts/capabilities/knowledge.infer.json`
+- records selected dependency, placement, status, failure reason, and trace id
+- fails with governed missing-dependency evidence when no compatible model/capability is available
+
+### Out of Scope
+
+- hardcoding Ollama, WebLLM, llama.cpp, cloud APIs, or provider-specific routing in youaskm3
+- accepting deterministic summary code as a fake replacement for agent behavior
+- accepting pre-generated answer recording as MVP inference
+- changing Traverse internals except through a linked Traverse blocker when public surfaces are insufficient
+- production-quality model answer benchmarking
+
+### Definition of Done
+
+- `knowledge.infer` is implemented as a real WASM agent capability or is blocked by a linked Traverse requirement proving the missing public surface.
+- The implementation compiles for `wasm32-wasip1`.
+- The capability contract clearly identifies the agent behavior, input, output, dependency evidence, failure evidence, and trace fields.
+- Unit tests cover successful agent output, missing prompt/context, missing selected dependency, missing trace id, empty generated output, and governed dependency failure.
+- The Traverse component manifest identifies `knowledge.infer` as a real runtime artifact with a real digest.
+- `knowledge.query.answer` workflow uses the real `knowledge.infer` agent step, not a recording-only shim.
+- PWA, CLI, and tests do not hardcode model providers.
+- If Traverse cannot execute the real WASM agent shape, the youaskm3 issue is marked Blocked and a detailed Traverse blocker is created.
+- `cargo build --locked --workspace --target wasm32-wasip1` passes.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+PATH=/Users/enricopiovesan/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH \
+cargo test --locked --package youaskm3-knowledge-infer
+
+PATH=/Users/enricopiovesan/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH \
+cargo build --locked --workspace --target wasm32-wasip1
+
+PATH=/Users/enricopiovesan/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH \
+PYTHON=/opt/homebrew/bin/python3.14 \
+bash scripts/smoke.sh
+
+TRAVERSE_REPO=/Users/enricopiovesan/Documents/repos/Traverse \
+bash scripts/traverse-answer-workflow-smoke.sh
+```
+
+## Ticket MVP-040: Add Final First-MVP Acceptance and Release Gate
+
+### Objective
+
+Create the final release gate that proves the entire first MVP end to end from a clean local setup.
+
+This ticket is the point where the project can honestly say the first MVP is complete. It must not count Browser demo, temporary harnesses, contract stubs, fake workflow steps, skeleton manifests, placeholder digests, or downstream provider shortcuts as acceptance evidence.
+
+### Scope
+
+Add a final acceptance command, checklist, or smoke path that proves:
+
+- local source input is converted or normalized into markdown artifacts
+- search and graph artifacts are generated from local knowledge
+- all MVP runtime capabilities build as real WASM microservices or real WASM agents
+- component manifests contain real digests
+- the app bundle validates and registers through Traverse v0.5.0 public CLI surfaces
+- the PWA path asks a question through the real Traverse `knowledge.query.answer` workflow
+- answer text, citations/source references, graph evidence, validation status, and trace reference are present
+- the MCP path exposes equivalent workflow evidence
+- failure cases are classified as setup, downstream implementation, or Traverse blocker
+
+### Out of Scope
+
+- federation discovery or cross-instance fan-out
+- hosted accounts, billing, teams, or databases
+- production hosted model service
+- claiming the model engine itself is WASM-native unless Traverse evidence proves it
+- accepting any placeholder/demo path as release evidence
+
+### Definition of Done
+
+- A single documented acceptance command or ordered checklist exists for the first MVP release gate.
+- The gate starts from a clean local setup and does not rely on pre-opened browser state.
+- The gate validates normal repo health with `bash scripts/smoke.sh`.
+- The gate validates Traverse v0.5.0 readiness or reports a clear setup failure.
+- The gate validates/registers the app bundle through public Traverse CLI surfaces.
+- The gate asks at least one imported-document question through the PWA/Traverse path.
+- The gate asserts non-empty answer text, citations/source references, graph evidence, validation status, and trace reference.
+- The gate exercises MCP parity for the same registered workflow.
+- The gate fails if Browser demo, temporary harnesses, contract stubs, fake workflow steps, skeleton manifests, placeholder digests, or all-zero component evidence are used as acceptance evidence.
+- The final docs list exact remaining caveats, including whether local model execution is optional and whether the model engine itself is WASM-native.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+PATH=/Users/enricopiovesan/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH \
+PYTHON=/opt/homebrew/bin/python3.14 \
+bash scripts/smoke.sh
+
+MIN_TRAVERSE_TAG=v0.5.0 \
+TRAVERSE_REPO=/Users/enricopiovesan/Documents/repos/Traverse \
+bash scripts/traverse-readiness.sh
+
+TRAVERSE_REPO=/Users/enricopiovesan/Documents/repos/Traverse \
+bash scripts/traverse-answer-workflow-smoke.sh
+
+TRAVERSE_REPO=/Users/enricopiovesan/Documents/repos/Traverse \
+bash scripts/traverse-mcp-answer-workflow-smoke.sh
+```
+
 ## Recommended Parallelization
 
 These tickets can start immediately and independently:
@@ -1187,6 +1306,8 @@ Next highest-ROI tranche after MVP-030:
 - MVP-036 Traverse v0.5.0 baseline adoption
 - MVP-037 public CLI app validate/register consumption
 - MVP-038 release-pinned v0.5.0 conformance evidence
+- MVP-039 real `knowledge.infer` WASM agent
+- MVP-040 final first-MVP acceptance and release gate
 
 ## First Ticket to Start
 

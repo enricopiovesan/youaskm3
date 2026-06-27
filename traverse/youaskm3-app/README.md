@@ -13,7 +13,7 @@ validation and local workspace registration surfaces added in Traverse v0.5.0.
 
 - Minimum Traverse release: `v0.5.0`
 - Traverse release date: 2026-06-26
-- Traverse release: <https://github.com/enricopiovesan/Traverse/releases/tag/v0.5.0>
+- Traverse release: <https://github.com/traverse-framework/Traverse/releases/tag/v0.5.0>
 - Governing Traverse specs:
   - `044-application-bundle-manifest`
   - `045-governed-model-dependency-resolution`

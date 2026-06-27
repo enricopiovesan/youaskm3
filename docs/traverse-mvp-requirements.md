@@ -49,7 +49,7 @@ As of 2026-06-26, Traverse `v0.5.0` is the minimum approved first-MVP integratio
 Release:
 
 - Tag: `v0.5.0`
-- URL: https://github.com/enricopiovesan/Traverse/releases/tag/v0.5.0
+- URL: https://github.com/traverse-framework/Traverse/releases/tag/v0.5.0
 - Release date: 2026-06-26
 - Governing Traverse specs: `044-application-bundle-manifest`, `045-governed-model-dependency-resolution`, and `046-public-cli-app-registration`
 
@@ -489,6 +489,12 @@ Business logic:
 - enforce prompt/input contract
 - return structured model output
 
+MVP acceptance requirement:
+
+- `knowledge.infer` must be a real Traverse-governed WASM agent capability when the workflow requires judgement, generation, planning, semantic interpretation, or model use.
+- A downstream crate that only records pre-generated model output does not satisfy MVP inference acceptance.
+- If Traverse cannot execute the required real WASM agent shape through public surfaces, the downstream ticket must be blocked and linked to an upstream Traverse requirement.
+
 ### `knowledge.answer.validate`
 
 Purpose: verify answer grounding.
@@ -540,6 +546,7 @@ Traverse should provide or extend validation scripts that prove:
 6. Failure to satisfy a model dependency fails deterministically.
 7. Browser/PWA consumption works without private Traverse internals.
 8. The conformance suite can run from a pinned release tag.
+9. The downstream final first-MVP acceptance gate can classify failures as setup, downstream implementation, or Traverse blocker evidence.
 
 Required Traverse validation command:
 
@@ -669,6 +676,8 @@ Traverse should only care about these external tools if the downstream app wraps
 Traverse is ready for this downstream MVP when the downstream app can honestly say:
 
 > The UI sends a user request to Traverse. Traverse executes all product/business behavior as governed WASM capabilities, resolves the needed inference capability, selects placement, records a trace, and exposes the same behavior through HTTP/JSON and MCP. The downstream app does not contain alternate business logic paths.
+
+The downstream app is ready to call the first MVP complete only when a final acceptance/release gate proves the complete local setup, bundle validation/registration, PWA question path, source/citation evidence, graph evidence, validation status, trace evidence, and MCP parity without Browser demo, temporary harnesses, contract stubs, fake workflow steps, skeleton manifests, placeholder digests, or downstream runtime shortcuts.
 
 ## Summary
 
