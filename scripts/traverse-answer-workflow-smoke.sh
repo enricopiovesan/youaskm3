@@ -7,7 +7,8 @@ REQUIRED="${TRAVERSE_ANSWER_WORKFLOW_REQUIRED:-0}"
 
 cd "$ROOT_DIR"
 
-if [[ -z "$TRAVERSE_REPO" && "$REQUIRED" == "1" && -d "$ROOT_DIR/../Traverse/.git" ]]; then
+if [[ -z "$TRAVERSE_REPO" && "$REQUIRED" == "1" ]] &&
+  git -C "$ROOT_DIR/../Traverse" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   TRAVERSE_REPO="$ROOT_DIR/../Traverse"
 fi
 

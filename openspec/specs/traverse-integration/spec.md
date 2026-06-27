@@ -96,6 +96,24 @@ The system SHALL implement `knowledge.infer` as a real Traverse-governed WASM ag
 - AND model dependency selection, placement, success, or failure is captured in governed trace evidence
 - AND deterministic microservice logic is not used as a fake replacement for the agent behavior
 
+#### Scenario: Reject recording-only inference as MVP acceptance
+
+- GIVEN `knowledge.infer` receives a packed context and a Traverse-selected inference dependency
+- WHEN the first-MVP workflow requires generated answer text
+- THEN the capability performs real agent execution through Traverse-governed WASM agent behavior
+- AND a crate that only records pre-generated model output does not satisfy MVP acceptance
+
+### Requirement: Prove final first-MVP acceptance end to end
+
+The system SHALL provide a final first-MVP acceptance gate that proves the complete local-first product path without Browser demo, placeholder manifests, contract stubs, fake workflow steps, or downstream runtime shortcuts.
+
+#### Scenario: Complete the first-MVP release gate
+
+- GIVEN a clean checkout with required local tools and a Traverse v0.5.0-or-newer runtime
+- WHEN the final MVP acceptance gate runs
+- THEN the CLI prepares artifacts, builds real WASM microservices and WASM agents, validates/registers the app bundle through public Traverse surfaces, asks an imported-document question through the PWA path, and verifies answer text, citations, graph evidence, validation status, trace evidence, and MCP parity
+- AND every failed prerequisite is reported as setup, downstream implementation, or Traverse blocker evidence
+
 ### Requirement: Escalate confirmed Traverse blockers upstream
 
 The system SHALL capture confirmed missing Traverse public surfaces as upstream Traverse requirements instead of adding downstream runtime shortcuts.

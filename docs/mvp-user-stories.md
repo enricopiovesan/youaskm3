@@ -2,7 +2,7 @@
 
 Status: First-MVP acceptance guide
 Owner: youaskm3 product/spec alignment
-Last updated: 2026-06-25
+Last updated: 2026-06-27
 
 ## Purpose
 
@@ -126,6 +126,7 @@ Capability and ticket map:
 - MVP-021 local inference readiness policy
 - MVP-030 `knowledge.infer` dependency failure and evidence tests
 - MVP-034 explicit Browser demo fallback semantics
+- MVP-039 real `knowledge.infer` WASM agent
 
 Acceptance criteria:
 
@@ -136,6 +137,7 @@ Acceptance criteria:
 - AND missing local inference capability fails clearly before or during governed execution
 - AND Traverse runtime failures remain visible instead of automatically switching to Browser demo
 - AND generation, judgement, planning, semantic interpretation, or model-use behavior is handled by a real Traverse-governed WASM agent capability
+- AND recording pre-generated model output does not count as real MVP inference
 
 ### MCP And Agent User
 
@@ -175,6 +177,7 @@ Capability and ticket map:
 - MVP-020 MCP parity smoke
 - MVP-028 end-to-end Traverse answer workflow smoke
 - MVP-035 Traverse blocker escalation template
+- MVP-040 final first-MVP acceptance and release gate
 
 Acceptance criteria:
 
@@ -184,6 +187,7 @@ Acceptance criteria:
 - AND readiness commands summarize pass/fail by capability area instead of requiring large log inspection
 - AND remaining gaps are represented as backlog tickets rather than undocumented assumptions
 - AND confirmed missing Traverse public surfaces are escalated upstream with reproduction evidence instead of hidden in downstream workaround code
+- AND first-MVP completion is declared only after the final acceptance gate passes
 
 ## Demo Acceptance Path
 
@@ -199,5 +203,6 @@ The first MVP demo is acceptable when these steps pass from a clean local setup:
 8. Exercise the same answer workflow through MCP parity validation.
 9. Explicitly select Browser demo only when validating the documented no-server fallback path.
 10. Treat any missing real Traverse workflow/capability support as a blocked youaskm3 ticket plus an upstream Traverse requirement, not as permission to add placeholders.
+11. Run the final first-MVP acceptance/release gate and record exact remaining caveats.
 
 The demo must not require a hosted account, hosted database, paid external model service, or product/business logic outside Traverse-governed capabilities.

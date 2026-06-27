@@ -69,3 +69,14 @@ The system SHALL support an acceptance path where a repo-safe fixture document i
 - THEN the PWA renders answer text with at least one source reference
 - AND the PWA renders graph or context evidence from the generated artifacts
 - AND the response includes validation status and trace evidence
+
+### Requirement: Support final first-MVP acceptance rendering
+
+The system SHALL render the final first-MVP acceptance response and evidence returned by Traverse without depending on Browser demo or hidden browser-side business logic.
+
+#### Scenario: Render final MVP acceptance evidence
+
+- GIVEN the final first-MVP acceptance gate has executed the real Traverse workflow
+- WHEN the PWA displays the result
+- THEN it renders the answer, citations, graph evidence, validation state, and trace reference from Traverse-owned response data
+- AND no browser-side fallback output is counted as release acceptance evidence

@@ -206,7 +206,7 @@ The first-MVP personas, "As a..., I want..., so that..." stories, capability map
 
 ### Next product-led MVP tranche
 
-After Traverse `v0.5.0` readiness and the first youaskm3 WASM capability tranche, the next highest-ROI work is tracked as MVP-031 through MVP-038 in [docs/mvp-ticket-backlog.md](docs/mvp-ticket-backlog.md):
+After Traverse `v0.5.0` readiness and the first youaskm3 WASM capability tranche, the next highest-ROI work is tracked as MVP-031 through MVP-040 in [docs/mvp-ticket-backlog.md](docs/mvp-ticket-backlog.md):
 
 - prove the local Traverse-backed chat happy path
 - wire real WASM artifacts and component digests for implemented capabilities
@@ -214,6 +214,8 @@ After Traverse `v0.5.0` readiness and the first youaskm3 WASM capability tranche
 - enforce explicit Browser demo fallback semantics
 - create a Traverse blocker escalation template for confirmed upstream gaps
 - adopt the v0.5.0 public CLI app validation/registration baseline
+- implement `knowledge.infer` as a real Traverse-governed WASM agent capability
+- add the final first-MVP acceptance and release gate
 
 These tickets keep youaskm3 product-led while using concrete app evidence to drive Traverse requirements. They must not add downstream runtime/provider shortcuts that bypass Traverse-governed WASM capability execution.
 

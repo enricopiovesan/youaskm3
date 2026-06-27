@@ -7,14 +7,14 @@
 [![Spec Governed](https://img.shields.io/badge/spec-governed-blueviolet)](openspec/specs/)
 [![License](https://img.shields.io/badge/license-MIT%20%7C%20Apache--2.0-blue)](LICENSE-APACHE)
 [![Rust](https://img.shields.io/badge/rust-1.94%2B-orange)](https://www.rust-lang.org/)
-[![Built on Traverse](https://img.shields.io/badge/built%20on-Traverse-black)](https://github.com/enricopiovesan/Traverse)
+[![Built on Traverse](https://img.shields.io/badge/built%20on-Traverse-black)](https://github.com/traverse-framework/Traverse)
 
 
 **your knowledge, queryable**
 
 youaskm3 is an open source, WASM-native, MCP-powered personal knowledge product for turning your books, papers, notes, and source material into a local-first chat experience you can query, inspect, fork, and evolve in the open.
 
-It is designed on top of [Traverse](https://github.com/enricopiovesan/Traverse) and the broader [Universal Microservices Architecture](https://github.com/enricopiovesan/UMA-code-examples) direction: portable capability contracts, governed specs, and runtime surfaces that stay usable across tools and hosts.
+It is designed on top of [Traverse](https://github.com/traverse-framework/Traverse) and the broader [Universal Microservices Architecture](https://github.com/enricopiovesan/UMA-code-examples) direction: portable capability contracts, governed specs, and runtime surfaces that stay usable across tools and hosts.
 
 ## Why This Exists
 
@@ -173,7 +173,7 @@ This project is set up like a production-minded open source repository:
 
 youaskm3 is not an isolated experiment. It sits in a larger line of work:
 
-- [Traverse](https://github.com/enricopiovesan/Traverse) provides the portable runtime and integration baseline
+- [Traverse](https://github.com/traverse-framework/Traverse) provides the portable runtime and integration baseline
 - [UMA code examples](https://github.com/enricopiovesan/UMA-code-examples) provide the broader architectural direction and reference patterns
 
 Traverse answers the runtime question. youaskm3 applies that model to personal knowledge.
@@ -210,7 +210,7 @@ Dual licensed under [MIT](LICENSE-MIT) and [Apache-2.0](LICENSE-APACHE).
 
 ## Related Work
 
-- [Traverse](https://github.com/enricopiovesan/Traverse)
+- [Traverse](https://github.com/traverse-framework/Traverse)
 - [Universal Microservices Architecture — Book](https://www.amazon.com/dp/B0GTTTTQH4)
 - [Contract-Driven AI Development (C-DAD) — White Paper](https://drive.google.com/file/d/1HC_ZWJl9aYaMeN78qiL3ZYBVY7mAGl3f/view)
 - [Speaking](https://enricopiovesan.github.io/enricopiovesan/)
