@@ -559,6 +559,7 @@ The wrapper looks for a local Traverse checkout at `../Traverse` by default. Use
 Traverse readiness passed.
 Capability areas:
 - application bundle registration: passed
+- public CLI app registration: passed
 - WASM workflow execution: passed
 - model dependency resolution: passed
 - HTTP/JSON app path: passed
@@ -582,7 +583,7 @@ the first-MVP Traverse baseline is satisfied:
 1. Confirm the local Traverse checkout path:
 
    ```bash
-   test -d ../Traverse/.git || test -d "$TRAVERSE_REPO/.git"
+   git -C "${TRAVERSE_REPO:-../Traverse}" rev-parse --is-inside-work-tree
    ```
 
 2. Confirm the checkout contains and is not older than the pinned baseline:
@@ -602,10 +603,15 @@ the first-MVP Traverse baseline is satisfied:
 4. Verify the summary reports these areas as passed:
 
    - application bundle registration
+   - public CLI app registration
    - WASM workflow execution
    - model dependency resolution
    - HTTP/JSON app path
    - MCP parity path
+
+   If the checkout is stale, the wrapper must fail as setup evidence with a
+   message such as `Traverse checkout <commit> is older than v0.5.0`, not as a
+   downstream runtime blocker.
 
 5. Treat live local Ollama model conformance as opt-in evidence only:
 

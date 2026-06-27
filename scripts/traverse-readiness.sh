@@ -6,7 +6,7 @@ MIN_TRAVERSE_TAG="${MIN_TRAVERSE_TAG:-v0.5.0}"
 TRAVERSE_REPO="${TRAVERSE_REPO:-${TRAVERSE_CHECKOUT:-}}"
 
 if [[ -z "$TRAVERSE_REPO" ]]; then
-  if [[ -d "$ROOT_DIR/../Traverse/.git" ]]; then
+  if git -C "$ROOT_DIR/../Traverse" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     TRAVERSE_REPO="$ROOT_DIR/../Traverse"
   else
     echo "Traverse readiness failed: set TRAVERSE_REPO to a local Traverse checkout." >&2
@@ -47,6 +47,7 @@ print_area_summary() {
   echo "Traverse readiness ${status}."
   echo "Capability areas:"
   summarize_area "$log_file" "application bundle registration" "downstream app bundle registration smoke passed."
+  summarize_area "$log_file" "public CLI app registration" "downstream public app registration smoke passed."
   summarize_area "$log_file" "WASM workflow execution" "downstream WASM workflow smoke passed."
   summarize_area "$log_file" "model dependency resolution" "downstream model dependency smoke passed."
   summarize_area "$log_file" "HTTP/JSON app path" "downstream HTTP/JSON smoke passed."
