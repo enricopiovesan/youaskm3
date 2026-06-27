@@ -1,0 +1,137 @@
+{
+  "kind": "capability_contract",
+  "schema_version": "1.0.0",
+  "id": "knowledge.context.pack",
+  "namespace": "knowledge.context",
+  "name": "pack",
+  "version": "0.1.0",
+  "lifecycle": "active",
+  "owner": {
+    "team": "youaskm3",
+    "contact": "maintainers@youaskm3.com"
+  },
+  "summary": "Build bounded prompt context from retrieved chunks and graph evidence.",
+  "description": "Constructs deterministic context packages inside model limits while preserving source and graph references.",
+  "inputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retrieved_chunks": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "graph_evidence": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "token_budget": {
+          "type": "integer",
+          "minimum": 256,
+          "maximum": 32768
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "query",
+        "retrieved_chunks",
+        "graph_evidence",
+        "token_budget",
+        "trace_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "outputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "string"
+        },
+        "included_chunk_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "included_edge_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "omitted_reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "trace_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "context",
+        "included_chunk_ids",
+        "included_edge_ids",
+        "omitted_reasons",
+        "trace_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "preconditions": [],
+  "postconditions": [],
+  "side_effects": [
+    {
+      "kind": "none",
+      "description": "Pure governed WASM capability execution."
+    }
+  ],
+  "emits": [],
+  "consumes": [],
+  "permissions": [],
+  "execution": {
+    "binary_format": "wasm",
+    "entrypoint": {
+      "kind": "wasi-command",
+      "command": "run"
+    },
+    "preferred_targets": [
+      "local"
+    ],
+    "constraints": {
+      "host_api_access": "none",
+      "network_access": "forbidden",
+      "filesystem_access": "none"
+    }
+  },
+  "policies": [],
+  "dependencies": [],
+  "provenance": {
+    "source": "greenfield",
+    "author": "youaskm3",
+    "created_at": "2026-06-26T00:00:00Z",
+    "spec_ref": "openspec/specs/traverse-integration/spec.md",
+    "adr_refs": [],
+    "exception_refs": []
+  },
+  "evidence": [],
+  "service_type": "stateless",
+  "permitted_targets": [
+    "local",
+    "cloud"
+  ],
+  "artifact_type": "native"
+}

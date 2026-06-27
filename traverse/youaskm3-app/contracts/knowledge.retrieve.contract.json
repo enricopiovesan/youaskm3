@@ -1,0 +1,142 @@
+{
+  "kind": "capability_contract",
+  "schema_version": "1.0.0",
+  "id": "knowledge.retrieve",
+  "namespace": "knowledge",
+  "name": "retrieve",
+  "version": "0.1.0",
+  "lifecycle": "active",
+  "owner": {
+    "team": "youaskm3",
+    "contact": "maintainers@youaskm3.com"
+  },
+  "summary": "Source-aware retrieval over prepared knowledge artifacts.",
+  "description": "Returns ranked chunks from generated search and markdown artifacts without embedding retrieval behavior in the PWA.",
+  "inputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_index_path": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      },
+      "required": [
+        "query",
+        "artifact_index_path"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "outputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "artifact_id": {
+                "type": "string"
+              },
+              "chunk_id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "source_path": {
+                "type": "string"
+              },
+              "excerpt": {
+                "type": "string"
+              },
+              "score": {
+                "type": "number"
+              },
+              "score_basis": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "artifact_id",
+              "chunk_id",
+              "title",
+              "source_path",
+              "excerpt",
+              "score",
+              "score_basis"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "trace_id": {
+          "type": "string"
+        },
+        "failure": {
+          "$ref": "#/$defs/failure"
+        }
+      },
+      "required": [
+        "results",
+        "trace_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "preconditions": [],
+  "postconditions": [],
+  "side_effects": [
+    {
+      "kind": "none",
+      "description": "Pure governed WASM capability execution."
+    }
+  ],
+  "emits": [],
+  "consumes": [],
+  "permissions": [],
+  "execution": {
+    "binary_format": "wasm",
+    "entrypoint": {
+      "kind": "wasi-command",
+      "command": "run"
+    },
+    "preferred_targets": [
+      "local"
+    ],
+    "constraints": {
+      "host_api_access": "none",
+      "network_access": "forbidden",
+      "filesystem_access": "none"
+    }
+  },
+  "policies": [],
+  "dependencies": [],
+  "provenance": {
+    "source": "greenfield",
+    "author": "youaskm3",
+    "created_at": "2026-06-26T00:00:00Z",
+    "spec_ref": "openspec/specs/traverse-integration/spec.md",
+    "adr_refs": [],
+    "exception_refs": []
+  },
+  "evidence": [],
+  "service_type": "stateless",
+  "permitted_targets": [
+    "local",
+    "cloud"
+  ],
+  "artifact_type": "native"
+}

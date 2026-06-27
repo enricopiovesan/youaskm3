@@ -4,7 +4,7 @@
   "schema_version": "1.0.0",
   "capability_id": "knowledge.infer",
   "capability_version": "0.1.0",
-  "contract_path": "../../../../contracts/capabilities/knowledge.infer.json",
+  "contract_path": "../../contracts/knowledge.infer.contract.json",
   "wasm_binary_path": "../../../../target/wasm32-wasip1/release/youaskm3_knowledge_infer.wasm",
   "wasm_digest": "sha256:e4ad1417c2b9b059a4f3db48f6368c801b115a974533e72cdd63ab0f54a42340",
   "implementation_status": "wasm_binary_ready",
@@ -15,8 +15,7 @@
   },
   "permitted_targets": [
     "local",
-    "server",
-    "mcp"
+    "cloud"
   ],
   "dependencies": [],
   "connector_requirements": [],

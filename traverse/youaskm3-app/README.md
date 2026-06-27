@@ -119,15 +119,12 @@ bash scripts/register-traverse-app.sh --validate-only --json
 TRAVERSE_REPO=/path/to/Traverse bash scripts/register-traverse-app.sh --json
 ```
 
-`--validate-only` is CI-safe and does not require a Traverse checkout. Real
-registration requires Traverse `v0.5.0` or newer and real WASM component
-artifacts.
-
-Traverse v0.5.0 exposes public local-dev app validation and registration through
-`traverse-cli app validate` and `traverse-cli app register`. Until
-`scripts/register-traverse-app.sh` consumes those commands directly, the
-remaining work is tracked as youaskm3 implementation work, not a Traverse
-surface gap.
+`--validate-only` is CI-safe and does not require a Traverse checkout. With
+`TRAVERSE_REPO` set to Traverse `v0.5.0` or newer and real WASM component
+artifacts present, the wrapper invokes public `traverse-cli app validate` and
+`traverse-cli app register` and returns the CLI-produced validation,
+registration, digest, workspace, app, workflow, model-readiness, and failure
+evidence in its JSON output.
 
 The end-to-end answer workflow integration gate is:
 
@@ -140,9 +137,9 @@ The gate validates prepared search artifacts, graph source evidence, public
 trace requirements, model dependency policy, Traverse `v0.5.0` readiness, and
 the app registration boundary. Without `TRAVERSE_REPO`, it validates local
 youaskm3 artifacts and skips the live Traverse step so default smoke remains
-CI-safe. With real component artifacts available, the live Traverse step should
-validate/register through Traverse v0.5.0 public CLI surfaces or return a stable
-youaskm3 implementation/setup error that is tracked by MVP-037.
+CI-safe. With real component artifacts available, the live Traverse step
+validates/registers through Traverse v0.5.0 public CLI surfaces or returns a
+stable youaskm3 implementation/setup error.
 
 The MCP parity gate is:
 

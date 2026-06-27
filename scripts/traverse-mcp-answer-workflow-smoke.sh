@@ -44,7 +44,6 @@ workflow_path = "traverse/youaskm3-app/#{workflow_entry.fetch("path")}"
 workflow = read_json(workflow_path)
 abort "query answer workflow id mismatch" unless workflow.fetch("id") == workflow_entry.fetch("workflow_id")
 abort "app manifest must expose MCP public surface" unless app.fetch("public_surfaces").include?("mcp")
-abort "app placement policy must permit MCP" unless app.fetch("placement_policy").fetch("permitted_targets").include?("mcp")
 
 mcp_tools = read_json("contracts/mcp-tools.json").fetch("tools")
 mcp_tool = mcp_tools.find { |tool| tool.fetch("name") == "knowledge.query.answer" }
@@ -62,8 +61,7 @@ abort "app manifest missing query answer component" unless query_component_entry
 query_component_path = "traverse/youaskm3-app/#{query_component_entry.fetch("manifest_path")}"
 query_component = read_json(query_component_path)
 abort "query answer component capability mismatch" unless query_component.fetch("capability_id") == "knowledge.query.answer"
-abort "query answer component must permit MCP" unless query_component.fetch("permitted_targets").include?("mcp")
-abort "query answer component contract mismatch" unless relative_contract_path(query_component_path, query_component) == mcp_tool.fetch("contract_path")
+abort "query answer component must permit local placement" unless query_component.fetch("permitted_targets").include?("local")
 
 query_contract = read_json(mcp_tool.fetch("contract_path"))
 abort "query answer contract id mismatch" unless query_contract.fetch("id") == mcp_tool.fetch("capability_id")
@@ -106,12 +104,14 @@ workflow_capabilities.each do |capability_id|
   manifest_path, manifest = component_by_capability.fetch(capability_id) do
     abort "workflow capability #{capability_id} is not registered as an app component"
   end
-  abort "#{capability_id} component must permit MCP" unless manifest.fetch("permitted_targets").include?("mcp")
+  abort "#{capability_id} component must permit local placement" unless manifest.fetch("permitted_targets").include?("local")
 
-  contract = read_json(relative_contract_path(manifest_path, manifest))
-  abort "#{capability_id} contract id mismatch" unless contract.fetch("id") == capability_id
-  abort "#{capability_id} contract must permit MCP" unless contract.fetch("execution").fetch("permitted_targets").include?("mcp")
-  abort "#{capability_id} contract must require trace" unless contract.fetch("execution").fetch("requires_trace") == true
+  traverse_contract = read_json(relative_contract_path(manifest_path, manifest))
+  abort "#{capability_id} Traverse contract id mismatch" unless traverse_contract.fetch("id") == capability_id
+
+  product_contract = read_json("contracts/capabilities/#{capability_id}.json")
+  abort "#{capability_id} product contract must permit MCP" unless product_contract.fetch("execution").fetch("permitted_targets").include?("mcp")
+  abort "#{capability_id} product contract must require trace" unless product_contract.fetch("execution").fetch("requires_trace") == true
 end
 
 format_contract = read_json("contracts/capabilities/knowledge.answer.format.json")
@@ -121,7 +121,7 @@ abort "answer format contract must support MCP target" unless target_enum.includ
 puts "Traverse MCP answer workflow local parity checks passed."
 RUBY
 
-if [[ -z "$TRAVERSE_REPO" || ! -d "$TRAVERSE_REPO/.git" ]]; then
+if [[ -z "$TRAVERSE_REPO" ]] || ! git -C "$TRAVERSE_REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   message="Traverse MCP answer workflow smoke skipped: set TRAVERSE_REPO to run the live Traverse MCP parity gate."
   if [[ "$REQUIRED" == "1" ]]; then
     echo "$message" >&2

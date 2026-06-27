@@ -4,7 +4,7 @@
   "schema_version": "1.0.0",
   "capability_id": "knowledge.graph.expand",
   "capability_version": "0.1.0",
-  "contract_path": "../../../../contracts/capabilities/knowledge.graph.expand.json",
+  "contract_path": "../../contracts/knowledge.graph.expand.contract.json",
   "wasm_binary_path": "../../../../target/wasm32-wasip1/release/youaskm3_knowledge_graph_expand.wasm",
   "wasm_digest": "sha256:4a7cbb539d76657467ac773c5b5aa6e2d16eaca98eecb1b854a453c7ee8ba78e",
   "implementation_status": "wasm_binary_ready",
@@ -15,8 +15,7 @@
   },
   "permitted_targets": [
     "local",
-    "server",
-    "mcp"
+    "cloud"
   ],
   "dependencies": [],
   "connector_requirements": [],

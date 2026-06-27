@@ -4,7 +4,7 @@
   "schema_version": "1.0.0",
   "capability_id": "knowledge.retrieve",
   "capability_version": "0.1.0",
-  "contract_path": "../../../../contracts/capabilities/knowledge.retrieve.json",
+  "contract_path": "../../contracts/knowledge.retrieve.contract.json",
   "wasm_binary_path": "../../../../target/wasm32-wasip1/release/youaskm3_knowledge_retrieve.wasm",
   "wasm_digest": "sha256:e4d078b9a4e894e41521f051929d43f662bcce71f84f36ff6b1edfe633146d33",
   "implementation_status": "wasm_binary_ready",
@@ -15,8 +15,7 @@
   },
   "permitted_targets": [
     "local",
-    "server",
-    "mcp"
+    "cloud"
   ],
   "dependencies": [],
   "connector_requirements": [],

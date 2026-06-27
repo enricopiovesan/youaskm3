@@ -97,7 +97,7 @@ if [[ -z "$traverse_tag" ]]; then
   traverse_tag="$(git -C "$TRAVERSE_REPO" describe --tags --abbrev=12 --always)"
 fi
 
-log_file="$(mktemp "${TMPDIR:-/tmp}/youaskm3-traverse-readiness.XXXXXX.log")"
+log_file="$(mktemp "${TMPDIR:-/tmp}/youaskm3-traverse-readiness.XXXXXX")"
 trap 'rm -f "$log_file"' EXIT
 
 echo "Checking Traverse readiness..."

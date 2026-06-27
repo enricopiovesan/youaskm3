@@ -4,7 +4,7 @@
   "schema_version": "1.0.0",
   "capability_id": "knowledge.query.answer",
   "capability_version": "0.1.0",
-  "contract_path": "../../../../contracts/capabilities/knowledge.query.answer.json",
+  "contract_path": "../../contracts/knowledge.query.answer.contract.json",
   "wasm_binary_path": "../../../../target/wasm32-wasip1/release/youaskm3_knowledge_query_answer.wasm",
   "wasm_digest": "sha256:9edbbe4b12962c1b4220000a6d513e6e5e07d32d09db53d009370cc28dd73f41",
   "implementation_status": "wasm_binary_ready",
@@ -15,33 +15,38 @@
   },
   "permitted_targets": [
     "local",
-    "server",
-    "mcp"
+    "cloud"
   ],
   "dependencies": [
     {
       "component_id": "youaskm3.knowledge.retrieve-component",
-      "version": "0.1.0"
+      "version": "0.1.0",
+      "digest": "sha256:e4d078b9a4e894e41521f051929d43f662bcce71f84f36ff6b1edfe633146d33"
     },
     {
       "component_id": "youaskm3.knowledge.graph-expand-component",
-      "version": "0.1.0"
+      "version": "0.1.0",
+      "digest": "sha256:4a7cbb539d76657467ac773c5b5aa6e2d16eaca98eecb1b854a453c7ee8ba78e"
     },
     {
       "component_id": "youaskm3.knowledge.context-pack-component",
-      "version": "0.1.0"
+      "version": "0.1.0",
+      "digest": "sha256:0a99fd6ac7664dbfdc3e913ff5f85e141bdc6ded9bceec24c64737066008d9bf"
     },
     {
       "component_id": "youaskm3.knowledge.infer-component",
-      "version": "0.1.0"
+      "version": "0.1.0",
+      "digest": "sha256:e4ad1417c2b9b059a4f3db48f6368c801b115a974533e72cdd63ab0f54a42340"
     },
     {
       "component_id": "youaskm3.knowledge.answer-validate-component",
-      "version": "0.1.0"
+      "version": "0.1.0",
+      "digest": "sha256:173f42ff50bc9ae05baddd504f880525965e3658695020cae121008f1ac452d8"
     },
     {
       "component_id": "youaskm3.knowledge.answer-format-component",
-      "version": "0.1.0"
+      "version": "0.1.0",
+      "digest": "sha256:d4ad5b271b43c1caf6ac8eafaf3d955a85b2518e6516dcf1e4e6848d712c0685"
     }
   ],
   "connector_requirements": [],

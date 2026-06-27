@@ -11,7 +11,7 @@ if [[ -z "$TRAVERSE_REPO" && "$REQUIRED" == "1" && -d "$ROOT_DIR/../Traverse/.gi
   TRAVERSE_REPO="$ROOT_DIR/../Traverse"
 fi
 
-json_file="$(mktemp "${TMPDIR:-/tmp}/youaskm3-answer-workflow.XXXXXX.json")"
+json_file="$(mktemp "${TMPDIR:-/tmp}/youaskm3-answer-workflow.XXXXXX")"
 trap 'rm -f "$json_file"' EXIT
 
 bash scripts/query-answer-workflow-smoke.sh
@@ -59,7 +59,7 @@ unless model_dependencies.any? { |dependency| dependency.fetch("required_capabil
 end
 RUBY
 
-if [[ -z "$TRAVERSE_REPO" || ! -d "$TRAVERSE_REPO/.git" ]]; then
+if [[ -z "$TRAVERSE_REPO" ]] || ! git -C "$TRAVERSE_REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   message="Traverse answer workflow smoke skipped: set TRAVERSE_REPO to run the live Traverse v0.5.0 gate."
   if [[ "$REQUIRED" == "1" ]]; then
     echo "$message" >&2
@@ -81,7 +81,7 @@ when "SKELETON_PENDING_WASM_COMPONENTS"
   abort "expected missing WASM evidence" unless payload.dig("evidence", "missing_wasm_count").to_i.positive?
   abort "expected skipped skeleton status" unless payload.fetch("status") == "skipped_skeleton_pending_wasm"
   puts "Traverse answer workflow smoke reached registration boundary: skeleton pending WASM; execution skipped."
-when "REGISTERED", "VALIDATED"
+when "REGISTERED", "ALREADY_REGISTERED", "VALIDATED"
   abort "registered workflow must expose no errors" unless payload.fetch("errors").empty?
   puts "Traverse answer workflow registration evidence passed."
 else

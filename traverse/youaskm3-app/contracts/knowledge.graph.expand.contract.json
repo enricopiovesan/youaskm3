@@ -1,0 +1,120 @@
+{
+  "kind": "capability_contract",
+  "schema_version": "1.0.0",
+  "id": "knowledge.graph.expand",
+  "namespace": "knowledge.graph",
+  "name": "expand",
+  "version": "0.1.0",
+  "lifecycle": "active",
+  "owner": {
+    "team": "youaskm3",
+    "contact": "maintainers@youaskm3.com"
+  },
+  "summary": "Expand source-backed graph context around retrieved evidence.",
+  "description": "Consumes graph artifacts and retrieved chunks to return bounded graph evidence for answer context.",
+  "inputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "graph_path": {
+          "type": "string"
+        },
+        "seed_chunk_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "max_hops": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "max_edges": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "graph_path",
+        "seed_chunk_ids",
+        "trace_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "outputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "nodes": {
+          "$ref": "knowledge-graph.schema.json#/properties/nodes"
+        },
+        "edges": {
+          "$ref": "knowledge-graph.schema.json#/properties/edges"
+        },
+        "trace_id": {
+          "type": "string"
+        },
+        "failure": {
+          "$ref": "#/$defs/failure"
+        }
+      },
+      "required": [
+        "nodes",
+        "edges",
+        "trace_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "preconditions": [],
+  "postconditions": [],
+  "side_effects": [
+    {
+      "kind": "none",
+      "description": "Pure governed WASM capability execution."
+    }
+  ],
+  "emits": [],
+  "consumes": [],
+  "permissions": [],
+  "execution": {
+    "binary_format": "wasm",
+    "entrypoint": {
+      "kind": "wasi-command",
+      "command": "run"
+    },
+    "preferred_targets": [
+      "local"
+    ],
+    "constraints": {
+      "host_api_access": "none",
+      "network_access": "forbidden",
+      "filesystem_access": "none"
+    }
+  },
+  "policies": [],
+  "dependencies": [],
+  "provenance": {
+    "source": "greenfield",
+    "author": "youaskm3",
+    "created_at": "2026-06-26T00:00:00Z",
+    "spec_ref": "openspec/specs/traverse-integration/spec.md",
+    "adr_refs": [],
+    "exception_refs": []
+  },
+  "evidence": [],
+  "service_type": "stateless",
+  "permitted_targets": [
+    "local",
+    "cloud"
+  ],
+  "artifact_type": "native"
+}

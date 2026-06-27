@@ -8,6 +8,7 @@ require "set"
 
 ROOT = Pathname.new(__dir__).join("..").realpath
 APP_MANIFEST_PATH = ROOT.join("traverse/youaskm3-app/manifest.json")
+TRAVERSE_CONTRACTS_DIR = ROOT.join("traverse/youaskm3-app/contracts")
 ZERO_DIGEST = "sha256:#{"0" * 64}"
 REQUIRED_COMPONENT_FIELDS = %w[
   component_id
@@ -73,10 +74,85 @@ def checked_write(path, data, check:)
   end
 end
 
+def traverse_component_targets(contract_targets)
+  contract_targets.map do |target|
+    case target
+    when "server"
+      "cloud"
+    when "mcp"
+      nil
+    else
+      target
+    end
+  end.compact.uniq
+end
+
+def traverse_contract_for(contract)
+  capability_id = contract.fetch("id")
+  namespace, name = capability_id.rpartition(".").values_at(0, 2)
+  {
+    "kind" => "capability_contract",
+    "schema_version" => "1.0.0",
+    "id" => capability_id,
+    "namespace" => namespace,
+    "name" => name,
+    "version" => contract.fetch("version"),
+    "lifecycle" => "active",
+    "owner" => {
+      "team" => "youaskm3",
+      "contact" => "maintainers@youaskm3.com"
+    },
+    "summary" => contract.fetch("summary"),
+    "description" => contract.fetch("description"),
+    "inputs" => contract.fetch("inputs"),
+    "outputs" => contract.fetch("outputs"),
+    "preconditions" => [],
+    "postconditions" => [],
+    "side_effects" => [
+      {
+        "kind" => "none",
+        "description" => "Pure governed WASM capability execution."
+      }
+    ],
+    "emits" => [],
+    "consumes" => [],
+    "permissions" => [],
+    "execution" => {
+      "binary_format" => "wasm",
+      "entrypoint" => {
+        "kind" => "wasi-command",
+        "command" => "run"
+      },
+      "preferred_targets" => ["local"],
+      "constraints" => {
+        "host_api_access" => "none",
+        "network_access" => "forbidden",
+        "filesystem_access" => "none"
+      }
+    },
+    "policies" => [],
+    "dependencies" => [],
+    "provenance" => {
+      "source" => "greenfield",
+      "author" => "youaskm3",
+      "created_at" => "2026-06-26T00:00:00Z",
+      "spec_ref" => "openspec/specs/traverse-integration/spec.md",
+      "adr_refs" => [],
+      "exception_refs" => []
+    },
+    "evidence" => [],
+    "service_type" => "stateless",
+    "permitted_targets" => traverse_component_targets(contract.fetch("execution").fetch("permitted_targets")),
+    "artifact_type" => "native"
+  }
+end
+
 app_manifest = read_json(APP_MANIFEST_PATH)
 components = app_manifest.fetch("components")
+component_digest_by_id = components.to_h { |component| [component.fetch("component_id"), component.fetch("digest")] }
 seen_component_ids = Set.new
 missing_binaries = []
+TRAVERSE_CONTRACTS_DIR.mkpath
 
 components.each do |app_component|
   manifest_path = ROOT.join("traverse/youaskm3-app", app_component.fetch("manifest_path")).cleanpath
@@ -90,13 +166,15 @@ components.each do |app_component|
   abort "Duplicate component_id in app manifest: #{component_id}" unless seen_component_ids.add?(component_id)
   abort "#{relative(manifest_path)} component_id does not match app manifest" unless component.fetch("component_id") == component_id
 
-  contract_path = manifest_path.dirname.join(component.fetch("contract_path")).cleanpath
+  contract_path = ROOT.join("contracts/capabilities/#{component.fetch("capability_id")}.json").cleanpath
   abort "Missing capability contract: #{relative(contract_path)}" unless contract_path.file?
 
   contract = read_json(contract_path)
   capability_id = contract.fetch("id")
   capability_version = contract.fetch("version")
   abort "#{relative(manifest_path)} capability_id does not match #{relative(contract_path)}" unless component.fetch("capability_id") == capability_id
+  traverse_contract_path = TRAVERSE_CONTRACTS_DIR.join("#{capability_id}.contract.json")
+  checked_write(traverse_contract_path, traverse_contract_for(contract), check: options[:check])
 
   wasm_binary_path = manifest_path.dirname.join(component.fetch("wasm_binary_path")).cleanpath
   if wasm_binary_path.file?
@@ -121,9 +199,13 @@ components.each do |app_component|
 
   component["version"] = app_component.fetch("version")
   component["capability_version"] = capability_version
+  component["contract_path"] = traverse_contract_path.relative_path_from(manifest_path.dirname).to_s
   component["wasm_digest"] = digest
   component["implementation_status"] = implementation_status
-  component["permitted_targets"] = contract.fetch("execution").fetch("permitted_targets")
+  component["permitted_targets"] = traverse_component_targets(contract.fetch("execution").fetch("permitted_targets"))
+  component.fetch("dependencies", []).each do |dependency|
+    dependency["digest"] = component_digest_by_id.fetch(dependency.fetch("component_id"))
+  end
   component["validation_evidence"] = validation_evidence
 
   app_component["digest"] = digest

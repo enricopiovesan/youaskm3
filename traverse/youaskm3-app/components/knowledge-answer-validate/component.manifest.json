@@ -4,7 +4,7 @@
   "schema_version": "1.0.0",
   "capability_id": "knowledge.answer.validate",
   "capability_version": "0.1.0",
-  "contract_path": "../../../../contracts/capabilities/knowledge.answer.validate.json",
+  "contract_path": "../../contracts/knowledge.answer.validate.contract.json",
   "wasm_binary_path": "../../../../target/wasm32-wasip1/release/youaskm3_knowledge_answer_validate.wasm",
   "wasm_digest": "sha256:173f42ff50bc9ae05baddd504f880525965e3658695020cae121008f1ac452d8",
   "implementation_status": "wasm_binary_ready",
@@ -15,8 +15,7 @@
   },
   "permitted_targets": [
     "local",
-    "server",
-    "mcp"
+    "cloud"
   ],
   "dependencies": [],
   "connector_requirements": [],
