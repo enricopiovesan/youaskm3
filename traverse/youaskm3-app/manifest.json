@@ -2,7 +2,7 @@
   "app_id": "youaskm3.knowledge-app",
   "version": "0.1.0",
   "schema_version": "1.0.0",
-  "minimum_traverse_version": "v0.4.0",
+  "minimum_traverse_version": "v0.5.0",
   "integration_status": "wasm_components_ready",
   "workspace_defaults": {
     "workspace_id": "youaskm3-local",

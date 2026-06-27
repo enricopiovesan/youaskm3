@@ -991,6 +991,150 @@ PYTHON=/opt/homebrew/bin/python3.14 \
 bash scripts/smoke.sh
 ```
 
+## Ticket MVP-036: Adopt Traverse v0.5.0 as the MVP-031 Runtime Baseline
+
+### Objective
+
+Pin youaskm3 MVP-031 and later runtime integration work to Traverse `v0.5.0`, the first Traverse release that adds public CLI app validation and local workspace registration surfaces for downstream apps.
+
+### Scope
+
+Update the repo baseline and validation references so future work uses:
+
+- Traverse release `v0.5.0`
+- governing Traverse spec `046-public-cli-app-registration`
+- `traverse-cli app validate --manifest <path> --json`
+- `traverse-cli app register --manifest <path> --workspace <workspace-id> --json`
+- v0.5.0 release-pinned evidence and caveats
+
+### Out of Scope
+
+- Implementing `scripts/register-traverse-app.sh` consumption of `traverse-cli`
+- Changing Traverse code
+- Claiming real WASM agent execution is proven before MVP-031 validates it
+
+### Definition of Done
+
+- `SPEC.md` names Traverse `v0.5.0` as the minimum approved baseline for MVP-031 onward.
+- `docs/traverse-mvp-requirements.md` documents v0.5.0 release evidence, new CLI surfaces, and remaining caveats.
+- `scripts/traverse-readiness.sh` defaults to `MIN_TRAVERSE_TAG=v0.5.0`.
+- The youaskm3 Traverse app manifest requires `v0.5.0`.
+- Bundle docs reference `traverse-cli app validate` and `traverse-cli app register`.
+- Historical v0.4.0 references remain only where they describe completed earlier work.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+PATH=/Users/enricopiovesan/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH \
+PYTHON=/opt/homebrew/bin/python3.14 \
+bash scripts/smoke.sh
+
+MIN_TRAVERSE_TAG=v0.5.0 \
+TRAVERSE_REPO=/Users/enricopiovesan/Documents/repos/Traverse \
+bash scripts/traverse-readiness.sh
+```
+
+If the local Traverse checkout is older than v0.5.0, the readiness command must fail with a clear setup message rather than weakening the baseline.
+
+## Ticket MVP-037: Consume Traverse v0.5.0 Public App Validate/Register CLI
+
+### Objective
+
+Update the youaskm3 registration command to use Traverse v0.5.0 public CLI app validation and local workspace registration instead of stopping at the old missing-surface error.
+
+### Scope
+
+Update `scripts/register-traverse-app.sh` so that, when real component artifacts are present and `TRAVERSE_REPO` points to Traverse v0.5.0 or newer, it invokes:
+
+- `traverse-cli app validate --manifest <path> --json`
+- `traverse-cli app register --manifest <path> --workspace <workspace-id> --json`
+
+The command must preserve machine-readable evidence for local validation, registration status, workspace id, app id, version, digests, failures, and Traverse version.
+
+### Out of Scope
+
+- Hosted registration service
+- HTTP admin API registration
+- Changing Traverse CLI behavior
+- Accepting skeleton manifests, placeholder digests, fake workflow steps, or Browser demo evidence
+
+### Definition of Done
+
+- `scripts/register-traverse-app.sh --validate-only --json` remains CI-safe and validates local bundle evidence without requiring Traverse.
+- With `TRAVERSE_REPO` set to Traverse v0.5.0 or newer and real WASM artifacts present, the script calls public `traverse-cli app validate`.
+- With a workspace id provided, the script calls public `traverse-cli app register`.
+- The script records CLI-produced workspace registration evidence in its JSON output.
+- Missing `traverse-cli`, stale Traverse checkout, invalid manifest, missing workspace id, and CLI validation failures return stable machine-readable error codes.
+- Existing smoke coverage is updated so the old `MISSING_PUBLIC_APP_REGISTRATION_SURFACE` path is no longer the expected success/failure result for v0.5.0.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+PATH=/Users/enricopiovesan/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH \
+cargo build --locked --workspace --target wasm32-wasip1 --release
+
+bash scripts/register-traverse-app.sh --validate-only --json
+
+MIN_TRAVERSE_TAG=v0.5.0 \
+TRAVERSE_REPO=/Users/enricopiovesan/Documents/repos/Traverse \
+bash scripts/register-traverse-app.sh --json
+
+PATH=/Users/enricopiovesan/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH \
+PYTHON=/opt/homebrew/bin/python3.14 \
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-038: Add Release-Pinned Traverse v0.5.0 Conformance Evidence
+
+### Objective
+
+Add release-pinned evidence proving youaskm3 can validate the Traverse v0.5.0 pairing from a local checkout and distinguish setup failures from runtime blockers.
+
+### Scope
+
+Update readiness docs and smoke evidence around:
+
+- v0.5.0 tag verification
+- downstream app MVP conformance
+- public CLI app registration conformance
+- local checkout freshness errors
+- optional live local model conformance caveat
+
+### Out of Scope
+
+- Implementing missing youaskm3 runtime capabilities
+- Changing Traverse conformance scripts
+- Treating release prose as enough evidence when local conformance can run
+
+### Definition of Done
+
+- `docs/traverse-mvp-requirements.md` contains a v0.5.0 release-pinned evidence checklist.
+- `scripts/traverse-readiness.sh` reports the active Traverse tag/commit and minimum baseline.
+- A stale local Traverse checkout fails clearly as an environment/setup failure.
+- A v0.5.0-or-newer checkout runs downstream conformance through public Traverse surfaces.
+- Readiness output summarizes application bundle registration, WASM workflow execution, model dependency resolution, HTTP/JSON app path, MCP parity path, and public CLI app registration where available.
+- Optional live local model conformance remains opt-in.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+MIN_TRAVERSE_TAG=v0.5.0 \
+TRAVERSE_REPO=/Users/enricopiovesan/Documents/repos/Traverse \
+bash scripts/traverse-readiness.sh
+
+TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1 \
+MIN_TRAVERSE_TAG=v0.5.0 \
+TRAVERSE_REPO=/Users/enricopiovesan/Documents/repos/Traverse \
+bash scripts/traverse-readiness.sh
+
+PATH=/Users/enricopiovesan/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH \
+PYTHON=/opt/homebrew/bin/python3.14 \
+bash scripts/smoke.sh
+```
+
 - Common failures are documented:
   - missing `cargo`
   - missing `wasm32-wasip1`
@@ -1040,6 +1184,9 @@ Next highest-ROI tranche after MVP-030:
 - MVP-033 real imported-document question acceptance test
 - MVP-034 explicit Browser demo fallback semantics
 - MVP-035 Traverse blocker escalation template
+- MVP-036 Traverse v0.5.0 baseline adoption
+- MVP-037 public CLI app validate/register consumption
+- MVP-038 release-pinned v0.5.0 conformance evidence
 
 ## First Ticket to Start
 
@@ -1049,7 +1196,7 @@ Recommended first implementation ticket:
 
 Reason:
 
-- Traverse v0.4.0 readiness is already green.
+- Traverse v0.5.0 is the approved baseline for MVP-031 onward.
 - It validates the user-facing product with real runtime pressure.
 - It exposes any remaining Traverse gaps through concrete evidence.
 - It keeps youaskm3 from drifting into downstream runtime shortcuts.

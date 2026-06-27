@@ -120,7 +120,7 @@ This repo is intentionally structured so humans and agents can navigate the same
 | Start or resume ops workflow | [docs/youaskm3-ops.md](docs/youaskm3-ops.md) |
 | Inspect the repo command surface | [scripts/m3.sh](scripts/m3.sh) |
 | Run the full validation path | [scripts/smoke.sh](scripts/smoke.sh) |
-| Check Traverse v0.4.0 readiness | [scripts/traverse-readiness.sh](scripts/traverse-readiness.sh) |
+| Check Traverse v0.5.0 readiness | [scripts/traverse-readiness.sh](scripts/traverse-readiness.sh) |
 | Update Traverse component manifests | [scripts/traverse-component-manifests.sh](scripts/traverse-component-manifests.sh) |
 | Review current knowledge layout | [knowledge/index.md](knowledge/index.md) |
 

@@ -280,7 +280,7 @@
     "mvp",
     "knowledge",
     "answer",
-    "traverse-v0.4.0"
+    "traverse-v0.5.0"
   ],
   "governing_spec": "openspec/specs/traverse-integration/spec.md"
 }

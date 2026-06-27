@@ -10,11 +10,20 @@ The traverse-integration capability defines how youaskm3 hands product/business 
 
 The system SHALL register the youaskm3 application bundle through documented Traverse public APIs, including capability contracts, event contracts, workflow definitions, WASM package manifests, binary digests, runtime constraints, permitted targets, and model dependency declarations.
 
+For MVP-031 onward, the minimum approved Traverse baseline is `v0.5.0`. Local development setup SHALL validate bundles through `traverse-cli app validate --manifest <path> --json` and register them into a workspace through `traverse-cli app register --manifest <path> --workspace <workspace-id> --json`.
+
 #### Scenario: Register the MVP bundle
 
 - GIVEN the CLI has built the MVP artifact and WASM package set
 - WHEN it registers the application with Traverse
 - THEN Traverse returns machine-readable bundle ids, versions, digests, and validation status without relying on private Traverse internals
+
+#### Scenario: Validate and register through the Traverse v0.5.0 CLI
+
+- GIVEN the CLI has built the youaskm3 Traverse application bundle
+- WHEN local development setup validates and registers the bundle
+- THEN it uses Traverse `v0.5.0` or newer public CLI app validation and local workspace registration commands
+- AND the setup path does not depend on private Traverse internals or downstream runtime shortcuts
 
 ### Requirement: Execute the chat workflow through real Traverse capabilities
 

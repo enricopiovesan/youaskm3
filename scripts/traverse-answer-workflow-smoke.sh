@@ -60,7 +60,7 @@ end
 RUBY
 
 if [[ -z "$TRAVERSE_REPO" || ! -d "$TRAVERSE_REPO/.git" ]]; then
-  message="Traverse answer workflow smoke skipped: set TRAVERSE_REPO to run the live Traverse v0.4.0 gate."
+  message="Traverse answer workflow smoke skipped: set TRAVERSE_REPO to run the live Traverse v0.5.0 gate."
   if [[ "$REQUIRED" == "1" ]]; then
     echo "$message" >&2
     exit 2

@@ -72,4 +72,4 @@ TRAVERSE_REPO=/path/to/Traverse bash scripts/traverse-readiness.sh
 ```
 
 See [traverse-mvp-requirements.md](traverse-mvp-requirements.md) for the
-release-pinned Traverse `v0.4.0` evidence checklist.
+release-pinned Traverse `v0.5.0` evidence checklist.

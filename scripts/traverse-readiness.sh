@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-MIN_TRAVERSE_TAG="${MIN_TRAVERSE_TAG:-v0.4.0}"
+MIN_TRAVERSE_TAG="${MIN_TRAVERSE_TAG:-v0.5.0}"
 TRAVERSE_REPO="${TRAVERSE_REPO:-${TRAVERSE_CHECKOUT:-}}"
 
 if [[ -z "$TRAVERSE_REPO" ]]; then
@@ -70,7 +70,7 @@ require_cmd bash
 require_cmd git
 require_cmd cargo
 
-if [[ ! -d "$TRAVERSE_REPO/.git" ]]; then
+if ! git -C "$TRAVERSE_REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   echo "Traverse readiness failed: TRAVERSE_REPO is not a git checkout: $TRAVERSE_REPO" >&2
   exit 1
 fi

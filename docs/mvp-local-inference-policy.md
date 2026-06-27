@@ -83,7 +83,7 @@ The UI may display summarized placement and dependency status, but it must not d
 
 ### WASM-Native Model Caveat
 
-Traverse `v0.4.0` proves governed model dependency resolution and includes an opt-in local Ollama provider path. It does not prove that the model engine itself is WASM-native.
+Traverse `v0.5.0` preserves governed model dependency resolution and includes an opt-in local Ollama provider path. It does not prove that the model engine itself is WASM-native.
 
 The first MVP may proceed while this caveat is true because the architectural requirement is that inference selection, placement, trace evidence, and failure handling are governed by Traverse rather than hardcoded downstream app logic. A later release may require the model engine itself to run as WASM when Traverse exposes stable readiness evidence for that path.
 

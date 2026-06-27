@@ -1,8 +1,8 @@
 # Traverse Requirements for the First Knowledge-App MVP
 
-Status: Updated for Traverse v0.4.0 first-MVP baseline
+Status: Updated for Traverse v0.5.0 first-MVP baseline
 Owner: youaskm3 downstream integration
-Last updated: 2026-06-22
+Last updated: 2026-06-26
 
 ## Purpose
 
@@ -44,22 +44,24 @@ The downstream app should only depend on Traverse public surfaces, not private c
 
 ## Current Baseline Confirmed
 
-As of 2026-06-22, Traverse `v0.4.0` is the minimum approved first-MVP integration baseline for this downstream app.
+As of 2026-06-26, Traverse `v0.5.0` is the minimum approved first-MVP integration baseline for MVP-031 onward.
 
 Release:
 
-- Tag: `v0.4.0`
-- URL: https://github.com/enricopiovesan/Traverse/releases/tag/v0.4.0
-- Release date: 2026-06-22
-- Governing Traverse specs: `044-application-bundle-manifest` and `045-governed-model-dependency-resolution`
+- Tag: `v0.5.0`
+- URL: https://github.com/enricopiovesan/Traverse/releases/tag/v0.5.0
+- Release date: 2026-06-26
+- Governing Traverse specs: `044-application-bundle-manifest`, `045-governed-model-dependency-resolution`, and `046-public-cli-app-registration`
 
-The exact `v0.4.0` tag conformance path passed locally:
+Traverse `v0.5.0` keeps the `v0.4.0` manifest and governed model-dependency baseline intact while adding the public downstream app setup commands needed by youaskm3:
 
-```bash
-bash scripts/ci/downstream_app_mvp_conformance.sh
-```
+- `traverse-cli app validate --manifest <path> --json`
+- `traverse-cli app register --manifest <path> --workspace <workspace-id> --json`
+- durable local workspace registration state under `.traverse/workspaces/<workspace-id>/apps/<app-id>/<version>/registration.json`
+- runtime loading from CLI-produced workspace app state
+- downstream public app registration conformance wired into downstream app MVP conformance
 
-Traverse `v0.4.0` covers the first-MVP runtime baseline:
+Traverse `v0.5.0` covers the first-MVP runtime baseline:
 
 - application bundle manifests
 - WASM component manifests
@@ -72,11 +74,16 @@ Traverse `v0.4.0` covers the first-MVP runtime baseline:
 - WASM execution via Wasmtime exists
 - public trace evidence exists
 - programmatic registration exists
+- public CLI app validation exists
+- public CLI local workspace app registration exists
+- runtime loading from CLI-produced workspace app state exists
 - downstream app MVP conformance exists
 
 Important caveat:
 
-Traverse `v0.4.0` proves governed model dependency resolution and includes a local Ollama provider path, but the default conformance suite does not require a reachable live local model. Live local Ollama conformance is separately gated with `TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1`. Also, this baseline does not prove that the model engine itself is WASM-native. The first youaskm3 MVP may proceed as long as `knowledge.infer` is declared, resolved, placed, traced, and failed through Traverse-governed dependency surfaces rather than hardcoded downstream app provider logic.
+Traverse `v0.5.0` proves governed model dependency resolution and includes a local Ollama provider path inherited from the `v0.4.0` baseline, but the default conformance suite does not require a reachable live local model. Live local Ollama conformance is separately gated with `TRAVERSE_RUN_LOCAL_OLLAMA_CONFORMANCE=1`. Also, this baseline does not prove that the model engine itself is WASM-native. The first youaskm3 MVP may proceed only if `knowledge.infer` is implemented as a real Traverse-governed WASM agent capability or fails with governed missing-dependency evidence; downstream app code must not hardcode provider logic or use fake deterministic inference as acceptance evidence.
+
+Historical note: Traverse `v0.4.0`, released on 2026-06-22, remains the first approved application-manifest and governed model-dependency baseline. MVP-031 onward uses `v0.5.0` because it adds the public CLI app validation and local workspace registration surfaces required for the real downstream setup flow.
 
 The downstream local inference policy is defined in [mvp-local-inference-policy.md](mvp-local-inference-policy.md). Default youaskm3 smoke must not require a live local LLM; optional live local conformance remains explicit and opt-in.
 
@@ -214,7 +221,7 @@ Acceptance criteria:
 
 #### TRV-P0-004: Runtime Dependency Resolution for Model Dependencies
 
-Traverse `v0.4.0` turns model dependency declarations into runtime-governed dependencies. youaskm3 must consume those public surfaces and must not hardcode an inference provider in product/business logic.
+Traverse `v0.5.0` preserves the `v0.4.0` model dependency declarations as runtime-governed dependencies. youaskm3 must consume those public surfaces and must not hardcode an inference provider in product/business logic.
 
 Acceptance criteria:
 
@@ -519,7 +526,7 @@ The downstream app needs stable public APIs for:
 - discovering MCP tools
 - executing MCP entrypoints
 
-Traverse `v0.4.0` covers the required public API baseline through application manifests, WASM component manifests, atomic registration, governed model dependency resolution, HTTP/JSON trace paths, MCP reporting, and downstream MVP conformance evidence.
+Traverse `v0.5.0` covers the required public API baseline through application manifests, WASM component manifests, public CLI app validation, public CLI local workspace registration, runtime loading from CLI-produced workspace app state, governed model dependency resolution, HTTP/JSON trace paths, MCP reporting, and downstream MVP conformance evidence.
 
 ## Required Validation Evidence
 
@@ -546,7 +553,7 @@ Downstream readiness wrapper:
 bash scripts/traverse-readiness.sh
 ```
 
-The wrapper looks for a local Traverse checkout at `../Traverse` by default. Use `TRAVERSE_REPO=/path/to/Traverse` or `TRAVERSE_CHECKOUT=/path/to/Traverse` when the checkout is elsewhere. It verifies that the checkout contains the `v0.4.0` baseline, reports the active tag and commit, delegates to Traverse's public downstream conformance script, and summarizes the capability areas instead of printing full passing logs:
+The wrapper looks for a local Traverse checkout at `../Traverse` by default. Use `TRAVERSE_REPO=/path/to/Traverse` or `TRAVERSE_CHECKOUT=/path/to/Traverse` when the checkout is elsewhere. It verifies that the checkout contains the `v0.5.0` baseline by default, reports the active tag and commit, delegates to Traverse's public downstream conformance script, and summarizes the capability areas instead of printing full passing logs:
 
 ```text
 Traverse readiness passed.
@@ -581,8 +588,8 @@ the first-MVP Traverse baseline is satisfied:
 2. Confirm the checkout contains and is not older than the pinned baseline:
 
    ```bash
-   git -C "${TRAVERSE_REPO:-../Traverse}" rev-parse --verify v0.4.0^{commit}
-   git -C "${TRAVERSE_REPO:-../Traverse}" merge-base --is-ancestor v0.4.0 HEAD
+   git -C "${TRAVERSE_REPO:-../Traverse}" rev-parse --verify v0.5.0^{commit}
+   git -C "${TRAVERSE_REPO:-../Traverse}" merge-base --is-ancestor v0.5.0 HEAD
    ```
 
 3. Run the public downstream conformance path from youaskm3, not a private
@@ -643,8 +650,8 @@ Traverse should only care about these external tools if the downstream app wraps
 
 ## Recommended Traverse Work Order
 
-1. Pin youaskm3 specs and docs to Traverse `v0.4.0`.
-2. Create the youaskm3 application bundle skeleton using v0.4.0 manifest fields.
+1. Pin youaskm3 specs and docs to Traverse `v0.5.0`.
+2. Use the youaskm3 application bundle with v0.5.0-compatible manifest fields and public CLI validation/registration.
 3. Add a youaskm3 readiness check that delegates to `downstream_app_mvp_conformance.sh`.
 4. Implement the MVP WASM capabilities and component manifests.
 5. Register the youaskm3 app bundle through Traverse public APIs.
@@ -672,4 +679,4 @@ Traverse already has a strong foundation for the first integration:
 - trace evidence
 - downstream app MVP conformance evidence
 
-The critical missing piece has moved to the downstream app: youaskm3 must now build and register its own Traverse v0.4.0 application bundle, implement the MVP WASM capabilities, wire the PWA/MCP paths to the registered workflow, and document the local inference caveat clearly.
+The critical missing piece has moved to the downstream app: youaskm3 must now build and register its own Traverse v0.5.0 application bundle through public CLI app validation/registration, implement the MVP WASM microservices and WASM agents, wire the PWA/MCP paths to the registered workflow, and document the local inference caveat clearly.

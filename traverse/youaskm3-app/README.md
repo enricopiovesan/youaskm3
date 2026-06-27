@@ -1,26 +1,27 @@
 # youaskm3 Traverse Application Bundle
 
 This directory contains the first youaskm3 application bundle for Traverse
-`v0.4.0`.
+`v0.5.0`.
 
 It is the checked-in target shape for registering the first MVP chat workflow
 through Traverse public application-bundle surfaces. The checked-in component
 manifests now carry real release WASM binary digests for the MVP capability
-artifacts; live app registration still depends on Traverse exposing the
-external registration surface for this manifest shape.
+artifacts; live app registration now targets the public Traverse CLI app
+validation and local workspace registration surfaces added in Traverse v0.5.0.
 
 ## Baseline
 
-- Minimum Traverse release: `v0.4.0`
-- Traverse release date: 2026-06-22
-- Traverse release: <https://github.com/enricopiovesan/Traverse/releases/tag/v0.4.0>
+- Minimum Traverse release: `v0.5.0`
+- Traverse release date: 2026-06-26
+- Traverse release: <https://github.com/enricopiovesan/Traverse/releases/tag/v0.5.0>
 - Governing Traverse specs:
   - `044-application-bundle-manifest`
   - `045-governed-model-dependency-resolution`
+  - `046-public-cli-app-registration`
 - youaskm3 governing spec:
   - `openspec/specs/traverse-integration/spec.md`
 
-Traverse `v0.4.0` provides the public surfaces this skeleton targets:
+Traverse `v0.5.0` provides the public surfaces this bundle targets:
 
 - application manifests
 - WASM component manifests
@@ -30,6 +31,10 @@ Traverse `v0.4.0` provides the public surfaces this skeleton targets:
 - MCP reporting
 - downstream app MVP conformance through
   `bash scripts/ci/downstream_app_mvp_conformance.sh`
+- public CLI app validation through
+  `traverse-cli app validate --manifest <path> --json`
+- public CLI local workspace registration through
+  `traverse-cli app register --manifest <path> --workspace <workspace-id> --json`
 
 ## Files
 
@@ -62,7 +67,7 @@ The first workflow composes them in this order:
 
 ## Component Artifact Evidence
 
-The component manifests use Traverse v0.4.0 field names and reference release
+The component manifests use Traverse v0.5.0-compatible field names and reference release
 WASM artifacts under `target/wasm32-wasip1/release`. Generate or verify real
 component evidence with:
 
@@ -81,7 +86,7 @@ implementation markers, or placeholder validation evidence.
 
 ## Model Dependency
 
-The app manifest declares inference through Traverse v0.4.0
+The app manifest declares inference through Traverse v0.5.0
 `model_dependencies` using the `traverse.inference.generate` interface.
 
 The local Ollama candidate is a Traverse-resolved provider candidate, not
@@ -104,8 +109,8 @@ provider logic.
 ## Registration Status
 
 The bundle has real component artifact digests and passes local validation.
-Real Traverse registration can still fail when Traverse does not expose a
-public external app-register CLI for this checked-in manifest shape.
+Real Traverse registration must now use the public v0.5.0 CLI app validation
+and local workspace registration surfaces.
 
 The youaskm3-side registration entrypoint is:
 
@@ -115,13 +120,14 @@ TRAVERSE_REPO=/path/to/Traverse bash scripts/register-traverse-app.sh --json
 ```
 
 `--validate-only` is CI-safe and does not require a Traverse checkout. Real
-registration requires Traverse `v0.4.0` or newer and real WASM component
+registration requires Traverse `v0.5.0` or newer and real WASM component
 artifacts.
 
-If real component artifacts are present but Traverse does not yet expose a
-public external app-register CLI for this application manifest shape, the
-command fails with `MISSING_PUBLIC_APP_REGISTRATION_SURFACE`. That is a
-Traverse integration requirement, not a downstream hidden fallback.
+Traverse v0.5.0 exposes public local-dev app validation and registration through
+`traverse-cli app validate` and `traverse-cli app register`. Until
+`scripts/register-traverse-app.sh` consumes those commands directly, the
+remaining work is tracked as youaskm3 implementation work, not a Traverse
+surface gap.
 
 The end-to-end answer workflow integration gate is:
 
@@ -131,12 +137,12 @@ TRAVERSE_REPO=/path/to/Traverse bash scripts/traverse-answer-workflow-smoke.sh
 ```
 
 The gate validates prepared search artifacts, graph source evidence, public
-trace requirements, model dependency policy, Traverse `v0.4.0` readiness, and
+trace requirements, model dependency policy, Traverse `v0.5.0` readiness, and
 the app registration boundary. Without `TRAVERSE_REPO`, it validates local
 youaskm3 artifacts and skips the live Traverse step so default smoke remains
 CI-safe. With real component artifacts available, the live Traverse step should
-either validate/register through Traverse or return a stable upstream Traverse
-surface gap such as `MISSING_PUBLIC_APP_REGISTRATION_SURFACE`.
+validate/register through Traverse v0.5.0 public CLI surfaces or return a stable
+youaskm3 implementation/setup error that is tracked by MVP-037.
 
 The MCP parity gate is:
 
@@ -163,7 +169,7 @@ Follow-up tickets:
 For this bundle slice:
 
 ```bash
-rg -n "v0.4.0|model_dependencies|knowledge.query.answer|knowledge.retrieve|knowledge.infer" traverse/youaskm3-app
+rg -n "v0.5.0|model_dependencies|knowledge.query.answer|knowledge.retrieve|knowledge.infer" traverse/youaskm3-app
 PATH=/Users/enricopiovesan/.cargo/bin:/opt/homebrew/opt/rustup/bin:$PATH \
 cargo build --locked --workspace --target wasm32-wasip1 --release
 bash scripts/traverse-component-manifests.sh --check
