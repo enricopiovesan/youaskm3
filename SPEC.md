@@ -13,13 +13,13 @@
 
 ## 1. Vision
 
-youaskm3 is an open source, WASM-native, MCP-powered personal knowledge product. It ingests everything you write, read, and save — books, white papers, blog posts, YouTube transcripts, articles, notes — and turns those files into a local-first chat experience grounded in user-owned markdown, search, chunk, and graph artifacts.
+youaskm3 is an open source, WASM-native, MCP-powered personal knowledge product. It ingests everything you write, read, and save — books, white papers, blog posts, YouTube transcripts, articles, notes, and structured reasoning logs — and turns those files into a local-first chat experience grounded in user-owned markdown, search, chunk, and graph artifacts.
 
-The system answers as *you*: in your voice, from your accumulated thinking.
+The system answers as *you*: in your voice, from your accumulated thinking. Its core product loop is not only retrieval over files; it is a second-brain reasoning loop where a persona works with an assistant to clarify concepts, challenge assumptions, record decisions, turn the resulting decision log into durable knowledge, update the graph, and defer back to the human when knowledge is missing, uncertain, or conflicting.
 
 Anyone can fork it, fill it with their own knowledge, and run their own instance for free on GitHub Pages. Runtime business behavior is delegated to Traverse as governed WASM capabilities so the same application logic can run locally, on a server, or through MCP as Traverse placement improves. Instances can optionally federate through a shared registry, making knowledge discoverable across the network.
 
-**Core promise:** no mandatory hosted service, no database, no lock-in. Git is the infrastructure, the browser is the product surface, and Traverse is the portable business-logic runtime.
+**Core promise:** no mandatory hosted service, no database, no lock-in. Git and local files are the infrastructure, chat is the product surface, and Traverse is the portable business-logic runtime.
 
 ---
 
@@ -32,8 +32,9 @@ Anyone can fork it, fill it with their own knowledge, and run their own instance
 5. **Production quality from day one.** No prototype shortcuts in core paths. Quality standards apply from the first commit.
 6. **Open by default.** Apache-2.0 licensed. Designed to be forked, extended, and contributed to.
 7. **Git as infrastructure.** Knowledge store, registry, deployment, and history are all git-native. No mandatory external services required.
-8. **UI-only product shell.** The PWA renders chat, sources, graph context, and traces; it does not own retrieval, ranking, graph traversal, context packing, inference selection, answer validation, or response formatting.
-9. **CLI as artifact builder.** The CLI may convert files, normalize markdown, write artifacts, build, sync, serve, and register bundles; product semantics belong in Traverse-run capabilities.
+8. **UI-only product shell.** The PWA renders chat, sources, graph context, gaps, conflicts, and traces; it does not own retrieval, ranking, graph traversal, context packing, inference selection, answer validation, response formatting, gap lifecycle, graph extraction, or sync conflict policy.
+9. **CLI as artifact and setup manager.** The CLI may convert files, normalize markdown, ingest decision-log packages, write artifacts, build, sync, serve, and register bundles; product semantics belong in Traverse-run capabilities.
+10. **Reasoning logs are first-class knowledge.** Decision-log packages from LLM-agnostic reasoning skills are first-class inputs to the knowledge store and graph, with provenance, validation, and gap/conflict handling.
 
 ---
 
@@ -63,6 +64,7 @@ Anyone can fork it, fill it with their own knowledge, and run their own instance
 | Conversion | **MarkItDown** | Default source-to-markdown conversion layer for supported office, PDF, and document formats |
 | Chunks | **Static JSON + markdown refs** | Deterministic context units with source and section evidence |
 | Graph | **Static JSON graph artifact** | Source-aware nodes and edges for graph-backed context |
+| Reasoning packages | **Decision-log package directories** | `decision-log.md`, `knowledge-note.md`, and `metadata.json` from LLM-agnostic assistant reasoning sessions |
 | Diagrams | **Mermaid** | Plain text, renders in GitHub, LLM-readable |
 | Index | **Static JSON** | Generated at build time, no DB needed |
 | Search | **WASM retrieval capability** | Runs through Traverse locally or remotely based on placement |
@@ -136,6 +138,10 @@ youaskm3/
 │   ├── books/
 │   ├── papers/
 │   ├── blog/
+│   ├── gaps/                   ← structured markdown knowledge gaps
+│   ├── conflicts/              ← structured markdown sync/semantic conflicts
+│   ├── sources/decision-logs/  ← immutable imported reasoning packages
+│   ├── notes/                  ← normalized derived knowledge notes
 │   └── inputs/                 ← raw captures (transcripts, notes, links)
 │
 ├── scripts/
@@ -204,6 +210,18 @@ Roadmap work that touches runtime, MCP, browser hosting, model inference, or for
 
 The first-MVP personas, "As a..., I want..., so that..." stories, capability mappings, and demo acceptance path are maintained in [docs/mvp-user-stories.md](docs/mvp-user-stories.md). Runtime and UI work should map back to those stories when defining tickets, smoke tests, and demo evidence.
 
+### Expanded first-MVP second-brain scope
+
+The expanded first-MVP decisions are recorded in [docs/expanded-second-brain-mvp-decision-log.md](docs/expanded-second-brain-mvp-decision-log.md). These decisions are approved through the user's brainstorming process and define the first MVP as a reasoning-and-knowledge-cementing product, not generic chat over documents.
+
+The approved additional OpenSpec surfaces are:
+
+- [reasoning-assistant-skill](openspec/specs/reasoning-assistant-skill/spec.md): LLM-agnostic canonical skill and generated ChatGPT/Claude adapters.
+- [decision-log-package](openspec/specs/decision-log-package/spec.md): package format, validation, CLI ingestion, provenance, and offline staging rules.
+- [reasoning-graph](openspec/specs/reasoning-graph/spec.md): full reasoning graph extraction and answer-type context selection.
+- [knowledge-gap-lifecycle](openspec/specs/knowledge-gap-lifecycle/spec.md): gaps, conflicts, direct fact resolution, and gap visibility.
+- [local-runtime-sync](openspec/specs/local-runtime-sync/spec.md): `m3 init`, `m3 serve`, sync preflight, `m3 sync check`, and `m3 mvp-check`.
+
 ### Next product-led MVP tranche
 
 After Traverse `v0.5.0` readiness and the first youaskm3 WASM capability tranche, the next highest-ROI work is tracked as MVP-031 through MVP-040 in [docs/mvp-ticket-backlog.md](docs/mvp-ticket-backlog.md):
@@ -218,6 +236,8 @@ After Traverse `v0.5.0` readiness and the first youaskm3 WASM capability tranche
 - add the final first-MVP acceptance and release gate
 
 These tickets keep youaskm3 product-led while using concrete app evidence to drive Traverse requirements. They must not add downstream runtime/provider shortcuts that bypass Traverse-governed WASM capability execution.
+
+The expanded second-brain tranche is tracked as MVP-041 and later in [docs/mvp-ticket-backlog.md](docs/mvp-ticket-backlog.md). It does not replace MVP-031 through MVP-040; it layers the approved decision-log, reasoning graph, knowledge gap, sync, local runtime, and final expanded acceptance requirements on top of the existing Traverse-backed runtime baseline.
 
 ### Real runtime implementation rule
 

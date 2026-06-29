@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The pwa-shell capability defines the installable, offline-capable browser shell that hosts the user-facing chat experience, presents sources and graph evidence, and delegates product/business behavior to Traverse-run WASM microservice and WASM agent capabilities.
+The pwa-shell capability defines the installable, offline-capable browser shell that hosts the user-facing chat experience, presents sources, graph evidence, gaps, conflicts, and traces, and delegates product/business behavior to Traverse-run WASM microservice and WASM agent capabilities.
 
 ## Requirements
 
@@ -28,7 +28,7 @@ The system SHALL reserve UI surfaces for chat responses and source attribution s
 
 ### Requirement: Keep the PWA as a UI-only application
 
-The system SHALL keep retrieval ranking, graph traversal, context packing, inference selection, answer validation, and answer formatting outside the PWA and behind real Traverse-run WASM microservice or WASM agent capability contracts.
+The system SHALL keep retrieval ranking, graph traversal, context packing, inference selection, answer validation, answer formatting, gap lifecycle, direct fact resolution policy, sync conflict policy, and reasoning graph extraction outside the PWA and behind real Traverse-run WASM microservice or WASM agent capability contracts.
 
 #### Scenario: Submit a chat prompt
 
@@ -80,3 +80,22 @@ The system SHALL render the final first-MVP acceptance response and evidence ret
 - WHEN the PWA displays the result
 - THEN it renders the answer, citations, graph evidence, validation state, and trace reference from Traverse-owned response data
 - AND no browser-side fallback output is counted as release acceptance evidence
+
+### Requirement: Render chat-native gap and conflict states
+
+The system SHALL render unsupported, uncertain, and conflicting knowledge states as chat responses using runtime-provided data.
+
+#### Scenario: Runtime defers to the human
+
+- GIVEN the runtime reports that a question cannot be answered from supported knowledge
+- WHEN the PWA renders the response
+- THEN it shows a chat-native deferral and request for missing information
+- AND it may submit a direct factual resolution only when the runtime marks that resolution path as allowed
+- AND it does not display rebuild, extraction, sync, or pipeline internals
+
+#### Scenario: Runtime reports relevant conflict
+
+- GIVEN the runtime reports a conflict that affects the answer or confidence
+- WHEN the PWA renders the response
+- THEN it shows the conflict summary and concise provenance returned by the runtime
+- AND it does not become a separate task dashboard
