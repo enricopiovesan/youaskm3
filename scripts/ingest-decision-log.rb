@@ -44,6 +44,23 @@ def stable_error(code, message)
   exit 1
 end
 
+def write_validation_gap(knowledge_root, validation, error)
+  package_id = validation["package_id"] || "unknown-package"
+  gap_id = "gap-#{package_id.gsub(/[^a-z0-9]+/, "-").gsub(/\A-+|-+\z/, "")}-validation"
+  system(
+    RbConfig.ruby,
+    ROOT.join("scripts", "knowledge-gap-lifecycle.rb").to_s,
+    "create-gap",
+    "--knowledge-root", knowledge_root.to_s,
+    "--gap-id", gap_id,
+    "--source-question", "Decision-log package validation failed for #{package_id}",
+    "--confidence-reason", error.fetch("message"),
+    "--trace-id", "decision-log-validation",
+    "--linked-package-id", package_id,
+    out: File::NULL
+  )
+end
+
 def archive_path?(path)
   ARCHIVE_EXTENSIONS.any? { |extension| path.to_s.end_with?(extension) }
 end
@@ -138,6 +155,7 @@ sync_preflight!(knowledge_root)
 validation, validator_stderr, ok = run_validator(package_path)
 unless ok && validation.fetch("valid")
   first_error = validation.fetch("errors").first || { "code" => "PACKAGE_VALIDATION_FAILED", "message" => validator_stderr }
+  write_validation_gap(knowledge_root, validation, first_error)
   stable_error(first_error.fetch("code"), first_error.fetch("message"))
 end
 

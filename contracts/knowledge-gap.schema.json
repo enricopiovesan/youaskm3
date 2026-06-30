@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://youaskm3.com/contracts/knowledge-gap.schema.json",
+  "title": "youaskm3 knowledge gap markdown front matter",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "kind",
+    "gap_id",
+    "status",
+    "persona_id",
+    "source_question",
+    "confidence_reason",
+    "trace_id",
+    "deterministic_complexity",
+    "final_complexity",
+    "allowed_resolution_path",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "kind": { "const": "knowledge_gap" },
+    "gap_id": { "type": "string", "pattern": "^gap-[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "status": { "enum": ["open", "resolved"] },
+    "persona_id": { "type": "string", "minLength": 1 },
+    "source_question": { "type": "string", "minLength": 1 },
+    "confidence_reason": { "type": "string", "minLength": 1 },
+    "trace_id": { "type": "string", "minLength": 1 },
+    "deterministic_complexity": { "enum": ["simple_factual", "reasoning_heavy"] },
+    "agent_complexity": { "type": ["string", "null"] },
+    "final_complexity": { "enum": ["simple_factual", "reasoning_heavy"] },
+    "allowed_resolution_path": { "enum": ["direct_chat", "decision_log_package"] },
+    "linked_package_id": { "type": ["string", "null"] },
+    "relevant_graph_nodes": { "type": "array", "items": { "type": "string" } }
+  }
+}
