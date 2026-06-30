@@ -103,8 +103,12 @@ case "$COMMAND" in
         shift
         ruby ./scripts/knowledge-gap-lifecycle.rb list-gaps "$@"
         ;;
+      resolve-fact)
+        shift
+        ruby ./scripts/resolve-direct-fact-gap.rb "$@"
+        ;;
       *)
-        echo "Usage: ./scripts/m3.sh gaps list [--knowledge-root PATH]" >&2
+        echo "Usage: ./scripts/m3.sh gaps {list|resolve-fact} ..." >&2
         exit 1
         ;;
     esac
