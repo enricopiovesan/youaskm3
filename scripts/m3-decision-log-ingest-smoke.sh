@@ -22,6 +22,7 @@ cp "$ROOT_DIR/scripts/generate-site-artifacts.rb" "$TEMP_DIR/scripts/generate-si
 cp "$ROOT_DIR/scripts/reasoning-graph-extractor.rb" "$TEMP_DIR/scripts/reasoning-graph-extractor.rb"
 cp "$ROOT_DIR/scripts/validate-decision-log-package.rb" "$TEMP_DIR/scripts/validate-decision-log-package.rb"
 cp "$ROOT_DIR/scripts/ingest-decision-log.rb" "$TEMP_DIR/scripts/ingest-decision-log.rb"
+cp "$ROOT_DIR/scripts/sync-preflight.rb" "$TEMP_DIR/scripts/sync-preflight.rb"
 cp "$ROOT_DIR/scripts/knowledge-gap-lifecycle.rb" "$TEMP_DIR/scripts/knowledge-gap-lifecycle.rb"
 cp -R "$ROOT_DIR/fixtures/decision-log-packages/valid/knowledge_addition" "$TEMP_DIR/fixtures/decision-log-packages/valid/knowledge_addition"
 cp -R "$ROOT_DIR/fixtures/decision-log-packages/invalid/unsupported-note-claim" "$TEMP_DIR/fixtures/decision-log-packages/invalid/unsupported-note-claim"

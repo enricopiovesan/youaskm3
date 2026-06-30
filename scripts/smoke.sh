@@ -69,6 +69,9 @@ bash ./scripts/m3-build-smoke.sh
 echo "Validating incremental sync..."
 bash ./scripts/m3-sync-smoke.sh
 
+echo "Validating sync preflight..."
+bash ./scripts/sync-preflight-smoke.sh
+
 echo "Validating m3 search and serve commands..."
 bash ./scripts/m3-command-surface-smoke.sh
 

@@ -90,7 +90,13 @@ case "$COMMAND" in
     bash ./scripts/build.sh
     ;;
   sync)
-    bash ./scripts/m3-sync.sh
+    shift
+    if [[ "${1:-}" == "check" ]]; then
+      shift
+      ruby ./scripts/sync-preflight.rb "$@"
+    else
+      bash ./scripts/m3-sync.sh "$@"
+    fi
     ;;
   search)
     shift
