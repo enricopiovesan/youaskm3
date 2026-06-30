@@ -135,6 +135,7 @@ def resolve_gap(flags)
   stable_error("GAP_NOT_FOUND", "Open gap not found: #{gap_id}") unless open_path.file?
   data = front_matter(open_path.read)
   data["status"] = "resolved"
+  data["linked_package_id"] = flags["linked_package_id"] if flags["linked_package_id"]
   data["updated_at"] = Time.now.utc.iso8601
   resolved_path = knowledge_root.join("gaps", "resolved", "#{gap_id}.md")
   write_record(resolved_path, data, open_path.read.split("---", 3).fetch(2, "").strip)
