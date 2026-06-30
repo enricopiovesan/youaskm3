@@ -4,6 +4,7 @@
 require "digest"
 require "fileutils"
 require "json"
+require_relative "reasoning-graph-extractor"
 
 root = File.expand_path("..", __dir__)
 output_dir = File.expand_path(ARGV[0] || File.join(root, "app/site"), root)
@@ -60,6 +61,7 @@ author_instance = JSON.parse(File.read(author_instance_path))
 
 processed_document_paths = Dir.glob(File.join(knowledge_dir, "{books,papers,blog}/**/*.md")).sort
 pending_input_paths = Dir.glob(File.join(knowledge_dir, "inputs/**/*")).sort.select { |path| File.file?(path) }
+decision_log_package_paths = Dir.glob(File.join(knowledge_dir, "sources/decision-logs/*")).sort.select { |path| File.directory?(path) && !File.basename(path).start_with?(".") }
 
 source_entries = [
   source_entry(author_instance_path, root, "instance-manifest")
@@ -67,6 +69,11 @@ source_entries = [
 
 source_entries.concat(processed_document_paths.map { |path| source_entry(path, root, "processed-knowledge") })
 source_entries.concat(pending_input_paths.map { |path| source_entry(path, root, "pending-input") })
+decision_log_package_paths.each do |package_path|
+  Dir.glob(File.join(package_path, "*")).sort.select { |path| File.file?(path) }.each do |path|
+    source_entries << source_entry(path, root, "decision-log-package")
+  end
+end
 
 source_fingerprint = Digest::SHA256.hexdigest(
   source_entries.map { |entry| [entry.fetch("path"), entry.fetch("kind"), entry.fetch("sha256")].join(":") }.join("\n")
@@ -131,12 +138,17 @@ graph_edges = knowledge_documents.map do |document|
   }
 end
 
+reasoning_graphs = decision_log_package_paths.map { |path| ReasoningGraphExtractor.extract(path, root) }
+reasoning_nodes = reasoning_graphs.flat_map { |graph| graph.fetch("nodes") }
+reasoning_edges = reasoning_graphs.flat_map { |graph| graph.fetch("edges") }
+reasoning_generated_from = reasoning_graphs.flat_map { |graph| graph.fetch("generated_from") }
+
 knowledge_graph = {
   "schema_version" => "0.1.0",
   "graph_id" => "#{author_instance.fetch("instanceId")}.knowledge-graph",
-  "generated_from" => knowledge_documents.map { |document| document.fetch("id") },
-  "nodes" => graph_nodes,
-  "edges" => graph_edges
+  "generated_from" => knowledge_documents.map { |document| document.fetch("id") } + reasoning_generated_from,
+  "nodes" => graph_nodes + reasoning_nodes,
+  "edges" => graph_edges + reasoning_edges
 }
 
 search_index = {

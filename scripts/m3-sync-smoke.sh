@@ -18,6 +18,7 @@ cp "$ROOT_DIR/app/site/provider-config.json" "$TEMP_DIR/app/site/provider-config
 cp "$ROOT_DIR/scripts/m3.sh" "$TEMP_DIR/scripts/m3.sh"
 cp "$ROOT_DIR/scripts/m3-sync.sh" "$TEMP_DIR/scripts/m3-sync.sh"
 cp "$ROOT_DIR/scripts/generate-site-artifacts.rb" "$TEMP_DIR/scripts/generate-site-artifacts.rb"
+cp "$ROOT_DIR/scripts/reasoning-graph-extractor.rb" "$TEMP_DIR/scripts/reasoning-graph-extractor.rb"
 
 cat <<'EOF' > "$TEMP_DIR/knowledge/blog/first-note.md"
 # First Note
