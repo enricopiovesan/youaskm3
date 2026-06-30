@@ -108,6 +108,9 @@ bash ./scripts/reasoning-skill-adapters-smoke.sh
 echo "Validating decision-log package contract..."
 bash ./scripts/decision-log-package-smoke.sh
 
+echo "Validating m3 decision-log package ingestion..."
+bash ./scripts/m3-decision-log-ingest-smoke.sh
+
 echo "Validating federation index generation..."
 bash ./scripts/federation-index-smoke.sh
 
