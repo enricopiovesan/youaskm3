@@ -114,6 +114,9 @@ bash ./scripts/m3-decision-log-ingest-smoke.sh
 echo "Validating reasoning graph extraction..."
 bash ./scripts/reasoning-graph-extraction-smoke.sh
 
+echo "Validating knowledge gap lifecycle..."
+bash ./scripts/knowledge-gap-lifecycle-smoke.sh
+
 echo "Validating federation index generation..."
 bash ./scripts/federation-index-smoke.sh
 

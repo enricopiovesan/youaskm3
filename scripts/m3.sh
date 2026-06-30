@@ -96,6 +96,19 @@ case "$COMMAND" in
     shift
     ruby ./scripts/m3-search.rb "$@"
     ;;
+  gaps)
+    shift
+    case "${1:-}" in
+      list)
+        shift
+        ruby ./scripts/knowledge-gap-lifecycle.rb list-gaps "$@"
+        ;;
+      *)
+        echo "Usage: ./scripts/m3.sh gaps list [--knowledge-root PATH]" >&2
+        exit 1
+        ;;
+    esac
+    ;;
   serve)
     shift
     bash ./scripts/m3-serve.sh "$@"

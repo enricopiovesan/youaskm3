@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://youaskm3.com/contracts/knowledge-conflict.schema.json",
+  "title": "youaskm3 knowledge conflict markdown front matter",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "kind",
+    "conflict_id",
+    "status",
+    "persona_id",
+    "summary",
+    "resolution_package_mode",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "kind": { "const": "knowledge_conflict" },
+    "conflict_id": { "type": "string", "pattern": "^conflict-[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "status": { "enum": ["open", "resolved"] },
+    "persona_id": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "resolution_package_mode": { "const": "conflict_resolution" },
+    "linked_package_id": { "type": ["string", "null"] }
+  }
+}
