@@ -3,9 +3,12 @@
 
 require "json"
 require "net/http"
+require "pathname"
 require "securerandom"
 require "uri"
 require "webrick"
+
+ROOT = Pathname.new(__dir__).join("..").expand_path
 
 OPERATIONS = {
   "answer" => {
@@ -43,6 +46,8 @@ def parse_args(argv)
     "port" => "8787",
     "traverse_endpoint" => ENV["TRAVERSE_ENDPOINT"].to_s,
     "workspace_id" => ENV.fetch("TRAVERSE_WORKSPACE_ID", "local-default"),
+    "config_path" => ENV.fetch("M3_PROJECT_CONFIG", ROOT.join(".youaskm3", "config.json").to_s),
+    "explicit_traverse_endpoint" => ENV.key?("TRAVERSE_ENDPOINT"),
     "routes_json" => false,
     "simulate" => nil,
     "body" => "{}"
@@ -55,8 +60,11 @@ def parse_args(argv)
       config["port"] = argv.shift || usage
     when "--traverse-endpoint"
       config["traverse_endpoint"] = argv.shift || usage
+      config["explicit_traverse_endpoint"] = true
     when "--workspace-id"
       config["workspace_id"] = argv.shift || usage
+    when "--config"
+      config["config_path"] = argv.shift || usage
     when "--routes-json"
       config["routes_json"] = true
     when "--simulate"
@@ -73,7 +81,21 @@ def parse_args(argv)
   end
 
   abort "m3 local runtime expects a numeric port." unless config.fetch("port").match?(/\A\d+\z/)
+  apply_project_config(config)
   config
+end
+
+def apply_project_config(config)
+  path = Pathname.new(config.fetch("config_path"))
+  return unless path.file?
+
+  project_config = JSON.parse(path.read)
+  if !config.fetch("explicit_traverse_endpoint") && config.fetch("traverse_endpoint").empty?
+    config["traverse_endpoint"] = project_config.dig("traverse", "endpoint").to_s
+  end
+  config["knowledge_root"] ||= project_config["knowledge_root"]
+rescue JSON::ParserError => error
+  abort "PROJECT_CONFIG_INVALID: #{path} is not valid JSON: #{error.message}"
 end
 
 def read_json_request(request)
@@ -153,10 +175,11 @@ def write_json(response, status, payload)
   response.body = JSON.pretty_generate(payload) + "\n"
 end
 
-def routes_payload
+def routes_payload(config)
   {
     "status" => "ready",
     "runtime" => "youaskm3-local-runtime",
+    "knowledge_root" => config["knowledge_root"],
     "routes" => ROUTES.map { |(method, path), (surface, operation)| { "method" => method, "path" => path, "surface" => surface, "operation" => operation } }
   }
 end
@@ -177,7 +200,7 @@ end
 config = parse_args(ARGV)
 
 if config.fetch("routes_json")
-  puts JSON.pretty_generate(routes_payload.merge("traverse_endpoint_configured" => !config.fetch("traverse_endpoint").empty?))
+  puts JSON.pretty_generate(routes_payload(config).merge("traverse_endpoint_configured" => !config.fetch("traverse_endpoint").empty?))
   exit 0
 end
 
@@ -202,7 +225,7 @@ server = WEBrick::HTTPServer.new(
 )
 
 server.mount_proc "/health" do |_request, response|
-  write_json(response, 200, routes_payload.merge("traverse_endpoint_configured" => !config.fetch("traverse_endpoint").empty?))
+  write_json(response, 200, routes_payload(config).merge("traverse_endpoint_configured" => !config.fetch("traverse_endpoint").empty?))
 end
 
 ROUTES.each do |(method, path), (surface, operation)|

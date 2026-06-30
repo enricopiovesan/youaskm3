@@ -2,12 +2,27 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-trap 'rm -f /tmp/m3-runtime-*.json' EXIT
+CONFIG_DIR=""
+trap 'rm -f /tmp/m3-runtime-*.json; if [[ -n "$CONFIG_DIR" ]]; then rm -rf "$CONFIG_DIR"; fi' EXIT
 
 cd "$ROOT_DIR"
 
+CONFIG_DIR="$(mktemp -d)"
+cat >"$CONFIG_DIR/config.json" <<'JSON'
+{
+  "schema_version": "1.0.0",
+  "knowledge_root": "/tmp/youaskm3-configured-knowledge",
+  "traverse": {
+    "endpoint": "http://127.0.0.1:8787"
+  }
+}
+JSON
+
 ruby ./scripts/m3-local-runtime.rb --routes-json >/tmp/m3-runtime-health.json
 ruby -rjson -e 'data=JSON.parse(File.read(ARGV[0])); abort "runtime not ready" unless data.fetch("status") == "ready"; routes=data.fetch("routes").map { |route| [route.fetch("method"), route.fetch("path")] }; [%w[POST /api/answer], %w[GET /api/gaps], %w[POST /api/gaps/resolve-fact], %w[POST /mcp/tools/knowledge.query.answer], %w[POST /mcp/tools/knowledge.gaps.list], %w[POST /mcp/tools/knowledge.gaps.resolve_fact]].each { |route| abort "missing route #{route.inspect}" unless routes.include?(route) }' /tmp/m3-runtime-health.json
+
+ruby ./scripts/m3-local-runtime.rb --config "$CONFIG_DIR/config.json" --routes-json >/tmp/m3-runtime-configured-health.json
+ruby -rjson -e 'data=JSON.parse(File.read(ARGV[0])); abort "config endpoint not loaded" unless data.fetch("traverse_endpoint_configured") == true; abort "config knowledge root not loaded" unless data.fetch("knowledge_root") == "/tmp/youaskm3-configured-knowledge"' /tmp/m3-runtime-configured-health.json
 
 ruby ./scripts/m3-local-runtime.rb --simulate POST /api/answer --body '{"query":"What is portable knowledge?","request_id":"parity-answer"}' >/tmp/m3-runtime-http-answer.json || true
 ruby ./scripts/m3-local-runtime.rb --simulate POST /mcp/tools/knowledge.query.answer --body '{"query":"What is portable knowledge?","request_id":"parity-answer"}' >/tmp/m3-runtime-mcp-answer.json || true
