@@ -1,0 +1,56 @@
+{
+  "kind": "youaskm3.capability_contract",
+  "schema_version": "1.0.0",
+  "id": "knowledge.gaps.resolve_fact",
+  "version": "0.1.0",
+  "lifecycle": "mvp",
+  "summary": "Resolve a simple factual knowledge gap through an internal decision-log package.",
+  "description": "Accepts a direct factual answer for an eligible gap while preserving Traverse-governed validation, package provenance, graph update, and gap lifecycle behavior.",
+  "execution": {
+    "runtime": "traverse",
+    "business_logic": "wasm",
+    "permitted_targets": ["local", "server", "mcp"],
+    "requires_trace": true
+  },
+  "inputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "gap_id": { "type": "string", "minLength": 1 },
+        "answer": { "type": "string", "minLength": 1 },
+        "persona_id": { "type": "string" }
+      },
+      "required": ["gap_id", "answer"],
+      "additionalProperties": false
+    }
+  },
+  "outputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string" },
+        "gap_id": { "type": "string" },
+        "package_id": { "type": "string" },
+        "package_path": { "type": "string" },
+        "knowledge_note_path": { "type": "string" },
+        "trace_id": { "type": "string" },
+        "validation": { "type": "object" },
+        "failure": { "$ref": "#/$defs/failure" }
+      },
+      "required": ["status", "gap_id", "package_id", "trace_id"],
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "failure": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "recoverable": { "type": "boolean" }
+      },
+      "required": ["code", "message", "recoverable"],
+      "additionalProperties": false
+    }
+  }
+}

@@ -10,6 +10,7 @@ mkdir -p "$TEMP_DIR/app/site" "$TEMP_DIR/scripts"
 cp "$ROOT_DIR/scripts/m3.sh" "$TEMP_DIR/scripts/m3.sh"
 cp "$ROOT_DIR/scripts/m3-search.rb" "$TEMP_DIR/scripts/m3-search.rb"
 cp "$ROOT_DIR/scripts/m3-serve.sh" "$TEMP_DIR/scripts/m3-serve.sh"
+cp "$ROOT_DIR/scripts/m3-local-runtime.rb" "$TEMP_DIR/scripts/m3-local-runtime.rb"
 
 cat <<'EOF' > "$TEMP_DIR/app/site/index.html"
 <!doctype html>
@@ -62,5 +63,6 @@ serve_help_output="$(
 )"
 
 grep -q "Usage: ./scripts/m3.sh serve \\[port\\]" <<<"$serve_help_output"
+grep -q "serve --runtime" <<<"$serve_help_output"
 
 echo "m3 command surface smoke passed."

@@ -44,6 +44,8 @@ describe("mcp-tools contracts", () => {
 
     expect(contracts.tools.map((tool) => tool.name)).toEqual([
       "knowledge.query.answer",
+      "knowledge.gaps.list",
+      "knowledge.gaps.resolve_fact",
       "search",
       "remember",
       "recall",
@@ -78,6 +80,12 @@ describe("mcp-tools contracts", () => {
       (tool) => tool.name === "knowledge.query.answer"
     );
     const searchContract = contracts.tools.find((tool) => tool.name === "search");
+    const gapsListContract = contracts.tools.find(
+      (tool) => tool.name === "knowledge.gaps.list"
+    );
+    const resolveFactContract = contracts.tools.find(
+      (tool) => tool.name === "knowledge.gaps.resolve_fact"
+    );
     const rememberContract = contracts.tools.find(
       (tool) => tool.name === "remember"
     );
@@ -100,6 +108,20 @@ describe("mcp-tools contracts", () => {
     ]);
     expect(searchContract).toBeDefined();
     expect(searchContract?.output_schema.properties).toHaveProperty("results");
+    expect(gapsListContract).toMatchObject({
+      capability_id: "knowledge.gaps.list",
+      contract_path: "contracts/capabilities/knowledge.gaps.list.json",
+      surface: "traverse_mcp",
+      workflow_id: "youaskm3.knowledge.gaps-list"
+    });
+    expect(gapsListContract?.output_schema.required).toEqual(["gaps", "trace_id"]);
+    expect(resolveFactContract).toMatchObject({
+      capability_id: "knowledge.gaps.resolve_fact",
+      contract_path: "contracts/capabilities/knowledge.gaps.resolve_fact.json",
+      surface: "traverse_mcp",
+      workflow_id: "youaskm3.knowledge.gaps-resolve-fact"
+    });
+    expect(resolveFactContract?.input_schema.required).toEqual(["gap_id", "answer"]);
     expect(rememberContract?.input_schema.required).toEqual([
       "source",
       "source_type"

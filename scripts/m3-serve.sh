@@ -7,7 +7,17 @@ SITE_DIR="$ROOT_DIR/app/site"
 
 if [[ "$PORT" == "--help" || "$PORT" == "-h" ]]; then
   echo "Usage: ./scripts/m3.sh serve [port]"
+  echo "       ./scripts/m3.sh serve --runtime [port] [--traverse-endpoint URL]"
   exit 0
+fi
+
+if [[ "$PORT" == "--runtime" ]]; then
+  shift
+  runtime_port="${1:-8787}"
+  if [[ "${1:-}" =~ ^[0-9]+$ ]]; then
+    shift
+  fi
+  exec ruby "$ROOT_DIR/scripts/m3-local-runtime.rb" --port "$runtime_port" "$@"
 fi
 
 if ! [[ "$PORT" =~ ^[0-9]+$ ]]; then

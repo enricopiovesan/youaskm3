@@ -1,0 +1,64 @@
+{
+  "kind": "youaskm3.capability_contract",
+  "schema_version": "1.0.0",
+  "id": "knowledge.gaps.list",
+  "version": "0.1.0",
+  "lifecycle": "mvp",
+  "summary": "List unresolved knowledge gaps with provenance and resolution paths.",
+  "description": "Returns open knowledge gaps through the Traverse runtime boundary so HTTP and MCP clients see the same missing-knowledge surface.",
+  "execution": {
+    "runtime": "traverse",
+    "business_logic": "wasm",
+    "permitted_targets": ["local", "server", "mcp"],
+    "requires_trace": true
+  },
+  "inputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "persona_id": { "type": "string" },
+        "limit": { "type": "integer", "minimum": 1, "maximum": 100 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "outputs": {
+    "schema": {
+      "type": "object",
+      "properties": {
+        "gaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "gap_id": { "type": "string" },
+              "status": { "type": "string" },
+              "source_question": { "type": "string" },
+              "allowed_resolution_path": { "type": "string" },
+              "final_complexity": { "type": "string" },
+              "trace_id": { "type": "string" }
+            },
+            "required": ["gap_id", "status", "source_question", "allowed_resolution_path", "final_complexity"],
+            "additionalProperties": false
+          }
+        },
+        "trace_id": { "type": "string" },
+        "failure": { "$ref": "#/$defs/failure" }
+      },
+      "required": ["gaps", "trace_id"],
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "failure": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "recoverable": { "type": "boolean" }
+      },
+      "required": ["code", "message", "recoverable"],
+      "additionalProperties": false
+    }
+  }
+}
