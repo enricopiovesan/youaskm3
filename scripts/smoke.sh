@@ -90,6 +90,9 @@ bash ./scripts/traverse-answer-workflow-smoke.sh
 echo "Validating Traverse MCP answer workflow parity..."
 bash ./scripts/traverse-mcp-answer-workflow-smoke.sh
 
+echo "Validating local runtime MCP parity..."
+bash ./scripts/local-runtime-mcp-parity-smoke.sh
+
 echo "Validating local inference policy..."
 bash ./scripts/local-inference-policy-smoke.sh
 

@@ -87,6 +87,130 @@
       }
     },
     {
+      "name": "knowledge.gaps.list",
+      "description": "List unresolved knowledge gaps through the same Traverse-backed operation used by HTTP JSON.",
+      "capability_id": "knowledge.gaps.list",
+      "workflow_id": "youaskm3.knowledge.gaps-list",
+      "contract_path": "contracts/capabilities/knowledge.gaps.list.json",
+      "surface": "traverse_mcp",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "persona_id": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "gaps": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "trace_id": {
+            "type": "string"
+          },
+          "failure": {
+            "type": "object"
+          }
+        },
+        "required": ["gaps", "trace_id"],
+        "additionalProperties": false
+      },
+      "error_schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "trace_id": {
+            "type": "string"
+          }
+        },
+        "required": ["code", "message"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "knowledge.gaps.resolve_fact",
+      "description": "Resolve a simple factual gap through the same Traverse-backed operation used by HTTP JSON.",
+      "capability_id": "knowledge.gaps.resolve_fact",
+      "workflow_id": "youaskm3.knowledge.gaps-resolve-fact",
+      "contract_path": "contracts/capabilities/knowledge.gaps.resolve_fact.json",
+      "surface": "traverse_mcp",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "gap_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "answer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "persona_id": {
+            "type": "string"
+          }
+        },
+        "required": ["gap_id", "answer"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "gap_id": {
+            "type": "string"
+          },
+          "package_id": {
+            "type": "string"
+          },
+          "trace_id": {
+            "type": "string"
+          },
+          "validation": {
+            "type": "object"
+          },
+          "failure": {
+            "type": "object"
+          }
+        },
+        "required": ["status", "gap_id", "package_id", "trace_id"],
+        "additionalProperties": false
+      },
+      "error_schema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "trace_id": {
+            "type": "string"
+          }
+        },
+        "required": ["code", "message"],
+        "additionalProperties": false
+      }
+    },
+    {
       "name": "search",
       "description": "Semantic and keyword hybrid search across indexed knowledge.",
       "input_schema": {
