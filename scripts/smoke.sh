@@ -10,6 +10,11 @@ SPEC_FILES=(
   "openspec/specs/mcp-interface/spec.md"
   "openspec/specs/federation/spec.md"
   "openspec/specs/pwa-shell/spec.md"
+  "openspec/specs/reasoning-assistant-skill/spec.md"
+  "openspec/specs/decision-log-package/spec.md"
+  "openspec/specs/reasoning-graph/spec.md"
+  "openspec/specs/knowledge-gap-lifecycle/spec.md"
+  "openspec/specs/local-runtime-sync/spec.md"
 )
 
 require_cmd() {
@@ -96,6 +101,9 @@ bash ./scripts/mvp-fixture-corpus-smoke.sh
 
 echo "Validating MVP graph artifact..."
 bash ./scripts/mvp-graph-artifact-smoke.sh
+
+echo "Validating reasoning skill adapter generation..."
+bash ./scripts/reasoning-skill-adapters-smoke.sh
 
 echo "Validating federation index generation..."
 bash ./scripts/federation-index-smoke.sh

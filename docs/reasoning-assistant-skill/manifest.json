@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0.0",
+  "skill_id": "youaskm3.reasoning-assistant",
+  "title": "youaskm3 Reasoning Assistant",
+  "version": "0.1.0",
+  "canonical_source": "canonical.md",
+  "handoff_command": "m3 ingest-decision-log /path/to/decision-log-package/",
+  "required_package_files": [
+    "decision-log.md",
+    "knowledge-note.md",
+    "metadata.json"
+  ],
+  "package_modes": [
+    "knowledge_addition",
+    "gap_resolution",
+    "direct_fact_resolution",
+    "conflict_resolution"
+  ],
+  "required_protocol_terms": [
+    "one question at a time",
+    "options",
+    "pros",
+    "cons",
+    "recommendation",
+    "challenge weak assumptions",
+    "no blocking clarifications remain",
+    "decision-log.md",
+    "knowledge-note.md",
+    "metadata.json",
+    "m3 ingest-decision-log /path/to/decision-log-package/"
+  ],
+  "adapters": [
+    {
+      "id": "chatgpt",
+      "label": "ChatGPT",
+      "output": "adapters/chatgpt.md",
+      "platform_note": "Use this as ChatGPT custom instructions or as the body of a project-specific reasoning assistant prompt."
+    },
+    {
+      "id": "claude",
+      "label": "Claude",
+      "output": "adapters/claude.md",
+      "platform_note": "Use this as Claude project instructions or as the body of a project-specific reasoning assistant prompt."
+    }
+  ]
+}
