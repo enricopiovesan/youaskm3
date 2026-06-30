@@ -19,6 +19,7 @@ cp "$ROOT_DIR/app/site/provider-config.json" "$TEMP_DIR/app/site/provider-config
 cp "$ROOT_DIR/scripts/m3.sh" "$TEMP_DIR/scripts/m3.sh"
 cp "$ROOT_DIR/scripts/m3-sync.sh" "$TEMP_DIR/scripts/m3-sync.sh"
 cp "$ROOT_DIR/scripts/generate-site-artifacts.rb" "$TEMP_DIR/scripts/generate-site-artifacts.rb"
+cp "$ROOT_DIR/scripts/reasoning-graph-extractor.rb" "$TEMP_DIR/scripts/reasoning-graph-extractor.rb"
 cp "$ROOT_DIR/scripts/validate-decision-log-package.rb" "$TEMP_DIR/scripts/validate-decision-log-package.rb"
 cp "$ROOT_DIR/scripts/ingest-decision-log.rb" "$TEMP_DIR/scripts/ingest-decision-log.rb"
 cp -R "$ROOT_DIR/fixtures/decision-log-packages/valid/knowledge_addition" "$TEMP_DIR/fixtures/decision-log-packages/valid/knowledge_addition"
@@ -41,6 +42,11 @@ ruby -rjson -e 'data=JSON.parse(STDIN.read); abort "expected accepted" unless da
 [[ -f "$TEMP_DIR/knowledge/notes/decision-logs/decision-log-20260629-portable-reasoning.md" ]]
 grep -q '"original_import_path"' "$TEMP_DIR/knowledge/sources/decision-logs/decision-log-20260629-portable-reasoning/ingestion-provenance.json"
 grep -q 'source_package: knowledge/sources/decision-logs/decision-log-20260629-portable-reasoning' "$TEMP_DIR/knowledge/notes/decision-logs/decision-log-20260629-portable-reasoning.md"
+
+(
+  cd "$TEMP_DIR"
+  bash ./scripts/m3.sh sync >/dev/null
+)
 
 mkdir -p "$TEMP_DIR/offline-knowledge"
 printf '{"schema_version":"1.0.0","offline":true}\n' >"$TEMP_DIR/offline-knowledge/.youaskm3-knowledge-root.json"
