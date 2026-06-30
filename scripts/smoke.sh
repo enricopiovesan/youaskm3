@@ -117,6 +117,9 @@ bash ./scripts/reasoning-graph-extraction-smoke.sh
 echo "Validating knowledge gap lifecycle..."
 bash ./scripts/knowledge-gap-lifecycle-smoke.sh
 
+echo "Validating answer context selection..."
+bash ./scripts/answer-context-selector-smoke.sh
+
 echo "Validating federation index generation..."
 bash ./scripts/federation-index-smoke.sh
 
