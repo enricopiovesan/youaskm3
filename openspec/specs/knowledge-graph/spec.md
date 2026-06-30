@@ -4,6 +4,8 @@
 
 The knowledge-graph capability defines how youaskm3 represents graph context derived from normalized knowledge artifacts so chat answers can include source-backed relationships rather than isolated text snippets.
 
+The expanded first MVP also includes a reasoning graph defined in `openspec/specs/reasoning-graph/spec.md`. Source-document graph behavior remains valid, and decision-log packages add structured reasoning nodes and edges on top of this base graph artifact.
+
 ## Requirements
 
 ### Requirement: Produce a deterministic graph artifact
@@ -35,3 +37,14 @@ The system SHALL expose graph expansion through the `knowledge.graph.expand` cap
 - GIVEN retrieval returned source chunks for a prompt
 - WHEN the answer workflow needs nearby graph context
 - THEN Traverse executes `knowledge.graph.expand` and returns bounded graph evidence to the workflow
+
+### Requirement: Preserve reasoning graph compatibility
+
+The system SHALL allow the graph artifact to include reasoning graph node and edge types produced from decision-log packages without breaking existing source-document graph behavior.
+
+#### Scenario: Include decision-log reasoning in graph context
+
+- GIVEN a decision-log package has been ingested and extracted into graph elements
+- WHEN graph context is generated
+- THEN the artifact can include reasoning nodes and edges with provenance to the decision-log package and derived knowledge note
+- AND existing source artifact and chunk evidence remains available for imported documents

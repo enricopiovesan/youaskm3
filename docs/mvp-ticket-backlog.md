@@ -1309,9 +1309,534 @@ Next highest-ROI tranche after MVP-030:
 - MVP-039 real `knowledge.infer` WASM agent
 - MVP-040 final first-MVP acceptance and release gate
 
-## First Ticket to Start
+Approved expanded second-brain tranche after the 2026-06-29 brainstorming session:
 
-Recommended first implementation ticket:
+- MVP-041 canonical LLM-agnostic reasoning skill and generated ChatGPT/Claude adapters ([#138](https://github.com/enricopiovesan/youaskm3/issues/138))
+- MVP-042 decision-log package schema, validator, and executable fixtures ([#139](https://github.com/enricopiovesan/youaskm3/issues/139))
+- MVP-043 CLI decision-log package ingestion and provenance preservation ([#140](https://github.com/enricopiovesan/youaskm3/issues/140))
+- MVP-044 full reasoning graph schema and deterministic extraction ([#141](https://github.com/enricopiovesan/youaskm3/issues/141))
+- MVP-045 knowledge gap and conflict lifecycle ([#142](https://github.com/enricopiovesan/youaskm3/issues/142))
+- MVP-046 graph-aware answer classification and context selection ([#143](https://github.com/enricopiovesan/youaskm3/issues/143))
+- MVP-047 direct chat simple fact resolution through internal mini packages ([#144](https://github.com/enricopiovesan/youaskm3/issues/144))
+- MVP-048 local HTTP JSON runtime and Traverse-backed MCP parity ([#145](https://github.com/enricopiovesan/youaskm3/issues/145))
+- MVP-049 `m3 init` first-run setup, external knowledge roots, and runtime config ([#146](https://github.com/enricopiovesan/youaskm3/issues/146))
+- MVP-050 file-system sync preflight and conflict detection ([#147](https://github.com/enricopiovesan/youaskm3/issues/147))
+- MVP-051 `m3 serve` Traverse start/attach orchestration ([#148](https://github.com/enricopiovesan/youaskm3/issues/148))
+- MVP-052 chat-only PWA UX for evidence, gaps, conflicts, and direct fact resolution ([#149](https://github.com/enricopiovesan/youaskm3/issues/149))
+- MVP-053 MCP answer, gaps, and simple fact resolution tools ([#150](https://github.com/enricopiovesan/youaskm3/issues/150))
+- MVP-054 expanded first-MVP acceptance gate with `m3 mvp-check` ([#151](https://github.com/enricopiovesan/youaskm3/issues/151))
+
+## Ticket MVP-041: Build the Canonical Reasoning Skill and Generated Adapters
+
+### Objective
+
+Create the LLM-agnostic reasoning skill source and generated ChatGPT and Claude adapters that help a persona reason through concepts and produce valid decision-log packages.
+
+### Governing Specs
+
+- `docs/expanded-second-brain-mvp-decision-log.md`
+- `openspec/specs/reasoning-assistant-skill/spec.md`
+- `openspec/specs/decision-log-package/spec.md`
+
+### Scope
+
+- Add canonical skill source with provider-neutral interview rules.
+- Add structured manifest metadata for generation.
+- Generate ChatGPT and Claude adapter outputs from the canonical source.
+- Add a drift check so generated adapters cannot fall behind the canonical source.
+- Include generic CLI handoff instructions: `m3 ingest-decision-log /path/to/decision-log-package/`.
+
+### Definition of Done
+
+- Canonical skill source exists in the repo and is provider-neutral.
+- ChatGPT and Claude generated adapter artifacts exist and are generated from the same source.
+- Generated adapters preserve one-question-at-a-time brainstorming, options, pros, cons, recommendation, assumption challenge, and no-finalization-until-clear rules.
+- Generated adapters require output package files: `decision-log.md`, `knowledge-note.md`, `metadata.json`.
+- A drift check fails when generated artifacts are stale.
+- No generated adapter contains hardcoded local user paths.
+- `bash scripts/smoke.sh` or a focused documented validation gate passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-042: Define Decision-Log Package Schema, Validator, and Fixtures
+
+### Objective
+
+Define and validate the decision-log package contract used by external assistant-generated packages and internal mini packages.
+
+### Governing Specs
+
+- `openspec/specs/decision-log-package/spec.md`
+- `openspec/specs/reasoning-assistant-skill/spec.md`
+- `openspec/specs/knowledge-gap-lifecycle/spec.md`
+
+### Scope
+
+- Add package schema for `metadata.json`.
+- Add structural rules for `decision-log.md` and `knowledge-note.md`.
+- Support modes: `knowledge_addition`, `gap_resolution`, `direct_fact_resolution`, `conflict_resolution`.
+- Add valid and invalid fixture packages.
+- Add deterministic validation for required files, ids, mode-specific sections, no blocking clarifications, provenance, and knowledge-note consistency.
+
+### Definition of Done
+
+- Package schema and fixture packages exist.
+- Validator rejects missing files, unsupported modes, incomplete required sections, and mismatched ids.
+- Validator rejects `knowledge-note.md` claims not represented in `decision-log.md`.
+- Validator records semantic validation as optional and distinguishes unavailable from failed.
+- Failed semantic validation blocks the whole package and emits gap creation data.
+- Archive/zip inputs are explicitly out of scope and rejected.
+- Tests cover all first-MVP package modes and at least one invalid package per failure class.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-043: Implement CLI Decision-Log Package Ingestion and Provenance
+
+### Objective
+
+Implement `m3 ingest-decision-log /path/to/package/` so package directories become durable personal knowledge with traceable provenance.
+
+### Governing Specs
+
+- `openspec/specs/decision-log-package/spec.md`
+- `openspec/specs/local-runtime-sync/spec.md`
+- `openspec/specs/reasoning-graph/spec.md`
+
+### Scope
+
+- Add the generic CLI ingest command.
+- Accept package directories only.
+- Copy accepted packages into `knowledge/sources/decision-logs/<package-id>/`.
+- Record original import path, package id, persona id, mode, timestamps, validation evidence, and Traverse availability.
+- Create normalized knowledge notes from accepted packages.
+- Support offline staging only; final ingestion and graph update require Traverse.
+
+### Definition of Done
+
+- `m3 ingest-decision-log /path/to/package/` exists.
+- The command rejects archive files and missing package directories with stable errors.
+- The command runs sync/conflict preflight before writes.
+- The command validates package structure before copying or writing final knowledge.
+- Accepted packages are copied into the knowledge store and preserve original path provenance.
+- Normalized notes are written with links back to the source package.
+- Offline mode can stage packages but cannot mark them as final ingested knowledge.
+- Tests prove success, deterministic validation failure, offline staging, and uninitialized external knowledge root failure.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-044: Implement Full Reasoning Graph Schema and Deterministic Extraction
+
+### Objective
+
+Extend the graph contract and generator so decision-log packages produce full reasoning graph elements required by the expanded first MVP.
+
+### Governing Specs
+
+- `openspec/specs/reasoning-graph/spec.md`
+- `openspec/specs/decision-log-package/spec.md`
+- `openspec/specs/knowledge-graph/spec.md`
+
+### Scope
+
+- Extend graph schema for required reasoning node and edge types.
+- Add deterministic extraction from structured decision-log package sections.
+- Add executable fixture package and expected graph output.
+- Preserve provenance to package, decision log, knowledge note, source gap, citations, confidence, and validation results.
+- Record optional Traverse agent enrichment as unavailable, passed, or failed without making it mandatory.
+
+### Definition of Done
+
+- Graph schema supports `concept`, `question`, `option`, `tradeoff`, `assumption`, `decision`, `claim`, `open_question`, `source_gap`, `knowledge_note`, `citation`, `source_artifact`, `confidence_assessment`, and `validation_result`.
+- Deterministic extraction produces stable node and edge ids and ordering.
+- Expected graph fixture output is checked in and validated.
+- Graph extraction fails when required package sections cannot produce mandatory graph elements.
+- Existing source-document graph behavior still works.
+- Tests cover at least one full reasoning package and one invalid extraction package.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-045: Implement Knowledge Gap and Conflict Lifecycle
+
+### Objective
+
+Create structured gap and conflict records for missing, uncertain, ambiguous, and conflicting knowledge discovered during answers, ingestion, validation, and sync.
+
+### Governing Specs
+
+- `openspec/specs/knowledge-gap-lifecycle/spec.md`
+- `openspec/specs/reasoning-graph/spec.md`
+- `openspec/specs/local-runtime-sync/spec.md`
+
+### Scope
+
+- Store gaps as `knowledge/gaps/open/<gap-id>.md` and resolved gaps as `knowledge/gaps/resolved/<gap-id>.md`.
+- Store conflicts as `knowledge/conflicts/open/<conflict-id>.md` and resolved conflicts as `knowledge/conflicts/resolved/<conflict-id>.md`.
+- Use structured front matter for status, persona, trace, source question, reason, linked package, linked graph nodes, and allowed resolution path.
+- Create/update gaps from question-time failures and ingestion/validation failures.
+- Classify gap complexity with deterministic baseline and optional Traverse agent override.
+
+### Definition of Done
+
+- Gap and conflict markdown schemas are documented and validated.
+- Question-time unsupported/uncertain answers create or update open gaps.
+- Ingestion validation failures create or update gaps without final knowledge ingestion.
+- Semantic conflicts create conflict reports and do not silently merge.
+- Gap complexity classification records deterministic result, optional agent result, final result, and allowed resolution path.
+- `m3 gaps list` can list unresolved gaps with stable output.
+- Tests cover gap creation, gap update, conflict creation, resolved movement, and invalid front matter.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-046: Add Graph-Aware Answer Classification and Context Selection
+
+### Objective
+
+Make the answer workflow select reasoning graph context based on answer type and disclose conflicts or uncertainty when relevant.
+
+### Governing Specs
+
+- `openspec/specs/reasoning-graph/spec.md`
+- `openspec/specs/knowledge-gap-lifecycle/spec.md`
+- `openspec/specs/traverse-integration/spec.md`
+
+### Scope
+
+- Add deterministic answer-type classification for factual, decision, uncertainty, concept explanation, and gap-oriented questions.
+- Allow optional Traverse-governed agent refinement when available.
+- Select graph context according to final answer type.
+- Record deterministic answer type, optional agent-refined answer type, final answer type, and context strategy in trace/evidence.
+- Summarize conflicts and create/update gaps when conflicts affect the answer.
+
+### Definition of Done
+
+- Answer-type classifier has deterministic tests for all MVP answer types.
+- Context selection uses claims/citations for factual answers, decisions/rationale/tradeoffs/options for decision answers, assumptions/open questions/confidence for uncertainty answers, and gaps/conflicts when relevant.
+- Trace output includes all required classification and context-strategy fields.
+- Conflicting relevant knowledge is surfaced with evidence and creates/updates a gap.
+- The UI receives formatted evidence from the runtime and does not implement classification or context selection.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-047: Implement Direct Chat Fact Resolution Through Internal Mini Packages
+
+### Objective
+
+Allow simple factual gaps to be resolved directly in chat while preserving the same package validation, provenance, graph extraction, and gap update path as external decision-log packages.
+
+### Governing Specs
+
+- `openspec/specs/knowledge-gap-lifecycle/spec.md`
+- `openspec/specs/decision-log-package/spec.md`
+- `openspec/specs/reasoning-graph/spec.md`
+
+### Scope
+
+- Detect when an open gap allows direct factual resolution.
+- Convert the user's chat answer into an internal mini package using the shared package schema.
+- Validate, ingest, extract graph elements, and resolve/update the gap through the same pipeline as external packages.
+- Reject direct chat resolution for reasoning-heavy gaps and direct the user to decision-log package flow.
+
+### Definition of Done
+
+- Direct simple fact resolution produces an internal package artifact with provenance.
+- Internal packages use the same schema with mode-specific required sections.
+- Successful direct resolution updates knowledge, graph, and gap status.
+- Reasoning-heavy gaps cannot be resolved through direct chat.
+- Trace records the internal package id and linked gap id.
+- Tests cover simple fact success, reasoning-heavy rejection, invalid direct answer, and graph update.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-048: Build Local HTTP JSON Runtime and Traverse-Backed MCP Parity
+
+### Objective
+
+Provide local runtime surfaces for PWA chat and MCP that call the same Traverse-backed workflows.
+
+### Governing Specs
+
+- `openspec/specs/local-runtime-sync/spec.md`
+- `openspec/specs/mcp-interface/spec.md`
+- `openspec/specs/traverse-integration/spec.md`
+
+### Scope
+
+- Add HTTP JSON endpoints for answer, gaps list, and direct simple fact resolution.
+- Add or extend MCP tools for the same operations.
+- Ensure HTTP and MCP share the same Traverse workflow and do not duplicate business logic.
+- Return equivalent trace, evidence, provenance, gap, and conflict fields.
+
+### Definition of Done
+
+- Local HTTP JSON answer endpoint exists and calls Traverse-backed workflow.
+- Local HTTP JSON gaps list and simple fact resolution endpoints exist.
+- MCP exposes answer, gaps list, and simple fact resolution tools.
+- HTTP and MCP parity tests prove equivalent behavior for the same fixture workspace.
+- Neither surface implements retrieval, graph traversal, context packing, inference selection, validation, formatting, gap lifecycle, or conflict policy outside Traverse-governed capabilities.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-049: Extend `m3 init` for First-Run Setup and Knowledge Roots
+
+### Objective
+
+Make `m3 init` the first-run setup command for workspace defaults, external knowledge roots, Traverse configuration, and offline mode.
+
+### Governing Specs
+
+- `openspec/specs/local-runtime-sync/spec.md`
+- `openspec/specs/decision-log-package/spec.md`
+
+### Scope
+
+- Support `m3 init --knowledge-root <path> --traverse-repo <path>`.
+- Support `m3 init --offline --knowledge-root <path>`.
+- Create/validate external knowledge-root markers before writes.
+- Write project config and allow CLI override for runtime commands.
+- Validate Traverse baseline when provided.
+- Mark runtime readiness unavailable in offline mode.
+
+### Definition of Done
+
+- `m3 init` initializes default workspace knowledge root and external roots.
+- External roots require a marker before any write command can mutate them.
+- Project config records Traverse path/config and knowledge-root defaults.
+- CLI overrides take precedence over config.
+- Offline mode can prepare storage but cannot final-ingest packages or run runtime acceptance.
+- Stable setup errors guide the user to the next command.
+- Tests cover workspace root, external root, offline mode, Traverse unavailable, and CLI override behavior.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-050: Add File-System Sync Preflight and Conflict Detection
+
+### Objective
+
+Support multi-machine local usage through file-system sync folders with safe preflight checks and conflict reports.
+
+### Governing Specs
+
+- `openspec/specs/local-runtime-sync/spec.md`
+- `openspec/specs/knowledge-gap-lifecycle/spec.md`
+
+### Scope
+
+- Add sync state metadata for decision-log packages, knowledge notes, gaps, conflicts, graph artifacts, and index metadata.
+- Run sync/conflict preflight before knowledge-writing commands.
+- Provide `m3 sync check`.
+- Auto-merge only safe append-only artifacts.
+- Stop and create structured conflict reports for semantic conflicts.
+
+### Definition of Done
+
+- `m3 sync check` reports clean, auto-merged, open conflict, and blocked states.
+- Knowledge-writing commands run preflight before mutation.
+- Safe append-only merge is narrowly defined and tested.
+- Semantic conflicts stop writes and create `knowledge/conflicts/open/<conflict-id>.md`.
+- Chat only discloses sync conflicts when they affect answer or confidence.
+- Tests cover clean sync, append-only merge, semantic conflict, metadata/index conflict, and blocked write.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-051: Implement `m3 serve` Traverse Start/Attach Runtime Orchestration
+
+### Objective
+
+Provide `m3 serve` as the local runtime command that starts or attaches to Traverse and powers HTTP JSON plus MCP surfaces.
+
+### Governing Specs
+
+- `openspec/specs/local-runtime-sync/spec.md`
+- `openspec/specs/traverse-integration/spec.md`
+
+### Scope
+
+- Read Traverse and knowledge-root configuration from project config with CLI overrides.
+- Try to start or attach to Traverse.
+- Validate the registered app bundle or fail with actionable setup errors.
+- Start local HTTP JSON and MCP surfaces only after runtime readiness is established.
+
+### Definition of Done
+
+- `m3 serve` exists and reads config plus CLI overrides.
+- Traverse unavailable errors are stable and actionable.
+- The command does not silently fall back to Browser demo or local fake runtime.
+- The command exposes local HTTP JSON and MCP surfaces when Traverse is ready.
+- The command reports runtime URL, MCP endpoint, workspace id, and trace/evidence mode.
+- Tests cover config read, CLI override, Traverse unavailable, and successful attach/start using the repo's available test harness.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-052: Implement Chat-Only PWA UX for Evidence, Gaps, Conflicts, and Direct Fact Resolution
+
+### Objective
+
+Make the PWA behave like a chat interface while rendering runtime-provided answers, evidence, deferrals, gaps, conflicts, and simple fact resolution states.
+
+### Governing Specs
+
+- `openspec/specs/pwa-shell/spec.md`
+- `openspec/specs/knowledge-gap-lifecycle/spec.md`
+- `openspec/specs/reasoning-graph/spec.md`
+
+### Scope
+
+- Render supported answers with concise provenance/evidence by default.
+- Render unsupported/uncertain deferral responses.
+- Let the user answer a simple factual gap in chat.
+- Display conflict summaries only when they affect the answer.
+- Keep rebuild, extraction, sync, and pipeline internals out of the UI.
+
+### Definition of Done
+
+- PWA renders answer, provenance type, citations, graph evidence, validation status, and trace reference from runtime response data.
+- PWA renders deferral and gap request states without implementing gap lifecycle logic.
+- PWA can submit direct simple fact resolution only when runtime marks it allowed.
+- PWA surfaces relevant conflicts without becoming a task dashboard.
+- PWA does not implement retrieval, graph traversal, context packing, inference selection, validation, formatting, gap lifecycle, sync conflict policy, or graph extraction.
+- Frontend tests cover supported answer, unsupported deferral, direct fact resolution prompt, relevant conflict disclosure, and no Browser demo acceptance path.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-053: Add MCP Answer, Gaps, and Simple Fact Resolution Tools
+
+### Objective
+
+Expose the expanded first-MVP chat loop through MCP with parity to the local HTTP JSON path.
+
+### Governing Specs
+
+- `openspec/specs/mcp-interface/spec.md`
+- `openspec/specs/local-runtime-sync/spec.md`
+- `openspec/specs/knowledge-gap-lifecycle/spec.md`
+
+### Scope
+
+- Add or update MCP contracts for answer, gaps list, and direct simple fact resolution.
+- Ensure tools invoke the same Traverse-backed workflow as HTTP/PWA.
+- Return equivalent provenance, evidence, trace, gap, and conflict data.
+
+### Definition of Done
+
+- MCP tool contracts exist for answer, gaps list, and simple fact resolution.
+- MCP implementation does not duplicate business logic outside Traverse-governed capabilities.
+- MCP parity smoke covers the same fixture workspace as HTTP/PWA tests.
+- MCP responses include trace ids, provenance type, citations/evidence, gap ids, and conflict ids when relevant.
+- MCP rejects unsupported direct resolution attempts for reasoning-heavy gaps.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+```
+
+## Ticket MVP-054: Add Expanded First-MVP Acceptance Gate
+
+### Objective
+
+Create `m3 mvp-check` as the final expanded first-MVP acceptance gate that proves the full second-brain product loop without placeholders.
+
+### Governing Specs
+
+- `docs/expanded-second-brain-mvp-decision-log.md`
+- `docs/mvp-user-stories.md`
+- `openspec/specs/reasoning-assistant-skill/spec.md`
+- `openspec/specs/decision-log-package/spec.md`
+- `openspec/specs/reasoning-graph/spec.md`
+- `openspec/specs/knowledge-gap-lifecycle/spec.md`
+- `openspec/specs/local-runtime-sync/spec.md`
+- `openspec/specs/traverse-integration/spec.md`
+
+### Scope
+
+- Add `m3 mvp-check --traverse-repo <path> --knowledge-root <path>`.
+- Run or orchestrate the real acceptance workflow from clean setup.
+- Validate assistant skill generation, package ingestion, reasoning graph extraction, gap lifecycle, sync preflight, local serve, PWA/HTTP answer, MCP parity, direct fact resolution, and provenance/evidence.
+- Link to baseline final gate issue `#136` and existing runtime baseline tickets `#120`, `#122`, and `#135`.
+
+### Definition of Done
+
+- `m3 mvp-check` exists and documents the real first-MVP acceptance path.
+- The gate validates normal repo health and Traverse readiness.
+- The gate fails if Browser demo, temporary harnesses, fake workflow steps, skeleton manifests, placeholder digests, all-zero evidence, or downstream runtime shortcuts are used as acceptance evidence.
+- The gate validates ChatGPT and Claude adapter generation drift.
+- The gate ingests at least one real decision-log package fixture.
+- The gate validates full reasoning graph extraction and expected graph output.
+- The gate validates gap creation, gap listing, direct simple fact resolution, and conflict report behavior.
+- The gate validates local HTTP JSON and MCP parity against the same Traverse-backed workflow.
+- The gate records exact remaining caveats, including optional semantic validation availability and WASM-native model-engine caveat.
+- `bash scripts/smoke.sh` passes.
+
+### Validation
+
+```bash
+bash scripts/smoke.sh
+m3 mvp-check --traverse-repo /path/to/Traverse --knowledge-root /path/to/root
+```
+
+## First Tickets to Start
+
+Recommended first implementation ticket for the Traverse-backed runtime baseline:
 
 > MVP-031: Prove the Local Traverse-Backed Chat Happy Path
 
@@ -1321,3 +1846,13 @@ Reason:
 - It validates the user-facing product with real runtime pressure.
 - It exposes any remaining Traverse gaps through concrete evidence.
 - It keeps youaskm3 from drifting into downstream runtime shortcuts.
+
+Recommended first implementation ticket for the expanded second-brain tranche:
+
+> MVP-041: Build the Canonical Reasoning Skill and Generated Adapters
+
+Reason:
+
+- It defines the quality of the reasoning content that future answers depend on.
+- It produces the decision-log package source that downstream ingestion, graph extraction, gaps, and final acceptance need.
+- It validates the LLM-agnostic adapter generation rule before ChatGPT/Claude-specific behavior can drift.
