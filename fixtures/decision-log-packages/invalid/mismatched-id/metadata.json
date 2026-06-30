@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "package_id": "decision-log-20260629-mismatched-id",
+  "persona_id": "default",
+  "mode": "knowledge_addition",
+  "created_by": "youaskm3.reasoning-assistant",
+  "created_at": "2026-06-29T13:15:00Z",
+  "source_gap_id": null,
+  "required_files": [
+    "decision-log.md",
+    "knowledge-note.md",
+    "metadata.json"
+  ]
+}
