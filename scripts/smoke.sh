@@ -105,6 +105,9 @@ bash ./scripts/mvp-graph-artifact-smoke.sh
 echo "Validating reasoning skill adapter generation..."
 bash ./scripts/reasoning-skill-adapters-smoke.sh
 
+echo "Validating decision-log package contract..."
+bash ./scripts/decision-log-package-smoke.sh
+
 echo "Validating federation index generation..."
 bash ./scripts/federation-index-smoke.sh
 
