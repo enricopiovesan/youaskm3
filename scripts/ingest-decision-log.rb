@@ -79,6 +79,15 @@ def validate_knowledge_root!(knowledge_root)
   stable_error("EXTERNAL_KNOWLEDGE_ROOT_UNINITIALIZED", "External knowledge roots must be initialized before writes: #{knowledge_root}") unless marker.file?
 end
 
+def offline_knowledge_root?(knowledge_root)
+  marker = knowledge_root.join(".youaskm3-knowledge-root.json")
+  return false unless marker.file?
+
+  JSON.parse(marker.read).fetch("offline", false) == true
+rescue JSON::ParserError
+  false
+end
+
 def sync_preflight!(knowledge_root)
   return unless knowledge_root == DEFAULT_KNOWLEDGE_ROOT
 
@@ -150,6 +159,7 @@ stable_error("ARCHIVE_INPUT_UNSUPPORTED", "Decision-log package input must be a 
 stable_error("PACKAGE_NOT_DIRECTORY", "Decision-log package input must be a directory.") unless package_path.directory?
 
 validate_knowledge_root!(knowledge_root)
+stable_error("OFFLINE_KNOWLEDGE_ROOT_REQUIRES_STAGING", "This knowledge root was initialized offline; re-run with --offline to stage package metadata.") if offline_knowledge_root?(knowledge_root) && !offline
 sync_preflight!(knowledge_root)
 
 validation, validator_stderr, ok = run_validator(package_path)

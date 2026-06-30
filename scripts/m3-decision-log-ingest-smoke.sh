@@ -62,6 +62,15 @@ ruby -rjson -e 'data=JSON.parse(STDIN.read); abort "expected staged offline" unl
 
 if (
   cd "$TEMP_DIR"
+  bash ./scripts/m3.sh ingest-decision-log fixtures/decision-log-packages/valid/knowledge_addition --knowledge-root "$TEMP_DIR/offline-knowledge" >/tmp/decision-log-offline-final.txt 2>&1
+); then
+  echo "Expected offline knowledge root to reject final ingestion." >&2
+  exit 1
+fi
+grep -q 'OFFLINE_KNOWLEDGE_ROOT_REQUIRES_STAGING' /tmp/decision-log-offline-final.txt
+
+if (
+  cd "$TEMP_DIR"
   bash ./scripts/m3.sh ingest-decision-log fixtures/decision-log-packages/invalid/unsupported-note-claim >/tmp/decision-log-invalid-ingest.txt 2>&1
 ); then
   echo "Expected invalid decision-log package to fail ingestion." >&2
