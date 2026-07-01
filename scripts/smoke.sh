@@ -75,6 +75,9 @@ bash ./scripts/sync-preflight-smoke.sh
 echo "Validating m3 search and serve commands..."
 bash ./scripts/m3-command-surface-smoke.sh
 
+echo "Validating m3 serve runtime orchestration..."
+bash ./scripts/m3-serve-runtime-smoke.sh
+
 echo "Validating MVP contracts..."
 bash ./scripts/mvp-contracts-smoke.sh
 
