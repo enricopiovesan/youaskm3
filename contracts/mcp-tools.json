@@ -39,6 +39,9 @@
           "answer": {
             "type": "string"
           },
+          "provenance_type": {
+            "type": "string"
+          },
           "citations": {
             "type": "array",
             "items": {
@@ -46,6 +49,18 @@
             }
           },
           "graph_evidence": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "gaps": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "conflicts": {
             "type": "array",
             "items": {
               "type": "object"
@@ -61,7 +76,7 @@
             "type": "object"
           }
         },
-        "required": ["answer", "citations", "graph_evidence", "trace_id", "validation"],
+        "required": ["answer", "provenance_type", "citations", "graph_evidence", "trace_id", "validation"],
         "additionalProperties": false
       },
       "error_schema": {

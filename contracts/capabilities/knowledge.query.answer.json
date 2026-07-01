@@ -30,13 +30,16 @@
       "type": "object",
       "properties": {
         "answer": { "type": "string" },
+        "provenance_type": { "type": "string" },
         "citations": { "$ref": "#/$defs/citations" },
         "graph_evidence": { "$ref": "#/$defs/graphEvidence" },
+        "gaps": { "$ref": "#/$defs/gaps" },
+        "conflicts": { "$ref": "#/$defs/conflicts" },
         "trace_id": { "type": "string" },
         "validation": { "$ref": "#/$defs/validation" },
         "failure": { "$ref": "#/$defs/failure" }
       },
-      "required": ["answer", "citations", "graph_evidence", "trace_id", "validation"],
+      "required": ["answer", "provenance_type", "citations", "graph_evidence", "trace_id", "validation"],
       "additionalProperties": false
     }
   },
@@ -66,6 +69,33 @@
           "supporting_chunk_ids": { "type": "array", "items": { "type": "string" } }
         },
         "required": ["node_ids", "edge_ids", "supporting_chunk_ids"],
+        "additionalProperties": false
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "gap_id": { "type": "string" },
+          "source_question": { "type": "string" },
+          "allowed_resolution_path": { "type": "string" },
+          "final_complexity": { "type": "string" }
+        },
+        "required": ["gap_id", "source_question", "allowed_resolution_path", "final_complexity"],
+        "additionalProperties": false
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "conflict_id": { "type": "string" },
+          "summary": { "type": "string" },
+          "affects_answer": { "type": "boolean" }
+        },
+        "required": ["conflict_id", "summary", "affects_answer"],
         "additionalProperties": false
       }
     },

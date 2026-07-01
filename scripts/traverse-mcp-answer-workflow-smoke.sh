@@ -68,9 +68,12 @@ abort "query answer contract id mismatch" unless query_contract.fetch("id") == m
 abort "query answer contract must permit MCP" unless query_contract.fetch("execution").fetch("permitted_targets").include?("mcp")
 abort "query answer contract must require trace" unless query_contract.fetch("execution").fetch("requires_trace") == true
 
-required_output = %w[answer citations graph_evidence trace_id validation]
+required_output = %w[answer provenance_type citations graph_evidence trace_id validation]
 missing_output = required_output - mcp_tool.fetch("output_schema").fetch("required")
 abort "MCP answer tool output missing #{missing_output.join(", ")}" unless missing_output.empty?
+%w[gaps conflicts].each do |field|
+  abort "MCP answer tool output missing optional evidence field #{field}" unless mcp_tool.fetch("output_schema").fetch("properties").key?(field)
+end
 
 trace = workflow.fetch("trace")
 abort "MCP parity requires workflow trace" unless trace.fetch("required") == true

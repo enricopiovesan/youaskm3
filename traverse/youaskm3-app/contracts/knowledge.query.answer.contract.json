@@ -48,11 +48,20 @@
         "answer": {
           "type": "string"
         },
+        "provenance_type": {
+          "type": "string"
+        },
         "citations": {
           "$ref": "#/$defs/citations"
         },
         "graph_evidence": {
           "$ref": "#/$defs/graphEvidence"
+        },
+        "gaps": {
+          "$ref": "#/$defs/gaps"
+        },
+        "conflicts": {
+          "$ref": "#/$defs/conflicts"
         },
         "trace_id": {
           "type": "string"
@@ -66,6 +75,7 @@
       },
       "required": [
         "answer",
+        "provenance_type",
         "citations",
         "graph_evidence",
         "trace_id",
