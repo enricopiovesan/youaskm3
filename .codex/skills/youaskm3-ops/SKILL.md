@@ -48,6 +48,15 @@ Continue cycling through PR finisher and Ready-ticket worker lanes until one of 
 
 Between tickets, keep the transition lean: sync `main`, verify clean status, inspect open PRs, inspect Ready Project 3 items, run ownership pre-flight, claim the next issue, and continue.
 
+Before stopping, run a filtered final audit and report the result:
+
+- open PR count and any PRs still needing attention
+- Ready Project 3 count and issue numbers
+- Blocked Project 3 count and blocker summary
+- current branch and `git status --short --branch`
+
+Do not stop solely because one PR merged. Stopping is valid only after this final audit proves no Ready items or open PRs remain, or after a real blocker is identified.
+
 ## Operating Lanes
 
 - **Ready-ticket worker:** claim one Ready Project 3 issue and implement it end to end.
@@ -79,7 +88,7 @@ Default to lean, filtered operations. Preserve autonomy and correctness by fetch
 
 - Issue/PR discovery: prefer filtered `gh issue list` / `gh pr list` queries for the active lane before any full board export. Pull a single issue, PR, or project item in detail only after it becomes actionable.
 - Project boards: use `--jq` or `jq` filters that return only issue number, title, labels, status, agent/owner, blocker, and item id. Avoid full Project item JSON unless debugging schema drift.
-- PR checks: prefer `gh pr checks --json name,state,conclusion,workflow,detailsUrl --jq ...` or a one-shot status query. Avoid repeated `gh pr checks --watch` transcripts; report only status changes and failing check names.
+- PR checks: prefer `gh pr checks --json name,state,bucket,workflow,link --jq ...` or a one-shot status query. Avoid repeated `gh pr checks --watch` transcripts; report only status changes and failing check names.
 - CI logs: start with check/run summaries. Fetch logs only for failed jobs, and quote only actionable failure lines plus a small amount of surrounding context.
 - Tests and coverage: run the normal commands, but summarize pass/fail counts, failing test names, coverage gate result, and first actionable error. Do not paste full passing test, clippy, coverage, or build logs.
 - Diffs: inspect `git diff --stat` and `git diff --name-only` before any larger diff. Read narrow hunks for files under review instead of dumping full diffs.
@@ -92,7 +101,7 @@ Useful lean command shapes:
 ```bash
 git diff --stat
 git diff --name-only
-gh pr checks <pr> --json name,state,conclusion,workflow,detailsUrl --jq '.[] | {name,state,conclusion,workflow,detailsUrl}'
+gh pr checks <pr> --json name,state,bucket,workflow,link --jq '.[] | {name,state,bucket,workflow,link}'
 gh run view <run-id> --log-failed
 gh project item-list 3 --owner enricopiovesan --format json --limit 100 --jq '[.items[] | {content:.content.title,status:.status,labels:.labels,item:.id}]'
 ```
