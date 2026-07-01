@@ -18,6 +18,18 @@ pub struct ToolDescriptor {
 /// Initial MCP tools defined by `contracts/mcp-tools.json`.
 pub const INITIAL_TOOLS: &[ToolDescriptor] = &[
     ToolDescriptor {
+        name: "knowledge.query.answer",
+        description: "Answer a question through the registered Traverse answer workflow.",
+    },
+    ToolDescriptor {
+        name: "knowledge.gaps.list",
+        description: "List unresolved knowledge gaps through the Traverse runtime.",
+    },
+    ToolDescriptor {
+        name: "knowledge.gaps.resolve_fact",
+        description: "Resolve an eligible simple factual gap through Traverse.",
+    },
+    ToolDescriptor {
         name: "search",
         description: "Semantic and keyword hybrid search across indexed knowledge.",
     },
@@ -46,6 +58,39 @@ pub const INITIAL_TOOLS: &[ToolDescriptor] = &[
 /// Structured MCP tool input accepted by the local adapter.
 #[derive(Debug, Clone, Copy)]
 pub enum ToolInput<'a> {
+    /// Input for the `knowledge.query.answer` tool.
+    QueryAnswer {
+        /// User-facing question supplied by the MCP client.
+        query: &'a str,
+        /// Optional conversation id for continuity across turns.
+        conversation_id: Option<&'a str>,
+        /// Optional artifact ids or paths that bound the answer scope.
+        artifact_scope: &'a [&'a str],
+        /// Optional source limit requested by the client.
+        max_sources: Option<u8>,
+        /// Optional request id for trace correlation.
+        request_id: Option<&'a str>,
+    },
+    /// Input for the `knowledge.gaps.list` tool.
+    GapsList {
+        /// Optional persona id used to scope gaps.
+        persona_id: Option<&'a str>,
+        /// Optional result limit requested by the client.
+        limit: Option<u16>,
+        /// Optional request id for trace correlation.
+        request_id: Option<&'a str>,
+    },
+    /// Input for the `knowledge.gaps.resolve_fact` tool.
+    ResolveFact {
+        /// Gap id marked eligible for direct factual resolution.
+        gap_id: &'a str,
+        /// Direct factual answer supplied by the MCP client.
+        answer: &'a str,
+        /// Optional persona id used to scope the resolution.
+        persona_id: Option<&'a str>,
+        /// Optional request id for trace correlation.
+        request_id: Option<&'a str>,
+    },
     /// Input for the `search` tool.
     Search {
         /// Query text supplied by the client.
@@ -81,6 +126,11 @@ pub enum ToolInput<'a> {
 /// Structured MCP tool output returned by the local adapter.
 #[derive(Debug, Clone, PartialEq)]
 pub enum ToolOutput {
+    /// Output returned by expanded Traverse-backed MCP tools before runtime execution.
+    RuntimeRequest {
+        /// Structured request that a host sends through Traverse.
+        request: RuntimeRequest,
+    },
     /// Output returned by the `search` tool.
     Search {
         /// Ranked source-aware search results.
@@ -131,6 +181,36 @@ pub struct Connection {
     pub relationship: String,
     /// Source path supporting the connection.
     pub supporting_source_path: String,
+}
+
+/// One typed field included in a Traverse-bound MCP runtime request.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RuntimeInputField {
+    /// Field name from the MCP tool input schema.
+    pub name: String,
+    /// String representation of the field value.
+    pub value: String,
+}
+
+/// Structured request emitted by the MCP adapter for Traverse-backed tools.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RuntimeRequest {
+    /// Stable request id for trace correlation.
+    pub request_id: String,
+    /// MCP surface marker.
+    pub surface: String,
+    /// Capability id from the MCP contract.
+    pub capability_id: String,
+    /// Traverse workflow id from the MCP contract.
+    pub workflow_id: String,
+    /// Capability contract path from the MCP contract.
+    pub contract_path: String,
+    /// Target requested by the MCP client.
+    pub requested_target: String,
+    /// Governing spec that defines runtime parity.
+    pub governing_spec: String,
+    /// Validated input fields to pass through Traverse.
+    pub input: Vec<RuntimeInputField>,
 }
 
 /// Errors returned by the local MCP adapter.
@@ -215,6 +295,39 @@ pub fn is_known_tool(name: &str) -> bool {
 /// its input.
 pub fn call_tool(tool_name: &str, input: ToolInput<'_>) -> Result<ToolOutput, ToolCallError> {
     match (tool_name, input) {
+        (
+            "knowledge.query.answer",
+            ToolInput::QueryAnswer {
+                query,
+                conversation_id,
+                artifact_scope,
+                max_sources,
+                request_id,
+            },
+        ) => plan_query_answer(
+            query,
+            conversation_id,
+            artifact_scope,
+            max_sources,
+            request_id,
+        ),
+        (
+            "knowledge.gaps.list",
+            ToolInput::GapsList {
+                persona_id,
+                limit,
+                request_id,
+            },
+        ) => plan_gaps_list(persona_id, limit, request_id),
+        (
+            "knowledge.gaps.resolve_fact",
+            ToolInput::ResolveFact {
+                gap_id,
+                answer,
+                persona_id,
+                request_id,
+            },
+        ) => plan_resolve_fact(gap_id, answer, persona_id, request_id),
         ("search", ToolInput::Search { query, documents }) => {
             let results = search_documents(query, documents)?;
             Ok(ToolOutput::Search { results })
@@ -235,6 +348,142 @@ pub fn call_tool(tool_name: &str, input: ToolInput<'_>) -> Result<ToolOutput, To
         (name, _) => Err(ToolCallError::UnknownTool {
             name: name.to_string(),
         }),
+    }
+}
+
+fn plan_query_answer(
+    query: &str,
+    conversation_id: Option<&str>,
+    artifact_scope: &[&str],
+    max_sources: Option<u8>,
+    request_id: Option<&str>,
+) -> Result<ToolOutput, ToolCallError> {
+    let query = require_non_empty("knowledge.query.answer", "query", query)?;
+    if matches!(max_sources, Some(0 | 21..=u8::MAX)) {
+        return Err(ToolCallError::InvalidInput {
+            tool: "knowledge.query.answer".to_string(),
+            message: "max_sources must be between 1 and 20".to_string(),
+        });
+    }
+
+    let mut input = vec![RuntimeInputField {
+        name: "query".to_string(),
+        value: query.to_string(),
+    }];
+    push_optional_field(&mut input, "conversation_id", conversation_id);
+    if !artifact_scope.is_empty() {
+        input.push(RuntimeInputField {
+            name: "artifact_scope".to_string(),
+            value: artifact_scope.join(","),
+        });
+    }
+    if let Some(max_sources) = max_sources {
+        input.push(RuntimeInputField {
+            name: "max_sources".to_string(),
+            value: max_sources.to_string(),
+        });
+    }
+
+    Ok(ToolOutput::RuntimeRequest {
+        request: runtime_request(
+            request_id,
+            "knowledge.query.answer",
+            "youaskm3.knowledge.query-answer",
+            "contracts/capabilities/knowledge.query.answer.json",
+            input,
+        ),
+    })
+}
+
+fn plan_gaps_list(
+    persona_id: Option<&str>,
+    limit: Option<u16>,
+    request_id: Option<&str>,
+) -> Result<ToolOutput, ToolCallError> {
+    if matches!(limit, Some(0 | 101..=u16::MAX)) {
+        return Err(ToolCallError::InvalidInput {
+            tool: "knowledge.gaps.list".to_string(),
+            message: "limit must be between 1 and 100".to_string(),
+        });
+    }
+
+    let mut input = Vec::new();
+    push_optional_field(&mut input, "persona_id", persona_id);
+    if let Some(limit) = limit {
+        input.push(RuntimeInputField {
+            name: "limit".to_string(),
+            value: limit.to_string(),
+        });
+    }
+
+    Ok(ToolOutput::RuntimeRequest {
+        request: runtime_request(
+            request_id,
+            "knowledge.gaps.list",
+            "youaskm3.knowledge.gaps-list",
+            "contracts/capabilities/knowledge.gaps.list.json",
+            input,
+        ),
+    })
+}
+
+fn plan_resolve_fact(
+    gap_id: &str,
+    answer: &str,
+    persona_id: Option<&str>,
+    request_id: Option<&str>,
+) -> Result<ToolOutput, ToolCallError> {
+    let gap_id = require_non_empty("knowledge.gaps.resolve_fact", "gap_id", gap_id)?;
+    let answer = require_non_empty("knowledge.gaps.resolve_fact", "answer", answer)?;
+
+    let mut input = vec![
+        RuntimeInputField {
+            name: "gap_id".to_string(),
+            value: gap_id.to_string(),
+        },
+        RuntimeInputField {
+            name: "answer".to_string(),
+            value: answer.to_string(),
+        },
+    ];
+    push_optional_field(&mut input, "persona_id", persona_id);
+
+    Ok(ToolOutput::RuntimeRequest {
+        request: runtime_request(
+            request_id,
+            "knowledge.gaps.resolve_fact",
+            "youaskm3.knowledge.gaps-resolve-fact",
+            "contracts/capabilities/knowledge.gaps.resolve_fact.json",
+            input,
+        ),
+    })
+}
+
+fn runtime_request(
+    request_id: Option<&str>,
+    capability_id: &str,
+    workflow_id: &str,
+    contract_path: &str,
+    input: Vec<RuntimeInputField>,
+) -> RuntimeRequest {
+    RuntimeRequest {
+        request_id: request_id.unwrap_or("youaskm3-mcp-request").to_string(),
+        surface: "mcp".to_string(),
+        capability_id: capability_id.to_string(),
+        workflow_id: workflow_id.to_string(),
+        contract_path: contract_path.to_string(),
+        requested_target: "mcp".to_string(),
+        governing_spec: "openspec/specs/local-runtime-sync/spec.md".to_string(),
+        input,
+    }
+}
+
+fn push_optional_field(fields: &mut Vec<RuntimeInputField>, name: &str, value: Option<&str>) {
+    if let Some(value) = value {
+        fields.push(RuntimeInputField {
+            name: name.to_string(),
+            value: value.to_string(),
+        });
     }
 }
 
@@ -388,8 +637,8 @@ fn slugify(value: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::{
-        Connection, RecallMatch, ToolCallError, ToolInput, ToolOutput, call_tool, crate_name,
-        is_known_tool, tool_contract_json, tool_descriptors,
+        Connection, RecallMatch, RuntimeInputField, RuntimeRequest, ToolCallError, ToolInput,
+        ToolOutput, call_tool, crate_name, is_known_tool, tool_contract_json, tool_descriptors,
     };
     use youaskm3_search::{SearchDocument, SearchError};
 
@@ -408,6 +657,9 @@ mod tests {
         assert_eq!(
             names,
             vec![
+                "knowledge.query.answer",
+                "knowledge.gaps.list",
+                "knowledge.gaps.resolve_fact",
                 "search",
                 "remember",
                 "recall",
@@ -416,6 +668,9 @@ mod tests {
                 "status"
             ]
         );
+        assert!(is_known_tool("knowledge.query.answer"));
+        assert!(is_known_tool("knowledge.gaps.list"));
+        assert!(is_known_tool("knowledge.gaps.resolve_fact"));
         assert!(is_known_tool("search"));
         assert!(!is_known_tool("ask"));
     }
@@ -428,6 +683,194 @@ mod tests {
         for tool in tool_descriptors() {
             assert!(contract.contains(&format!("\"name\": \"{}\"", tool.name)));
         }
+    }
+
+    #[test]
+    fn plans_answer_tool_as_traverse_mcp_runtime_request() {
+        let output = call_tool(
+            "knowledge.query.answer",
+            ToolInput::QueryAnswer {
+                query: "What is portable knowledge?",
+                conversation_id: Some("conversation-1"),
+                artifact_scope: &["artifact-a", "artifact-b"],
+                max_sources: Some(3),
+                request_id: Some("answer-request"),
+            },
+        );
+
+        assert_eq!(
+            output,
+            Ok(ToolOutput::RuntimeRequest {
+                request: RuntimeRequest {
+                    request_id: "answer-request".to_string(),
+                    surface: "mcp".to_string(),
+                    capability_id: "knowledge.query.answer".to_string(),
+                    workflow_id: "youaskm3.knowledge.query-answer".to_string(),
+                    contract_path: "contracts/capabilities/knowledge.query.answer.json".to_string(),
+                    requested_target: "mcp".to_string(),
+                    governing_spec: "openspec/specs/local-runtime-sync/spec.md".to_string(),
+                    input: vec![
+                        RuntimeInputField {
+                            name: "query".to_string(),
+                            value: "What is portable knowledge?".to_string(),
+                        },
+                        RuntimeInputField {
+                            name: "conversation_id".to_string(),
+                            value: "conversation-1".to_string(),
+                        },
+                        RuntimeInputField {
+                            name: "artifact_scope".to_string(),
+                            value: "artifact-a,artifact-b".to_string(),
+                        },
+                        RuntimeInputField {
+                            name: "max_sources".to_string(),
+                            value: "3".to_string(),
+                        },
+                    ],
+                },
+            })
+        );
+    }
+
+    #[test]
+    fn plans_gaps_list_tool_with_trace_and_runtime_parity_metadata() {
+        let output = call_tool(
+            "knowledge.gaps.list",
+            ToolInput::GapsList {
+                persona_id: Some("default"),
+                limit: Some(25),
+                request_id: Some("gaps-request"),
+            },
+        );
+
+        assert_eq!(
+            output,
+            Ok(ToolOutput::RuntimeRequest {
+                request: RuntimeRequest {
+                    request_id: "gaps-request".to_string(),
+                    surface: "mcp".to_string(),
+                    capability_id: "knowledge.gaps.list".to_string(),
+                    workflow_id: "youaskm3.knowledge.gaps-list".to_string(),
+                    contract_path: "contracts/capabilities/knowledge.gaps.list.json".to_string(),
+                    requested_target: "mcp".to_string(),
+                    governing_spec: "openspec/specs/local-runtime-sync/spec.md".to_string(),
+                    input: vec![
+                        RuntimeInputField {
+                            name: "persona_id".to_string(),
+                            value: "default".to_string(),
+                        },
+                        RuntimeInputField {
+                            name: "limit".to_string(),
+                            value: "25".to_string(),
+                        },
+                    ],
+                },
+            })
+        );
+    }
+
+    #[test]
+    fn plans_direct_fact_resolution_tool_without_local_business_logic() {
+        let output = call_tool(
+            "knowledge.gaps.resolve_fact",
+            ToolInput::ResolveFact {
+                gap_id: "gap-author-name",
+                answer: "The author is Enrico Piovesan.",
+                persona_id: None,
+                request_id: Some("resolve-request"),
+            },
+        );
+
+        assert_eq!(
+            output,
+            Ok(ToolOutput::RuntimeRequest {
+                request: RuntimeRequest {
+                    request_id: "resolve-request".to_string(),
+                    surface: "mcp".to_string(),
+                    capability_id: "knowledge.gaps.resolve_fact".to_string(),
+                    workflow_id: "youaskm3.knowledge.gaps-resolve-fact".to_string(),
+                    contract_path: "contracts/capabilities/knowledge.gaps.resolve_fact.json"
+                        .to_string(),
+                    requested_target: "mcp".to_string(),
+                    governing_spec: "openspec/specs/local-runtime-sync/spec.md".to_string(),
+                    input: vec![
+                        RuntimeInputField {
+                            name: "gap_id".to_string(),
+                            value: "gap-author-name".to_string(),
+                        },
+                        RuntimeInputField {
+                            name: "answer".to_string(),
+                            value: "The author is Enrico Piovesan.".to_string(),
+                        },
+                    ],
+                },
+            })
+        );
+    }
+
+    #[test]
+    fn rejects_invalid_expanded_mcp_inputs_with_stable_errors() {
+        assert_eq!(
+            call_tool(
+                "knowledge.query.answer",
+                ToolInput::QueryAnswer {
+                    query: "",
+                    conversation_id: None,
+                    artifact_scope: &[],
+                    max_sources: None,
+                    request_id: None,
+                },
+            ),
+            Err(ToolCallError::InvalidInput {
+                tool: "knowledge.query.answer".to_string(),
+                message: "missing query".to_string(),
+            })
+        );
+        assert_eq!(
+            call_tool(
+                "knowledge.query.answer",
+                ToolInput::QueryAnswer {
+                    query: "What changed?",
+                    conversation_id: None,
+                    artifact_scope: &[],
+                    max_sources: Some(21),
+                    request_id: None,
+                },
+            ),
+            Err(ToolCallError::InvalidInput {
+                tool: "knowledge.query.answer".to_string(),
+                message: "max_sources must be between 1 and 20".to_string(),
+            })
+        );
+        assert_eq!(
+            call_tool(
+                "knowledge.gaps.list",
+                ToolInput::GapsList {
+                    persona_id: None,
+                    limit: Some(101),
+                    request_id: None,
+                },
+            ),
+            Err(ToolCallError::InvalidInput {
+                tool: "knowledge.gaps.list".to_string(),
+                message: "limit must be between 1 and 100".to_string(),
+            })
+        );
+        assert_eq!(
+            call_tool(
+                "knowledge.gaps.resolve_fact",
+                ToolInput::ResolveFact {
+                    gap_id: "gap-heavy-reasoning",
+                    answer: " ",
+                    persona_id: None,
+                    request_id: None,
+                },
+            ),
+            Err(ToolCallError::InvalidInput {
+                tool: "knowledge.gaps.resolve_fact".to_string(),
+                message: "missing answer".to_string(),
+            })
+        );
     }
 
     #[test]

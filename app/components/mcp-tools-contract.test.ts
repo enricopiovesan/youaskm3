@@ -101,11 +101,14 @@ describe("mcp-tools contracts", () => {
     });
     expect(answerContract?.output_schema.required).toEqual([
       "answer",
+      "provenance_type",
       "citations",
       "graph_evidence",
       "trace_id",
       "validation"
     ]);
+    expect(answerContract?.output_schema.properties).toHaveProperty("gaps");
+    expect(answerContract?.output_schema.properties).toHaveProperty("conflicts");
     expect(searchContract).toBeDefined();
     expect(searchContract?.output_schema.properties).toHaveProperty("results");
     expect(gapsListContract).toMatchObject({
