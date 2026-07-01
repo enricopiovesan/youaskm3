@@ -8,6 +8,7 @@ import {
   componentNamespace,
   providerConfigPath,
   renderChatCard,
+  renderRuntimeChatResponse,
   renderResultCard,
   renderSourceCard,
   resultTagName,
@@ -19,6 +20,103 @@ import {
 describe("componentNamespace", () => {
   it("returns the expected namespace", () => {
     expect(componentNamespace()).toBe("youaskm3");
+  });
+});
+
+describe("renderRuntimeChatResponse", () => {
+  it("renders supported runtime answers with provenance and evidence", () => {
+    const markup = renderRuntimeChatResponse({
+      answer: "Portable knowledge stays source-backed.",
+      provenance_type: "traverse_runtime",
+      citations: [
+        {
+          citation_id: "cite-1",
+          source_path: "knowledge/blog/portable.md",
+          excerpt: "source-backed excerpt"
+        }
+      ],
+      graph_evidence: [{ node_ids: ["node-a"], edge_ids: ["edge-a"] }],
+      trace_id: "trace-answer",
+      validation: { status: "valid", checks: ["grounded"] }
+    });
+
+    expect(markup).toContain("Portable knowledge stays source-backed.");
+    expect(markup).toContain("traverse_runtime");
+    expect(markup).toContain("knowledge/blog/portable.md");
+    expect(markup).toContain("node-a");
+    expect(markup).toContain("Trace trace-answer");
+  });
+
+  it("renders unsupported deferrals and direct fact prompts from runtime gaps", () => {
+    const markup = renderRuntimeChatResponse({
+      answer: "",
+      provenance_type: "traverse_runtime",
+      citations: [],
+      graph_evidence: [],
+      trace_id: "trace-gap",
+      validation: { status: "invalid", checks: ["missing-knowledge"] },
+      failure: {
+        code: "MISSING_KNOWLEDGE",
+        message: "I need one simple fact before I can answer.",
+        recoverable: true
+      },
+      gaps: [
+        {
+          gap_id: "gap-author-name",
+          source_question: "What is the author name?",
+          allowed_resolution_path: "direct_chat",
+          final_complexity: "simple_factual"
+        }
+      ]
+    });
+
+    expect(markup).toContain('data-mode="deferral"');
+    expect(markup).toContain("I need one simple fact before I can answer.");
+    expect(markup).toContain('class="m3-direct-fact"');
+    expect(markup).toContain('data-gap-id="gap-author-name"');
+  });
+
+  it("discloses only conflicts that affect the answer", () => {
+    const markup = renderRuntimeChatResponse({
+      answer: "The runtime boundary is Traverse-owned.",
+      provenance_type: "traverse_runtime",
+      citations: [],
+      graph_evidence: [],
+      trace_id: "trace-conflict",
+      validation: { status: "partial", checks: ["conflict-disclosed"] },
+      conflicts: [
+        {
+          conflict_id: "conflict-runtime-boundary",
+          summary: "Two notes disagree about runtime ownership.",
+          affects_answer: true
+        },
+        {
+          conflict_id: "conflict-unrelated",
+          summary: "Unrelated conflict.",
+          affects_answer: false
+        }
+      ]
+    });
+
+    expect(markup).toContain("conflict-runtime-boundary");
+    expect(markup).toContain("Two notes disagree about runtime ownership.");
+    expect(markup).not.toContain("conflict-unrelated");
+  });
+
+  it("does not treat Browser demo or pipeline internals as acceptance UI", () => {
+    const markup = renderRuntimeChatResponse({
+      answer: "Answer comes from the runtime response.",
+      provenance_type: "traverse_runtime",
+      citations: [],
+      graph_evidence: [],
+      trace_id: "trace-clean",
+      validation: { status: "valid", checks: ["formatted"] }
+    });
+
+    expect(markup).not.toContain("Browser demo");
+    expect(markup).not.toContain("temporary harness");
+    expect(markup).not.toContain("retrieval");
+    expect(markup).not.toContain("context packing");
   });
 });
 
