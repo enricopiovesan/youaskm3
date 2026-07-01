@@ -92,18 +92,20 @@ def sync_preflight!(knowledge_root)
   return unless knowledge_root == DEFAULT_KNOWLEDGE_ROOT
 
   author_instance = ROOT.join("app", "site", "author-instance.json")
-  sync_state = ROOT.join("app", "site", "sync-state.json")
   stable_error("INSTANCE_NOT_INITIALIZED", "Run ./scripts/m3.sh init before ingesting decision-log packages.") unless author_instance.file?
-  return unless sync_state.file?
+  stdout, stderr, status = Open3.capture3(
+    RbConfig.ruby,
+    ROOT.join("scripts", "sync-preflight.rb").to_s,
+    "--knowledge-root", knowledge_root.to_s,
+    "--write-conflicts",
+    "--json"
+  )
+  data = JSON.parse(stdout)
+  return if status.success? && ["clean", "auto_merged"].include?(data.fetch("status"))
 
-  Dir.mktmpdir do |tmpdir|
-    system(RbConfig.ruby, ROOT.join("scripts", "generate-site-artifacts.rb").to_s, tmpdir, out: File::NULL, err: File::NULL) ||
-      stable_error("SYNC_PREFLIGHT_FAILED", "Unable to compute sync preflight state.")
-    generated = Pathname.new(tmpdir).join("sync-state.json")
-    unless generated.read == sync_state.read
-      stable_error("SYNC_PREFLIGHT_DIRTY", "Current knowledge artifacts are stale. Run ./scripts/m3.sh sync before ingesting.")
-    end
-  end
+  stable_error(data.fetch("code", "SYNC_PREFLIGHT_BLOCKED"), data.fetch("message", stderr))
+rescue JSON::ParserError => error
+  stable_error("SYNC_PREFLIGHT_FAILED", "Unable to parse sync preflight result: #{error.message}")
 end
 
 def run_validator(package_path)
