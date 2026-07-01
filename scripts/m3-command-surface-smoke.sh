@@ -11,6 +11,7 @@ cp "$ROOT_DIR/scripts/m3.sh" "$TEMP_DIR/scripts/m3.sh"
 cp "$ROOT_DIR/scripts/m3-search.rb" "$TEMP_DIR/scripts/m3-search.rb"
 cp "$ROOT_DIR/scripts/m3-serve.sh" "$TEMP_DIR/scripts/m3-serve.sh"
 cp "$ROOT_DIR/scripts/m3-local-runtime.rb" "$TEMP_DIR/scripts/m3-local-runtime.rb"
+cp "$ROOT_DIR/scripts/m3-mvp-check.sh" "$TEMP_DIR/scripts/m3-mvp-check.sh"
 
 cat <<'EOF' > "$TEMP_DIR/app/site/index.html"
 <!doctype html>
@@ -64,5 +65,13 @@ serve_help_output="$(
 
 grep -q "Usage: ./scripts/m3.sh serve \\[port\\]" <<<"$serve_help_output"
 grep -q "serve --runtime" <<<"$serve_help_output"
+
+mvp_check_help_output="$(
+  cd "$TEMP_DIR"
+  bash ./scripts/m3.sh mvp-check --help 2>&1
+)"
+
+grep -q "Usage: ./scripts/m3.sh mvp-check --knowledge-root PATH" <<<"$mvp_check_help_output"
+grep -q "without Browser demo, skeleton, or" <<<"$mvp_check_help_output"
 
 echo "m3 command surface smoke passed."
