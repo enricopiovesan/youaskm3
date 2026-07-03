@@ -49,6 +49,9 @@ If you clone this repository right now, you can:
 - inspect and extend the current Rust crates for `core`, `ingest`, `search`, and `mcp`
 - work against real OpenSpec contracts and CI gates instead of placeholders
 
+For a fuller view of usable-today flows, in-progress work, and unsupported
+claims, see [docs/supported-use-cases.md](docs/supported-use-cases.md).
+
 ## What Is Still Missing
 
 This repository is not yet a finished end-user product. The main gaps today are:
@@ -113,6 +116,7 @@ This repo is intentionally structured so humans and agents can navigate the same
 |---|---|
 | Understand the project contract | [SPEC.md](SPEC.md) |
 | Learn contribution rules | [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Check supported use cases | [docs/supported-use-cases.md](docs/supported-use-cases.md) |
 | Review active capability specs | [openspec/specs/](openspec/specs/) |
 | Review current MCP contracts | [contracts/mcp-tools.json](contracts/mcp-tools.json) |
 | Connect MCP clients and app routes | [docs/mcp-connection-flows.md](docs/mcp-connection-flows.md) |
@@ -130,7 +134,7 @@ This repo is intentionally structured so humans and agents can navigate the same
 The current repo-level command entrypoint is:
 
 ```bash
-./scripts/m3.sh {init|add|build|sync|search|serve|test|lint|smoke|status}
+./scripts/m3.sh {init|add|ingest-decision-log|import-decision-log|semantic-quality|federated-answer|wasm-native-model-evidence|build|sync|search|serve|mvp-check|test|lint|smoke|status}
 ```
 
 Available now:
@@ -142,6 +146,9 @@ Available now:
 - `m3 search <query>` queries the generated local search index from the CLI
 - `m3 serve [port]` serves the static PWA shell from `app/site` for local inspection
 - `m3 smoke` runs the full repository validation path
+
+Additional implemented subcommands are listed in
+[docs/supported-use-cases.md](docs/supported-use-cases.md#current-commands).
 
 Traverse integration readiness is checked with:
 

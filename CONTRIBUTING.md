@@ -9,6 +9,7 @@ This repository is organized around the idea that approved specs come first, con
 Read these documents before proposing or implementing a change:
 
 - [SPEC.md](SPEC.md)
+- [docs/supported-use-cases.md](docs/supported-use-cases.md)
 - [ref/SPEC.md](ref/SPEC.md)
 - [ref/codex-prompt.md](ref/codex-prompt.md)
 - the reference documents in `ref/`, including the author's book and white paper, when they are relevant to the capability you are changing
@@ -89,6 +90,7 @@ Agent-led work should follow [AGENTS.md](AGENTS.md) and
 - quote only actionable failure lines when something fails
 - inspect `git diff --stat` and `git diff --name-only` before larger diffs
 - apply the Minimality Ladder before adding code or abstractions
+- check [docs/supported-use-cases.md](docs/supported-use-cases.md) before claiming a flow is supported today
 
 This discipline reduces review cost and token churn without weakening specs,
 contracts, validation, traceability, or governance.
