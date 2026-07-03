@@ -7,7 +7,7 @@ COMMAND="${1:-}"
 cd "$ROOT_DIR"
 
 usage() {
-  echo "Usage: ./scripts/m3.sh {init|add|ingest-decision-log|import-decision-log|semantic-quality|federated-answer|build|sync|search|serve|mvp-check|test|lint|smoke|status}" >&2
+  echo "Usage: ./scripts/m3.sh {init|add|ingest-decision-log|import-decision-log|semantic-quality|federated-answer|wasm-native-model-evidence|build|sync|search|serve|mvp-check|test|lint|smoke|status}" >&2
 }
 
 slugify_url() {
@@ -97,6 +97,10 @@ case "$COMMAND" in
   federated-answer)
     shift
     ruby ./scripts/federated-answer.rb "$@"
+    ;;
+  wasm-native-model-evidence)
+    shift
+    ruby ./scripts/wasm-native-model-evidence.rb "$@"
     ;;
   build)
     bash ./scripts/build.sh
