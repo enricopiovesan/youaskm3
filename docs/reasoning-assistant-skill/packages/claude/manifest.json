@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "package_id": "youaskm3.reasoning-assistant.claude",
+  "package_version": "0.1.0",
+  "platform": {
+    "id": "claude",
+    "label": "Claude"
+  },
+  "source_skill": {
+    "id": "youaskm3.reasoning-assistant",
+    "version": "0.1.0",
+    "canonical_source": "docs/reasoning-assistant-skill/canonical.md"
+  },
+  "source_adapter": {
+    "id": "claude",
+    "path": "docs/reasoning-assistant-skill/adapters/claude.md",
+    "sha256": "f7a9df12423285f51ec78f80a162cf4e03514643b858fa50962a60ba2d252b9e"
+  },
+  "required_files": [
+    "manifest.json",
+    "instructions.md",
+    "README.md"
+  ],
+  "handoff_command": "m3 ingest-decision-log /path/to/decision-log-package/",
+  "limitations": {
+    "export_shape": "Markdown project instructions plus machine-readable package manifest.",
+    "action_tool_availability": "No packaged tool or MCP action is required; the generic CLI handoff remains user-run outside Claude.",
+    "local_file_handoff": "Claude cannot directly write the local decision-log package; the user must create the files and run the generic m3 ingest command.",
+    "marketplace_publication": "Not packaged for marketplace publication in this slice; distribute as project instructions."
+  }
+}

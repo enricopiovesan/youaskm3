@@ -11,6 +11,7 @@ SPEC_FILES=(
   "openspec/specs/federation/spec.md"
   "openspec/specs/pwa-shell/spec.md"
   "openspec/specs/reasoning-assistant-skill/spec.md"
+  "openspec/specs/assistant-distribution/spec.md"
   "openspec/specs/decision-log-package/spec.md"
   "openspec/specs/reasoning-graph/spec.md"
   "openspec/specs/knowledge-gap-lifecycle/spec.md"
@@ -113,6 +114,9 @@ bash ./scripts/mvp-graph-artifact-smoke.sh
 
 echo "Validating reasoning skill adapter generation..."
 bash ./scripts/reasoning-skill-adapters-smoke.sh
+
+echo "Validating assistant distribution packages..."
+bash ./scripts/assistant-distribution-smoke.sh
 
 echo "Validating decision-log package contract..."
 bash ./scripts/decision-log-package-smoke.sh
