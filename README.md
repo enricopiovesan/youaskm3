@@ -115,6 +115,7 @@ This repo is intentionally structured so humans and agents can navigate the same
 | Learn contribution rules | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Review active capability specs | [openspec/specs/](openspec/specs/) |
 | Review current MCP contracts | [contracts/mcp-tools.json](contracts/mcp-tools.json) |
+| Connect MCP clients and app routes | [docs/mcp-connection-flows.md](docs/mcp-connection-flows.md) |
 | Review MVP capability contracts | [contracts/capabilities/](contracts/capabilities/) |
 | Set up local validation tools | [docs/local-development-toolchain.md](docs/local-development-toolchain.md) |
 | Start or resume ops workflow | [docs/youaskm3-ops.md](docs/youaskm3-ops.md) |
@@ -157,6 +158,11 @@ bash scripts/traverse-component-manifests.sh --skeleton --check
 ```
 
 Omit `--skeleton` when real capability WASM binaries are expected. In that mode the command fails if a referenced binary is missing and writes SHA-256 digests from the actual `.wasm` files.
+
+MCP client and app-route connection guidance is documented in
+[docs/mcp-connection-flows.md](docs/mcp-connection-flows.md). It separates the
+validated contract and local-runtime paths from planned Claude Desktop-style
+packaging that is not yet supported end to end.
 
 ## Project Standards
 
