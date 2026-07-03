@@ -123,3 +123,61 @@ The following items remain outside the first MVP but are no longer undocumented:
 - Evidence required before claiming model-engine execution itself is WASM-native.
 
 These items are captured by future-scope OpenSpec files and FUTURE-001 through FUTURE-007 in `docs/mvp-ticket-backlog.md`.
+
+## Future-Scope Unknowns Resolved
+
+The following planning decisions were approved after the future-scope tickets were created:
+
+### Multi-Persona
+
+- A persona is a knowledge identity. It can represent a real person, role/context, project, or domain-specific thinking identity.
+- Persona is distinct from hosted account.
+- Multi-persona uses a hybrid graph model: isolated persona scopes by default plus explicit shared scopes.
+- Chat uses a configured default persona and explicit persona switching. The runtime must not silently infer/switch persona from message content.
+- Shared scopes are read-only by default and writable only through explicit policy.
+- Reasoning packages can target either a persona scope or an explicit shared scope.
+- Conflict visibility follows scope visibility: mutually visible conflicts can use shared conflict records; hidden scopes use persona-local conflict records.
+- Full multi-persona behavior remains future scope, but current schemas reserve `persona_id`, `scope_id`, and target scope fields.
+
+### Assistant Distribution
+
+- Assistant distribution starts as generated platform artifact bundles, not marketplace-ready packages and not only copy/paste instructions.
+- ChatGPT and Claude remain equal golden targets.
+- Bundles include a small example suite for `knowledge_addition`, `gap_resolution`, and `conflict_resolution`.
+- Bundles produce files for CLI ingestion first. Optional platform action/tool integration is later and must not bypass validation or Traverse-governed ingestion.
+
+### WASM-Native Model Evidence
+
+- WASM-native model engine execution means a WASM-governed runtime engine plus digest-traceable model assets.
+- Evidence must include engine/module identity and digest, model/weights id and digest, placement target, trace id, model dependency id, selected candidate/provider id, and failure mode.
+- WASM-native model evidence is required only for releases that claim fully WASM-native inference.
+- Normal releases may claim Traverse-governed inference while preserving the model-engine caveat.
+
+### Hosted Service
+
+- Hosted service is an optional hosted convenience layer over the local-first core.
+- Nothing leaves the user's machine by default.
+- Hosted features require explicit setup and consent.
+- Personal hosted sync defaults to end-to-end encrypted blobs.
+- Raw readable content or team/shared modes require explicit opt-in and policy.
+- Hosted runtime execution is allowed only per explicit capability policy and must remain Traverse-governed with trace evidence.
+
+### Import Automation
+
+- Archive ingestion comes before inbox/watch-folder automation.
+- First archive format is `.zip`; tar formats are later only if needed.
+- Inbox processing starts as an explicit command, not background watching.
+- Optional watcher behavior is later and must use the same validation path.
+
+### Semantic Quality
+
+- Generic answer benchmark is required and committed.
+- Persona-specific benchmark is optional/local/private.
+- Benchmark release gates cover full trust behavior: correctness, grounding, provenance, unsupported claim rate, conflict disclosure, gap creation behavior, and citation completeness.
+- Claim-level partial ingestion uses deterministic claim extraction plus optional Traverse-governed semantic refinement.
+
+### Federated Answers
+
+- Federated answers can appear in the same chat only when explicitly enabled per question or session.
+- Remote evidence is lower-trust, evidence-only by default.
+- Importing remote evidence has two paths: source artifact for saved reference, or decision-log package for adopted personal reasoning.
