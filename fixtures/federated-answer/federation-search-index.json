@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "instances": [
+    {
+      "instanceId": "remote-systems",
+      "instanceName": "Remote Systems Notes",
+      "shellUrl": "https://remote.example/"
+    }
+  ],
+  "documents": [
+    {
+      "instanceId": "remote-systems",
+      "instanceName": "Remote Systems Notes",
+      "instanceUrl": "https://remote.example/",
+      "documentId": "remote-wasm-notes",
+      "title": "Remote WASM Notes",
+      "sourcePath": "knowledge/papers/remote-wasm-notes/index.md",
+      "category": "papers",
+      "excerpt": "WASM component evidence can support federated answer exploration.",
+      "confidence": "medium"
+    }
+  ]
+}
