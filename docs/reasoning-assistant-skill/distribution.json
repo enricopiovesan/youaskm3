@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "package_schema_version": "1.0.0",
+  "packages_root": "packages",
+  "packages": [
+    {
+      "id": "chatgpt",
+      "label": "ChatGPT",
+      "adapter_id": "chatgpt",
+      "package_version": "0.1.0",
+      "output_dir": "packages/chatgpt",
+      "export_shape": "Markdown instructions plus machine-readable package manifest.",
+      "action_tool_availability": "No packaged tool or action is required; the generic CLI handoff remains user-run outside ChatGPT.",
+      "local_file_handoff": "ChatGPT cannot directly write the local decision-log package; the user must create the files and run the generic m3 ingest command.",
+      "marketplace_publication": "Not packaged for marketplace publication in this slice; distribute as project/custom instructions."
+    },
+    {
+      "id": "claude",
+      "label": "Claude",
+      "adapter_id": "claude",
+      "package_version": "0.1.0",
+      "output_dir": "packages/claude",
+      "export_shape": "Markdown project instructions plus machine-readable package manifest.",
+      "action_tool_availability": "No packaged tool or MCP action is required; the generic CLI handoff remains user-run outside Claude.",
+      "local_file_handoff": "Claude cannot directly write the local decision-log package; the user must create the files and run the generic m3 ingest command.",
+      "marketplace_publication": "Not packaged for marketplace publication in this slice; distribute as project instructions."
+    }
+  ]
+}

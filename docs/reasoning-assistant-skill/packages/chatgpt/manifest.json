@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "package_id": "youaskm3.reasoning-assistant.chatgpt",
+  "package_version": "0.1.0",
+  "platform": {
+    "id": "chatgpt",
+    "label": "ChatGPT"
+  },
+  "source_skill": {
+    "id": "youaskm3.reasoning-assistant",
+    "version": "0.1.0",
+    "canonical_source": "docs/reasoning-assistant-skill/canonical.md"
+  },
+  "source_adapter": {
+    "id": "chatgpt",
+    "path": "docs/reasoning-assistant-skill/adapters/chatgpt.md",
+    "sha256": "3f1ce34e1cca54b50e92abb46cb30d21f745f5c113265050f9019a5c6c50740e"
+  },
+  "required_files": [
+    "manifest.json",
+    "instructions.md",
+    "README.md"
+  ],
+  "handoff_command": "m3 ingest-decision-log /path/to/decision-log-package/",
+  "limitations": {
+    "export_shape": "Markdown instructions plus machine-readable package manifest.",
+    "action_tool_availability": "No packaged tool or action is required; the generic CLI handoff remains user-run outside ChatGPT.",
+    "local_file_handoff": "ChatGPT cannot directly write the local decision-log package; the user must create the files and run the generic m3 ingest command.",
+    "marketplace_publication": "Not packaged for marketplace publication in this slice; distribute as project/custom instructions."
+  }
+}
