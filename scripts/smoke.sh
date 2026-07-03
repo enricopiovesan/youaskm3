@@ -15,6 +15,7 @@ SPEC_FILES=(
   "openspec/specs/package-import-automation/spec.md"
   "openspec/specs/semantic-quality-evaluation/spec.md"
   "openspec/specs/multi-persona/spec.md"
+  "openspec/specs/hosted-service/spec.md"
   "openspec/specs/decision-log-package/spec.md"
   "openspec/specs/reasoning-graph/spec.md"
   "openspec/specs/knowledge-gap-lifecycle/spec.md"
@@ -137,6 +138,9 @@ bash ./scripts/semantic-quality-evaluation-smoke.sh
 
 echo "Validating multi-persona isolation..."
 bash ./scripts/multi-persona-smoke.sh
+
+echo "Validating hosted service architecture..."
+bash ./scripts/hosted-service-smoke.sh
 
 echo "Validating reasoning graph extraction..."
 bash ./scripts/reasoning-graph-extraction-smoke.sh
