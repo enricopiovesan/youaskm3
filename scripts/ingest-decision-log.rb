@@ -15,7 +15,7 @@ REQUIRED_PACKAGE_FILES = ["decision-log.md", "knowledge-note.md", "metadata.json
 ARCHIVE_EXTENSIONS = [".zip", ".tar", ".tgz", ".tar.gz", ".gz"].freeze
 
 def usage
-  abort "Usage: ./scripts/m3.sh ingest-decision-log <package-dir> [--knowledge-root PATH] [--offline]"
+  abort "Usage: ./scripts/m3.sh ingest-decision-log <package-dir> [--knowledge-root PATH] [--offline] [--original-import-path PATH]"
 end
 
 def parse_args(argv)
@@ -23,6 +23,7 @@ def parse_args(argv)
   package_path = Pathname.new(argv.shift)
   knowledge_root = DEFAULT_KNOWLEDGE_ROOT
   offline = false
+  original_import_path = package_path
 
   until argv.empty?
     flag = argv.shift
@@ -31,12 +32,14 @@ def parse_args(argv)
       knowledge_root = Pathname.new(argv.shift || usage)
     when "--offline"
       offline = true
+    when "--original-import-path"
+      original_import_path = Pathname.new(argv.shift || usage)
     else
       usage
     end
   end
 
-  [package_path.expand_path, knowledge_root.expand_path, offline]
+  [package_path.expand_path, knowledge_root.expand_path, offline, original_import_path.expand_path]
 end
 
 def stable_error(code, message)
@@ -156,7 +159,7 @@ def write_normalized_note(knowledge_root, package_id, package_destination)
   MARKDOWN
 end
 
-package_path, knowledge_root, offline = parse_args(ARGV)
+package_path, knowledge_root, offline, original_import_path = parse_args(ARGV)
 stable_error("ARCHIVE_INPUT_UNSUPPORTED", "Decision-log package input must be a directory, not an archive.") if archive_path?(package_path)
 stable_error("PACKAGE_NOT_DIRECTORY", "Decision-log package input must be a directory.") unless package_path.directory?
 
@@ -177,7 +180,7 @@ destination = destination_root.join(package_id)
 stable_error("PACKAGE_ALREADY_EXISTS", "Decision-log package already exists: #{destination}") if destination.exist?
 
 copy_required_package_files(package_path, destination)
-write_provenance(destination, package_path, validation, offline)
+write_provenance(destination, original_import_path, validation, offline)
 write_normalized_note(knowledge_root, package_id, destination) unless offline
 
 result = {
