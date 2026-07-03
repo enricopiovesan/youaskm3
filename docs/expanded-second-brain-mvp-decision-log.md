@@ -108,3 +108,18 @@ The expanded first MVP is a local-first second-brain product with:
 - Local HTTP JSON and MCP runtime surfaces backed by the same Traverse workflow.
 - File-system sync-folder support with conflict detection.
 - One final `m3 mvp-check` acceptance gate.
+
+## Post-First-MVP Missing Scope Now Ticketed
+
+The following items remain outside the first MVP but are no longer undocumented:
+
+- Packaged/distributed ChatGPT, Claude, and future assistant artifacts.
+- Archive/zip package ingestion and optional inbox/watch-folder processing.
+- Claim-level partial ingestion after semantic validation.
+- Production-quality answer benchmarks.
+- Multi-persona knowledge isolation and explicit sharing.
+- Optional hosted service, accounts, teams, permissions, and hosted sync.
+- Cross-instance federated answer flows beyond registry/index discovery.
+- Evidence required before claiming model-engine execution itself is WASM-native.
+
+These items are captured by future-scope OpenSpec files and FUTURE-001 through FUTURE-007 in `docs/mvp-ticket-backlog.md`.

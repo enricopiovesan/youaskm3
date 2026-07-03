@@ -239,6 +239,18 @@ These tickets keep youaskm3 product-led while using concrete app evidence to dri
 
 The expanded second-brain tranche is tracked as MVP-041 and later in [docs/mvp-ticket-backlog.md](docs/mvp-ticket-backlog.md). It does not replace MVP-031 through MVP-040; it layers the approved decision-log, reasoning graph, knowledge gap, sync, local runtime, and final expanded acceptance requirements on top of the existing Traverse-backed runtime baseline.
 
+### Post-first-MVP missing scope
+
+The following surfaces are intentionally outside the first MVP but now have explicit future-scope specs and backlog tickets:
+
+- [assistant-distribution](openspec/specs/assistant-distribution/spec.md): packaged ChatGPT, Claude, and future assistant distribution artifacts.
+- [package-import-automation](openspec/specs/package-import-automation/spec.md): zip/archive ingestion and optional inbox/watch-folder processing.
+- [semantic-quality-evaluation](openspec/specs/semantic-quality-evaluation/spec.md): claim-level partial ingestion and production answer benchmarks.
+- [multi-persona](openspec/specs/multi-persona/spec.md): multiple personas, isolation, and shared scopes.
+- [hosted-service](openspec/specs/hosted-service/spec.md): optional hosted accounts, teams, permissions, sync, and runtime services.
+- [federated-answer](openspec/specs/federated-answer/spec.md): cross-instance search and answer flows beyond registry/index discovery.
+- [wasm-native-model-evidence](openspec/specs/wasm-native-model-evidence/spec.md): proof requirements before claiming the model engine itself is WASM-native.
+
 ### Real runtime implementation rule
 
 First-MVP runtime acceptance requires the real product/business implementation, not placeholders:

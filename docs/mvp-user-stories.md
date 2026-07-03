@@ -43,6 +43,16 @@ MVP runtime acceptance requires the real implementation. Browser demo, temporary
 - Automatic inbox watcher for decision-log packages.
 - Claim-level partial ingestion after failed semantic validation.
 
+These post-MVP surfaces now have explicit future-scope specs:
+
+- `openspec/specs/assistant-distribution/spec.md`
+- `openspec/specs/package-import-automation/spec.md`
+- `openspec/specs/semantic-quality-evaluation/spec.md`
+- `openspec/specs/multi-persona/spec.md`
+- `openspec/specs/hosted-service/spec.md`
+- `openspec/specs/federated-answer/spec.md`
+- `openspec/specs/wasm-native-model-evidence/spec.md`
+
 ## Personas And Stories
 
 ### Local-First Knowledge Owner

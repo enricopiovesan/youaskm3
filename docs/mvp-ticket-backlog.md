@@ -1834,6 +1834,251 @@ bash scripts/smoke.sh
 m3 mvp-check --traverse-repo /path/to/Traverse --knowledge-root /path/to/root
 ```
 
+## Post-First-MVP Missing Scope
+
+The following tickets cover missing surfaces that are intentionally outside the expanded first MVP but now have traceable specs and DoD.
+
+## Ticket FUTURE-001: Package and Distribute Assistant Adapters ([#168](https://github.com/enricopiovesan/youaskm3/issues/168))
+
+### Objective
+
+Turn generated ChatGPT, Claude, and future assistant adapters into packaged, versioned distribution artifacts without moving product logic out of the canonical LLM-agnostic skill.
+
+### Governing Specs
+
+- `openspec/specs/assistant-distribution/spec.md`
+- `openspec/specs/reasoning-assistant-skill/spec.md`
+
+### Scope
+
+- Define platform packaging metadata for ChatGPT and Claude.
+- Generate packaged artifacts from existing generated adapters.
+- Add package/version drift checks against canonical skill and package schema versions.
+- Document platform limitations for marketplace publishing, file export, local handoff, and action/tool availability.
+
+### Definition of Done
+
+- Packaging metadata exists for ChatGPT and Claude adapters.
+- Packaged artifacts are generated from canonical skill/adapters, not hand-edited copies.
+- Drift checks fail when canonical skill, adapter, or schema versions change without regenerated packages.
+- Package docs list each platform's known limitations and blocked capabilities.
+- No package hardcodes private user paths or private knowledge.
+- Validation passes.
+
+### Unknowns To Discuss
+
+- Which platform should be packaged first for real distribution?
+- What exact packaging format does each platform require at that time?
+- Should marketplace publication be part of this ticket or a later release ticket?
+
+## Ticket FUTURE-002: Add Archive and Inbox Decision-Log Import Automation ([#169](https://github.com/enricopiovesan/youaskm3/issues/169))
+
+### Objective
+
+Add convenience import flows for decision-log packages after the canonical CLI directory ingestion path is stable.
+
+### Governing Specs
+
+- `openspec/specs/package-import-automation/spec.md`
+- `openspec/specs/decision-log-package/spec.md`
+- `openspec/specs/local-runtime-sync/spec.md`
+
+### Scope
+
+- Add safe zip/archive ingestion with path traversal, size, and structure validation.
+- Add optional inbox/watch-folder processing.
+- Preserve the same validation, provenance, sync preflight, and Traverse final-ingestion rules as `m3 ingest-decision-log`.
+- Add clear ingested, rejected, staged, and blocked result records.
+
+### Definition of Done
+
+- Archive ingestion rejects unsafe paths, oversized packages, missing files, and invalid metadata before writes.
+- Inbox processing can be enabled explicitly and does not silently ingest final knowledge without validation.
+- Automated imports can be reproduced through the canonical CLI command.
+- Validation and error messages match package directory ingestion semantics.
+- Tests cover safe archive, traversal attack, invalid archive, inbox success, inbox rejection, and offline staging.
+- Validation passes.
+
+### Unknowns To Discuss
+
+- Which archive formats are worth supporting first?
+- Should inbox processing be polling, explicit command, or filesystem watcher?
+- How much user confirmation is required before final ingestion from automation?
+
+## Ticket FUTURE-003: Add Claim-Level Partial Ingestion and Answer Benchmarks ([#170](https://github.com/enricopiovesan/youaskm3/issues/170))
+
+### Objective
+
+Move beyond first-MVP all-or-nothing semantic validation by supporting claim-level partial ingestion and production-quality answer benchmarks.
+
+### Governing Specs
+
+- `openspec/specs/semantic-quality-evaluation/spec.md`
+- `openspec/specs/decision-log-package/spec.md`
+- `openspec/specs/reasoning-graph/spec.md`
+- `openspec/specs/knowledge-gap-lifecycle/spec.md`
+
+### Scope
+
+- Define claim-level extraction and validation records.
+- Allow accepted claims to ingest while rejected claims become gaps.
+- Add benchmark fixture corpus for grounding, provenance, conflicts, gaps, and reasoning usefulness.
+- Report unsupported claim rate, conflict disclosure rate, gap behavior, and provenance completeness.
+
+### Definition of Done
+
+- Claim-level validation schema exists.
+- Partial ingestion records accepted and rejected claims with provenance.
+- Rejected claims create or update gaps instead of disappearing.
+- Benchmarks run deterministically and do not mutate personal knowledge.
+- Benchmark reports are useful for release quality decisions.
+- Tests cover partial package ingestion, rejected claim gap creation, and benchmark reporting.
+- Validation passes.
+
+### Unknowns To Discuss
+
+- What answer-quality thresholds should block release?
+- Which semantic validator or Traverse agent is acceptable for claim-level review?
+- Should benchmark corpora be generic, project-specific, or persona-specific?
+
+## Ticket FUTURE-004: Support Multi-Persona Knowledge Isolation and Sharing ([#171](https://github.com/enricopiovesan/youaskm3/issues/171))
+
+### Objective
+
+Support multiple personas in one installation while preserving isolation, provenance, and explicit sharing rules.
+
+### Governing Specs
+
+- `openspec/specs/multi-persona/spec.md`
+- `openspec/specs/decision-log-package/spec.md`
+- `openspec/specs/reasoning-graph/spec.md`
+- `openspec/specs/knowledge-gap-lifecycle/spec.md`
+
+### Scope
+
+- Add persona registry and active persona selection.
+- Isolate knowledge, gaps, conflicts, graph context, and assistant package metadata by default.
+- Support explicit shared scopes with conflict visibility.
+- Generate persona-aware assistant packages without embedding private knowledge.
+
+### Definition of Done
+
+- Multiple personas can exist in one installation.
+- Answer context uses only the active persona's allowed scope.
+- Shared scopes require explicit metadata.
+- Conflicts between persona-specific and shared knowledge are visible.
+- Assistant adapters can include persona metadata without embedding private knowledge content.
+- Tests cover isolated personas, shared scope, conflict visibility, and provenance.
+- Validation passes.
+
+### Unknowns To Discuss
+
+- Is a persona a person, a role, a project, or all three?
+- Should personas share one graph with scopes or separate graphs?
+- How should persona switching work in chat and CLI?
+
+## Ticket FUTURE-005: Define Optional Hosted Service, Accounts, Teams, and Hosted Sync ([#172](https://github.com/enricopiovesan/youaskm3/issues/172))
+
+### Objective
+
+Define optional hosted youaskm3 capabilities without weakening local-first operation.
+
+### Governing Specs
+
+- `openspec/specs/hosted-service/spec.md`
+- `openspec/specs/local-runtime-sync/spec.md`
+- `openspec/specs/multi-persona/spec.md`
+
+### Scope
+
+- Define hosted account, team, permission, and hosted sync boundaries.
+- Keep hosted identity separate from local persona identity.
+- Preserve local operation when hosted service is unavailable.
+- Preserve conflict records and no-silent-overwrite policy in hosted sync.
+
+### Definition of Done
+
+- Hosted service architecture spec exists for accounts, teams, permissions, and hosted sync.
+- Local-first operation remains valid without hosted config.
+- Hosted identity and local persona metadata are separate.
+- Hosted sync uses the same semantic conflict principles as local sync.
+- Security and privacy risks are documented before implementation.
+- Validation passes for docs/spec checks.
+
+### Unknowns To Discuss
+
+- Is hosted service part of the commercial product or optional community infrastructure?
+- What identity provider and permission model are acceptable?
+- What data, if any, may leave the user's machine by default?
+
+## Ticket FUTURE-006: Add Federated Cross-Instance Answer Flows ([#173](https://github.com/enricopiovesan/youaskm3/issues/173))
+
+### Objective
+
+Extend existing federation registry and index work into explicit cross-instance search and answer behavior.
+
+### Governing Specs
+
+- `openspec/specs/federated-answer/spec.md`
+- `openspec/specs/federation/spec.md`
+- `openspec/specs/reasoning-graph/spec.md`
+
+### Scope
+
+- Add opt-in policy for federated search and answers.
+- Label remote evidence separately from local personal knowledge.
+- Preserve remote instance, source artifact, retrieval path, and confidence provenance.
+- Support explicit import from federated evidence into local knowledge or decision-log reasoning.
+
+### Definition of Done
+
+- Federated answer policy is explicit and disabled unless allowed.
+- Answers distinguish local evidence from remote instance evidence.
+- Remote evidence is never silently treated as personal knowledge.
+- Import from remote evidence preserves source provenance.
+- Tests cover disabled federation, remote-evidence answer, and explicit import path.
+- Validation passes.
+
+### Unknowns To Discuss
+
+- Should federated answers be available in the same chat or a separate explore mode?
+- What trust model applies to remote instance evidence?
+- How should remote content licensing and removal be handled?
+
+## Ticket FUTURE-007: Prove WASM-Native Model-Engine Execution When Traverse Supports It ([#174](https://github.com/enricopiovesan/youaskm3/issues/174))
+
+### Objective
+
+Define and validate the evidence required before youaskm3 claims the model engine itself is WASM-native.
+
+### Governing Specs
+
+- `openspec/specs/wasm-native-model-evidence/spec.md`
+- `docs/mvp-local-inference-policy.md`
+- `openspec/specs/traverse-integration/spec.md`
+
+### Scope
+
+- Distinguish Traverse-governed inference from WASM-native model-engine execution.
+- Define required Traverse evidence: module identity, digest, placement, execution trace, model dependency id, and failure mode.
+- Add readiness checks that fail unsupported WASM-native model claims.
+- Keep the first-MVP caveat until evidence exists.
+
+### Definition of Done
+
+- Docs clearly distinguish governed inference from WASM-native model-engine execution.
+- Required Traverse evidence contract is documented.
+- Readiness validation fails if release notes or docs claim WASM-native model execution without evidence.
+- Positive validation passes when Traverse exposes stable model-engine WASM evidence.
+- Tests cover unsupported claim failure and supported evidence success.
+- Validation passes.
+
+### Unknowns To Discuss
+
+- What exact Traverse trace fields will prove WASM-native model-engine execution?
+- Is a WASI model runtime enough, or must weights/runtime/engine all be WASM-packaged?
+- Should this block a future release or remain an advanced conformance badge?
+
 ## First Tickets to Start
 
 Recommended first implementation ticket for the Traverse-backed runtime baseline:
