@@ -1,0 +1,25 @@
+{
+  "nodes": [
+    {
+      "node_id": "research-claim",
+      "label": "Research persona can use claim-level benchmarks.",
+      "type": "claim",
+      "persona_id": "research",
+      "source_paths": ["knowledge/personas/research/claims/research-claim.json"]
+    },
+    {
+      "node_id": "personal-claim",
+      "label": "Personal persona has a private planning note.",
+      "type": "claim",
+      "persona_id": "personal",
+      "source_paths": ["knowledge/personas/personal/claims/personal-claim.json"]
+    },
+    {
+      "node_id": "shared-product-claim",
+      "label": "Shared product scope can be used by allowed personas.",
+      "type": "claim",
+      "shared_scope_id": "shared-product",
+      "source_paths": ["knowledge/shared/shared-product/claims/product-claim.json"]
+    }
+  ]
+}
