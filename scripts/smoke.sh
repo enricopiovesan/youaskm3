@@ -14,6 +14,7 @@ SPEC_FILES=(
   "openspec/specs/assistant-distribution/spec.md"
   "openspec/specs/package-import-automation/spec.md"
   "openspec/specs/semantic-quality-evaluation/spec.md"
+  "openspec/specs/multi-persona/spec.md"
   "openspec/specs/decision-log-package/spec.md"
   "openspec/specs/reasoning-graph/spec.md"
   "openspec/specs/knowledge-gap-lifecycle/spec.md"
@@ -133,6 +134,9 @@ bash ./scripts/package-import-automation-smoke.sh
 
 echo "Validating semantic quality evaluation..."
 bash ./scripts/semantic-quality-evaluation-smoke.sh
+
+echo "Validating multi-persona isolation..."
+bash ./scripts/multi-persona-smoke.sh
 
 echo "Validating reasoning graph extraction..."
 bash ./scripts/reasoning-graph-extraction-smoke.sh

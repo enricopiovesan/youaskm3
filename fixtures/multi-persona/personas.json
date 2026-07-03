@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "active_persona_id": "research",
+  "personas": [
+    {
+      "persona_id": "research",
+      "label": "Research Persona",
+      "assistant_metadata": {
+        "role": "research reasoning",
+        "allowed_shared_scopes": ["shared-product"]
+      }
+    },
+    {
+      "persona_id": "personal",
+      "label": "Personal Persona",
+      "assistant_metadata": {
+        "role": "personal planning",
+        "allowed_shared_scopes": []
+      }
+    }
+  ],
+  "shared_scopes": [
+    {
+      "scope_id": "shared-product",
+      "label": "Shared Product Knowledge",
+      "allowed_persona_ids": ["research"],
+      "conflict_policy": "surface"
+    }
+  ]
+}
