@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "package_id": "decision-log-20260629-portable-reasoning",
+  "claims": [
+    {
+      "claim_id": "claim-provenance-package",
+      "text": "Decision-log packages preserve provenance better than single markdown notes.",
+      "status": "accepted",
+      "reason": "Supported by the decision log tradeoff and recommendation.",
+      "provenance": {
+        "decision_log_path": "decision-log.md",
+        "metadata_path": "metadata.json",
+        "citations": [
+          "docs/expanded-second-brain-mvp-decision-log.md"
+        ]
+      }
+    },
+    {
+      "claim_id": "claim-semantic-validation-order",
+      "text": "Deterministic validation should run before Traverse semantic validation.",
+      "status": "rejected",
+      "reason": "Future semantic ordering requires Traverse validator evidence before release-level acceptance.",
+      "provenance": {
+        "decision_log_path": "decision-log.md",
+        "metadata_path": "metadata.json",
+        "citations": [
+          "docs/expanded-second-brain-mvp-decision-log.md"
+        ]
+      }
+    }
+  ]
+}

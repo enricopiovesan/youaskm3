@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "benchmark_id": "semantic-quality-basic",
+  "cases": [
+    {
+      "case_id": "grounded-answer",
+      "query": "Why use decision-log packages?",
+      "answer": "Decision-log packages preserve provenance better than single markdown notes.",
+      "citations": ["decision-log.md"],
+      "unsupported_claims": [],
+      "conflicts_disclosed": [],
+      "gap_created": false,
+      "provenance_complete": true
+    },
+    {
+      "case_id": "unsupported-answer",
+      "query": "Can package compression ship now?",
+      "answer": "Package compression is complete and ready for all users.",
+      "citations": [],
+      "unsupported_claims": ["Package compression is complete and ready for all users."],
+      "conflicts_disclosed": [],
+      "gap_created": true,
+      "provenance_complete": false
+    },
+    {
+      "case_id": "conflict-disclosure",
+      "query": "Should conflicting knowledge affect confidence?",
+      "answer": "A conflict is open, so confidence must be disclosed before final recall.",
+      "citations": ["conflicts/open/conflict-runtime-shortcut.md"],
+      "unsupported_claims": [],
+      "conflicts_disclosed": ["conflict-runtime-shortcut"],
+      "gap_created": false,
+      "provenance_complete": true
+    }
+  ]
+}
