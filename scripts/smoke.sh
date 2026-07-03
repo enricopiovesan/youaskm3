@@ -12,6 +12,7 @@ SPEC_FILES=(
   "openspec/specs/pwa-shell/spec.md"
   "openspec/specs/reasoning-assistant-skill/spec.md"
   "openspec/specs/assistant-distribution/spec.md"
+  "openspec/specs/package-import-automation/spec.md"
   "openspec/specs/decision-log-package/spec.md"
   "openspec/specs/reasoning-graph/spec.md"
   "openspec/specs/knowledge-gap-lifecycle/spec.md"
@@ -46,6 +47,8 @@ validate_openspec_file() {
 
 require_cmd npm
 require_cmd ruby
+require_cmd unzip
+require_cmd zip
 
 cd "$ROOT_DIR"
 
@@ -123,6 +126,9 @@ bash ./scripts/decision-log-package-smoke.sh
 
 echo "Validating m3 decision-log package ingestion..."
 bash ./scripts/m3-decision-log-ingest-smoke.sh
+
+echo "Validating package import automation..."
+bash ./scripts/package-import-automation-smoke.sh
 
 echo "Validating reasoning graph extraction..."
 bash ./scripts/reasoning-graph-extraction-smoke.sh
