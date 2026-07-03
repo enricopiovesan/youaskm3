@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://youaskm3.local/contracts/claim-level-validation.schema.json",
+  "title": "Claim-Level Validation",
+  "type": "object",
+  "required": ["schema_version", "package_id", "claims"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "package_id": {
+      "type": "string",
+      "pattern": "^decision-log-[0-9]{8}-[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["claim_id", "text", "status", "reason", "provenance"],
+        "additionalProperties": false,
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "pattern": "^claim-[a-z0-9-]+$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": ["accepted", "rejected"]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "provenance": {
+            "type": "object",
+            "required": ["decision_log_path", "metadata_path"],
+            "additionalProperties": false,
+            "properties": {
+              "decision_log_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "metadata_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "citations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
