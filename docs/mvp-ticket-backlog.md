@@ -1862,14 +1862,22 @@ Turn generated ChatGPT, Claude, and future assistant adapters into packaged, ver
 - Packaged artifacts are generated from canonical skill/adapters, not hand-edited copies.
 - Drift checks fail when canonical skill, adapter, or schema versions change without regenerated packages.
 - Package docs list each platform's known limitations and blocked capabilities.
+- ChatGPT and Claude are both treated as equal golden targets.
+- Bundles include examples for `knowledge_addition`, `gap_resolution`, and `conflict_resolution`.
+- Bundles produce package files for CLI ingestion without requiring platform action/tool integration.
 - No package hardcodes private user paths or private knowledge.
 - Validation passes.
 
-### Unknowns To Discuss
+### Resolved Planning Decisions
 
-- Which platform should be packaged first for real distribution?
-- What exact packaging format does each platform require at that time?
-- Should marketplace publication be part of this ticket or a later release ticket?
+- Distribution starts as generated platform artifact bundles, not marketplace-ready publishing.
+- ChatGPT and Claude are equal golden targets.
+- Marketplace publication and platform action/tool integration are later scope.
+
+### Remaining Unknowns To Discuss
+
+- What exact packaging format does each platform require at implementation time?
+- Should marketplace publication become a separate release ticket once package artifacts are stable?
 
 ## Ticket FUTURE-002: Add Archive and Inbox Decision-Log Import Automation ([#169](https://github.com/enricopiovesan/youaskm3/issues/169))
 
@@ -1893,16 +1901,24 @@ Add convenience import flows for decision-log packages after the canonical CLI d
 ### Definition of Done
 
 - Archive ingestion rejects unsafe paths, oversized packages, missing files, and invalid metadata before writes.
+- `.zip` is the first supported archive format.
+- Unsupported archive formats fail with stable errors.
 - Inbox processing can be enabled explicitly and does not silently ingest final knowledge without validation.
+- First inbox processing is command-driven, not a background watcher.
 - Automated imports can be reproduced through the canonical CLI command.
 - Validation and error messages match package directory ingestion semantics.
 - Tests cover safe archive, traversal attack, invalid archive, inbox success, inbox rejection, and offline staging.
 - Validation passes.
 
-### Unknowns To Discuss
+### Resolved Planning Decisions
 
-- Which archive formats are worth supporting first?
-- Should inbox processing be polling, explicit command, or filesystem watcher?
+- Archive ingestion comes first.
+- `.zip` is first; tar formats are later only if needed.
+- Inbox processing starts as an explicit command; watcher behavior is later.
+
+### Remaining Unknowns To Discuss
+
+- What should the explicit inbox command be named?
 - How much user confirmation is required before final ingestion from automation?
 
 ## Ticket FUTURE-003: Add Claim-Level Partial Ingestion and Answer Benchmarks ([#170](https://github.com/enricopiovesan/youaskm3/issues/170))
@@ -1928,18 +1944,27 @@ Move beyond first-MVP all-or-nothing semantic validation by supporting claim-lev
 ### Definition of Done
 
 - Claim-level validation schema exists.
+- Deterministic claim extraction is required.
+- Optional Traverse-governed semantic refinement is supported when available.
 - Partial ingestion records accepted and rejected claims with provenance.
 - Rejected claims create or update gaps instead of disappearing.
-- Benchmarks run deterministically and do not mutate personal knowledge.
+- Generic benchmarks run deterministically and do not mutate personal knowledge.
+- Persona-specific benchmarks are optional, local, and private.
 - Benchmark reports are useful for release quality decisions.
+- Release gates cover correctness, grounding, provenance, unsupported claim rate, conflict disclosure, gap creation behavior, and citation completeness.
 - Tests cover partial package ingestion, rejected claim gap creation, and benchmark reporting.
 - Validation passes.
 
-### Unknowns To Discuss
+### Resolved Planning Decisions
 
-- What answer-quality thresholds should block release?
-- Which semantic validator or Traverse agent is acceptable for claim-level review?
-- Should benchmark corpora be generic, project-specific, or persona-specific?
+- Generic benchmark is required; persona-specific benchmark is optional/local.
+- Release-blocking benchmark dimensions cover full trust behavior.
+- Claim extraction is deterministic with optional Traverse-governed semantic refinement.
+
+### Remaining Unknowns To Discuss
+
+- What numeric answer-quality thresholds should block release?
+- Which Traverse semantic validator/agent is acceptable for refinement?
 
 ## Ticket FUTURE-004: Support Multi-Persona Knowledge Isolation and Sharing ([#171](https://github.com/enricopiovesan/youaskm3/issues/171))
 
@@ -1964,18 +1989,28 @@ Support multiple personas in one installation while preserving isolation, proven
 ### Definition of Done
 
 - Multiple personas can exist in one installation.
+- A persona is a knowledge identity, distinct from hosted account.
 - Answer context uses only the active persona's allowed scope.
-- Shared scopes require explicit metadata.
-- Conflicts between persona-specific and shared knowledge are visible.
+- Hybrid graph model isolates persona scopes by default and supports explicit shared scopes.
+- Shared scopes require explicit metadata and are read-only by default.
+- Shared-scope writes require explicit policy.
+- Conflicts follow scope visibility.
+- Default persona plus explicit chat/CLI switch are supported; no silent persona inference occurs.
 - Assistant adapters can include persona metadata without embedding private knowledge content.
 - Tests cover isolated personas, shared scope, conflict visibility, and provenance.
 - Validation passes.
 
-### Unknowns To Discuss
+### Resolved Planning Decisions
 
-- Is a persona a person, a role, a project, or all three?
-- Should personas share one graph with scopes or separate graphs?
-- How should persona switching work in chat and CLI?
+- Persona is a knowledge identity: person, role, project, or domain identity.
+- Graph model is hybrid: isolated persona scopes plus explicit shared scopes.
+- Active persona uses default persona plus explicit switch.
+- Full behavior is future scope, but schemas reserve persona/scope fields now.
+
+### Remaining Unknowns To Discuss
+
+- What exact CLI/chat syntax should switch personas?
+- How should shared-scope write policies be expressed?
 
 ## Ticket FUTURE-005: Define Optional Hosted Service, Accounts, Teams, and Hosted Sync ([#172](https://github.com/enricopiovesan/youaskm3/issues/172))
 
@@ -2000,16 +2035,27 @@ Define optional hosted youaskm3 capabilities without weakening local-first opera
 
 - Hosted service architecture spec exists for accounts, teams, permissions, and hosted sync.
 - Local-first operation remains valid without hosted config.
+- Nothing leaves the user's machine by default.
+- Hosted features require explicit opt-in and state what data leaves the machine.
 - Hosted identity and local persona metadata are separate.
+- Personal hosted sync defaults to end-to-end encrypted blobs.
+- Raw readable or team/shared hosted modes require explicit policy and consent.
+- Hosted runtime execution is allowed only per explicit capability placement policy.
 - Hosted sync uses the same semantic conflict principles as local sync.
 - Security and privacy risks are documented before implementation.
 - Validation passes for docs/spec checks.
 
-### Unknowns To Discuss
+### Resolved Planning Decisions
 
-- Is hosted service part of the commercial product or optional community infrastructure?
+- Hosted service is an optional hosted convenience layer over the local-first core.
+- Nothing leaves the machine by default.
+- Hosted sync is mode-specific: encrypted personal sync by default, raw/shared/team modes by explicit opt-in.
+- Hosted runtime is per-capability, explicit, and Traverse-governed.
+
+### Remaining Unknowns To Discuss
+
 - What identity provider and permission model are acceptable?
-- What data, if any, may leave the user's machine by default?
+- Which hosted capabilities are worth implementing first?
 
 ## Ticket FUTURE-006: Add Federated Cross-Instance Answer Flows ([#173](https://github.com/enricopiovesan/youaskm3/issues/173))
 
@@ -2033,17 +2079,25 @@ Extend existing federation registry and index work into explicit cross-instance 
 ### Definition of Done
 
 - Federated answer policy is explicit and disabled unless allowed.
+- Federated answers can appear in the same chat only when explicitly enabled per question or session.
 - Answers distinguish local evidence from remote instance evidence.
+- Remote evidence is lower-trust, evidence-only by default.
 - Remote evidence is never silently treated as personal knowledge.
-- Import from remote evidence preserves source provenance.
+- Import from remote evidence can save a source artifact or create a decision-log package for adopted personal reasoning.
+- Import preserves source provenance.
 - Tests cover disabled federation, remote-evidence answer, and explicit import path.
 - Validation passes.
 
-### Unknowns To Discuss
+### Resolved Planning Decisions
 
-- Should federated answers be available in the same chat or a separate explore mode?
-- What trust model applies to remote instance evidence?
+- Federated answers are same-chat only when explicitly enabled.
+- Remote evidence is lower-trust evidence-only by default.
+- Remote import supports source artifact and decision-log package paths.
+
+### Remaining Unknowns To Discuss
+
 - How should remote content licensing and removal be handled?
+- What UI control enables federation per question/session?
 
 ## Ticket FUTURE-007: Prove WASM-Native Model-Engine Execution When Traverse Supports It ([#174](https://github.com/enricopiovesan/youaskm3/issues/174))
 
@@ -2067,17 +2121,22 @@ Define and validate the evidence required before youaskm3 claims the model engin
 ### Definition of Done
 
 - Docs clearly distinguish governed inference from WASM-native model-engine execution.
-- Required Traverse evidence contract is documented.
-- Readiness validation fails if release notes or docs claim WASM-native model execution without evidence.
+- Required Traverse evidence contract includes engine/module identity and digest, model/weights id and digest, placement target, trace id, dependency id, selected provider/candidate id, and failure mode.
+- Readiness validation fails if release notes or docs claim fully WASM-native inference without evidence.
 - Positive validation passes when Traverse exposes stable model-engine WASM evidence.
 - Tests cover unsupported claim failure and supported evidence success.
 - Validation passes.
 
-### Unknowns To Discuss
+### Resolved Planning Decisions
 
-- What exact Traverse trace fields will prove WASM-native model-engine execution?
-- Is a WASI model runtime enough, or must weights/runtime/engine all be WASM-packaged?
-- Should this block a future release or remain an advanced conformance badge?
+- WASM-native model execution means WASM-governed runtime engine plus digest-traceable model assets.
+- Fully WASM-native inference evidence is required only for releases that claim fully WASM-native inference.
+- Normal releases may claim Traverse-governed inference while preserving the model-engine caveat.
+
+### Remaining Unknowns To Discuss
+
+- What exact Traverse trace field names will expose the required evidence?
+- Should fully WASM-native inference become a release blocker later or remain a conformance badge?
 
 ## First Tickets to Start
 

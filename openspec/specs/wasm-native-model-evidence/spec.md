@@ -49,6 +49,10 @@ The system SHALL fail readiness if docs or release notes claim fully WASM-native
 - WHEN validation runs
 - THEN the gate passes the positive WASM-native model-engine claim
 
+### Requirement: Allow Traverse-governed inference releases
+
+The system SHALL allow releases that claim Traverse-governed inference without claiming fully WASM-native inference.
+
 #### Scenario: Traverse-governed inference release
 
 - GIVEN a release claims Traverse-governed inference but not fully WASM-native inference
