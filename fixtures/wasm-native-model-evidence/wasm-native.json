@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "traverse_version": "v0.6.0",
+  "inference_dependency_id": "knowledge.infer",
+  "selected_candidate_id": "wasm-native-llama",
+  "model_dependency_id": "llama-wasm-fixture",
+  "traverse_governed_inference": true,
+  "model_engine_wasm_native": true,
+  "module_identity": "traverse.agent.model.llama-wasm",
+  "module_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "model_asset_id": "llama-wasm-fixture-weights",
+  "model_asset_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "runtime_placement": "wasm",
+  "execution_trace_id": "trace-wasm-native-model",
+  "failure_mode": null
+}

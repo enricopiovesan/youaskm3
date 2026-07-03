@@ -17,6 +17,7 @@ SPEC_FILES=(
   "openspec/specs/multi-persona/spec.md"
   "openspec/specs/hosted-service/spec.md"
   "openspec/specs/federated-answer/spec.md"
+  "openspec/specs/wasm-native-model-evidence/spec.md"
   "openspec/specs/decision-log-package/spec.md"
   "openspec/specs/reasoning-graph/spec.md"
   "openspec/specs/knowledge-gap-lifecycle/spec.md"
@@ -160,6 +161,9 @@ bash ./scripts/federation-index-smoke.sh
 
 echo "Validating federated answer flows..."
 bash ./scripts/federated-answer-smoke.sh
+
+echo "Validating WASM-native model evidence..."
+bash ./scripts/wasm-native-model-evidence-smoke.sh
 
 echo "Running Rust tests..."
 bash ./scripts/test.sh
