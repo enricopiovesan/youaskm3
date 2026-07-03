@@ -19,6 +19,13 @@ The system SHALL use federated indexes only when the user or configured policy e
 - THEN only local knowledge is used
 - AND no cross-instance query is performed
 
+#### Scenario: Ask with federation enabled
+
+- GIVEN federation search is explicitly allowed
+- WHEN the user asks a question that matches remote index evidence
+- THEN the remote query is recorded
+- AND returned evidence is labeled as remote
+
 ### Requirement: Preserve remote provenance
 
 The system SHALL label remote evidence distinctly from local personal knowledge.
@@ -39,3 +46,4 @@ The system SHALL allow useful federated evidence to become local knowledge only 
 - GIVEN the user wants to keep remote evidence
 - WHEN the import flow runs
 - THEN the evidence becomes a local source artifact or reasoning package with provenance back to the remote instance
+- AND imported remote evidence is not silently promoted to personal knowledge

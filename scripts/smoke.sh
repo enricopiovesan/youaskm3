@@ -16,6 +16,7 @@ SPEC_FILES=(
   "openspec/specs/semantic-quality-evaluation/spec.md"
   "openspec/specs/multi-persona/spec.md"
   "openspec/specs/hosted-service/spec.md"
+  "openspec/specs/federated-answer/spec.md"
   "openspec/specs/decision-log-package/spec.md"
   "openspec/specs/reasoning-graph/spec.md"
   "openspec/specs/knowledge-gap-lifecycle/spec.md"
@@ -156,6 +157,9 @@ bash ./scripts/answer-context-selector-smoke.sh
 
 echo "Validating federation index generation..."
 bash ./scripts/federation-index-smoke.sh
+
+echo "Validating federated answer flows..."
+bash ./scripts/federated-answer-smoke.sh
 
 echo "Running Rust tests..."
 bash ./scripts/test.sh
