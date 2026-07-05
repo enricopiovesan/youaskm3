@@ -119,10 +119,11 @@ The following items remain outside the first MVP but are no longer undocumented:
 - Production-quality answer benchmarks.
 - Multi-persona knowledge isolation and explicit sharing.
 - Optional hosted service, accounts, teams, permissions, and hosted sync.
+- Optional hosted public gap collector for low-friction GitHub Pages gap capture.
 - Cross-instance federated answer flows beyond registry/index discovery.
 - Evidence required before claiming model-engine execution itself is WASM-native.
 
-These items are captured by future-scope OpenSpec files and FUTURE-001 through FUTURE-007 in `docs/mvp-ticket-backlog.md`.
+These items are captured by future-scope OpenSpec files and FUTURE-001 through FUTURE-012 in `docs/mvp-ticket-backlog.md`.
 
 ## Future-Scope Unknowns Resolved
 
@@ -161,6 +162,20 @@ The following planning decisions were approved after the future-scope tickets we
 - Personal hosted sync defaults to end-to-end encrypted blobs.
 - Raw readable content or team/shared modes require explicit opt-in and policy.
 - Hosted runtime execution is allowed only per explicit capability policy and must remain Traverse-governed with trace evidence.
+
+### Hosted Public Gap Collector
+
+- GitHub Pages can host published chat and static knowledge artifacts without a server.
+- Painless public gap capture cannot be solved by browser WASM or GitHub Secrets because static browser code cannot safely hold write credentials.
+- Prefilled GitHub issue drafts are safe but cumbersome because they require a GitHub account and manual submission.
+- Low-friction public gap capture requires an optional trusted hosted boundary.
+- The minimum hosted architecture is a narrow gap collector, not full hosted youaskm3.
+- Recommended MVP architecture is GitHub Pages plus Cloudflare Worker, D1, and Turnstile or equivalent zero/near-zero-cost managed primitives.
+- The collector stores pending external gap reports only; it does not answer questions, run inference, mutate the local graph, or bypass local validation.
+- The local user-owned instance remains the source of truth.
+- The owner pulls, reviews, and imports accepted reports through the CLI.
+- The public client must provide a no-hosted fallback such as GitHub issue draft, copy markdown, or download gap package.
+- Cost controls, abuse controls, privacy disclosure, and retention policy are required before enabling a collector.
 
 ### Import Automation
 

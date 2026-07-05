@@ -1326,6 +1326,14 @@ Approved expanded second-brain tranche after the 2026-06-29 brainstorming sessio
 - MVP-053 MCP answer, gaps, and simple fact resolution tools ([#150](https://github.com/enricopiovesan/youaskm3/issues/150))
 - MVP-054 expanded first-MVP acceptance gate with `m3 mvp-check` ([#151](https://github.com/enricopiovesan/youaskm3/issues/151))
 
+Approved hosted public gap collector tranche after the 2026-07-05 planning session:
+
+- FUTURE-008 hosted public gap collector architecture ([#187](https://github.com/enricopiovesan/youaskm3/issues/187))
+- FUTURE-009 static chat gap submission UX ([#190](https://github.com/enricopiovesan/youaskm3/issues/190))
+- FUTURE-010 minimal hosted gap collector endpoint ([#189](https://github.com/enricopiovesan/youaskm3/issues/189))
+- FUTURE-011 CLI pull/review/import for hosted gap reports ([#188](https://github.com/enricopiovesan/youaskm3/issues/188))
+- FUTURE-012 hosted gap collector security, privacy, and cost gate ([#186](https://github.com/enricopiovesan/youaskm3/issues/186))
+
 ## Ticket MVP-041: Build the Canonical Reasoning Skill and Generated Adapters
 
 ### Objective
@@ -2137,6 +2145,210 @@ Define and validate the evidence required before youaskm3 claims the model engin
 
 - What exact Traverse trace field names will expose the required evidence?
 - Should fully WASM-native inference become a release blocker later or remain a conformance badge?
+
+## Ticket FUTURE-008: Define Hosted Public Gap Collector Architecture ([#187](https://github.com/enricopiovesan/youaskm3/issues/187))
+
+### Objective
+
+Define the smallest optional hosted architecture that makes public GitHub Pages chat gap capture low-friction without creating a full hosted youaskm3 service.
+
+### Governing Specs
+
+- `openspec/specs/hosted-gap-collector/spec.md`
+- `openspec/specs/hosted-service/spec.md`
+- `openspec/specs/knowledge-gap-lifecycle/spec.md`
+
+### Scope
+
+- Document why browser WASM and GitHub Secrets cannot safely provide automatic public writes from GitHub Pages.
+- Define the recommended minimal architecture: GitHub Pages chat, trusted collector endpoint, abuse validation, pending gap storage, and CLI owner import.
+- Define accepted equivalent provider requirements for alternatives to Cloudflare Worker, D1, and Turnstile.
+- Define public gap report schema fields and stable error codes at the spec level.
+
+### Definition of Done
+
+- `openspec/specs/hosted-gap-collector/spec.md` describes local-first source-of-truth, no browser secrets, pending-only storage, owner review/import, abuse controls, privacy disclosure, and cost limits.
+- Architecture docs distinguish this narrow collector from full hosted youaskm3 accounts, sync, teams, hosted runtime, and inference.
+- Public gap report payload fields are listed: question, missing knowledge, published scope, checked evidence, source URL, timestamp, reporter context, schema version, and validation version.
+- Failure modes are documented for missing collector config, invalid payload, abuse challenge failure, rate limit, storage failure, and owner import failure.
+- No implementation claims direct graph writes or automatic local knowledge mutation from the public hosted collector.
+- Validation passes for OpenSpec/docs checks.
+
+### Resolved Planning Decisions
+
+- Low-friction GitHub Pages gap capture requires a trusted hosted boundary.
+- The collector is optional and narrow; it stores pending reports only.
+- The local user-owned instance remains the source of truth.
+- Cloudflare Worker, D1, and Turnstile are the recommended first near-zero-cost architecture, but equivalent providers are allowed if they preserve the same trust and cost boundaries.
+
+### Remaining Unknowns To Discuss
+
+- Which provider should be the first supported reference implementation?
+- What retention period should pending public gap reports use by default?
+
+## Ticket FUTURE-009: Add Static Chat Gap Submission UX ([#190](https://github.com/enricopiovesan/youaskm3/issues/190))
+
+### Objective
+
+Add the GitHub Pages/static-chat UX for reporting a knowledge gap to a configured hosted collector, with honest fallback behavior when no collector exists.
+
+### Governing Specs
+
+- `openspec/specs/hosted-gap-collector/spec.md`
+- `openspec/specs/pwa-shell/spec.md`
+- `openspec/specs/knowledge-gap-lifecycle/spec.md`
+
+### Scope
+
+- Add static client configuration for an optional gap collector endpoint and public scope metadata.
+- Show transparent insufficient-knowledge messaging and a submit-gap action for public chat.
+- Send a validated public gap report to the configured collector.
+- Provide fallback actions when no collector is configured: GitHub issue draft, copy markdown, or download gap package.
+- Keep the PWA UI-only: no graph mutation, no inference, no secret handling, and no business-logic shortcuts in the client.
+
+### Definition of Done
+
+- Static chat shows what was known, what is missing, and the action to submit a public gap.
+- Submit action posts only the public gap report payload to the configured collector endpoint.
+- The browser bundle contains no write token, GitHub secret, database credential, or hidden privileged endpoint.
+- UI discloses what data leaves the page before submission.
+- Missing collector config produces a clear fallback path and does not show fake one-click hosted submission.
+- Tests cover configured collector success, collector unavailable failure, invalid input, and no-collector fallback.
+- Accessibility checks cover the submit, fallback, success, and error states.
+- Validation passes.
+
+### Resolved Planning Decisions
+
+- GitHub Pages public chat may capture gaps through a hosted collector when configured.
+- Without a collector, the product must offer honest manual fallbacks instead of pretending the flow is painless.
+- Static client code must not contain secrets or mutate knowledge directly.
+
+### Remaining Unknowns To Discuss
+
+- What exact public UI label should distinguish hosted submit from manual fallback?
+- Should copy/download fallback use markdown only or a zip package from day one?
+
+## Ticket FUTURE-010: Implement Minimal Hosted Gap Collector Endpoint ([#189](https://github.com/enricopiovesan/youaskm3/issues/189))
+
+### Objective
+
+Implement the optional hosted collector reference endpoint that accepts public gap reports, validates abuse controls, and stores pending reports for owner review.
+
+### Governing Specs
+
+- `openspec/specs/hosted-gap-collector/spec.md`
+- `openspec/specs/hosted-service/spec.md`
+
+### Scope
+
+- Implement a reference Cloudflare Worker or equivalent serverless endpoint.
+- Validate payload schema, origin policy, Turnstile or equivalent challenge, body size, and rate limits.
+- Store accepted reports in D1 or equivalent pending storage.
+- Return stable success and error responses.
+- Avoid LLM calls, inference, graph writes, and automatic GitHub issue creation in the collector.
+
+### Definition of Done
+
+- Collector rejects requests with missing required fields, oversized payloads, failed challenge, disallowed origin, and rate limit violations.
+- Accepted reports receive a stable report id and are stored with pending status.
+- Stored report includes schema version, validation version, created timestamp, source URL, published scope, checked evidence, missing knowledge, and reporter context.
+- No browser-facing secret is required for submission.
+- No collector path can directly mutate local knowledge or mark a report imported without owner-side action.
+- Tests cover valid report, invalid report, challenge failure, rate limit, storage failure, and stable error codes.
+- Deployment docs list required environment variables/secrets and free-tier/cost assumptions.
+- Validation passes.
+
+### Resolved Planning Decisions
+
+- The first hosted feature should be a gap collector, not full hosted youaskm3.
+- The collector should use managed free/near-free primitives and conservative quotas.
+- The collector must store pending reports only.
+
+### Remaining Unknowns To Discuss
+
+- Should the first reference implementation live in this repo or a separate deployable package?
+- Should owner authentication for report-status updates be included in the first collector slice or deferred to CLI pull-only access?
+
+## Ticket FUTURE-011: Add CLI Pull, Review, and Import for Hosted Gap Reports ([#188](https://github.com/enricopiovesan/youaskm3/issues/188))
+
+### Objective
+
+Allow an owner to pull pending hosted gap reports, review them, and import accepted reports into the local knowledge gap lifecycle.
+
+### Governing Specs
+
+- `openspec/specs/hosted-gap-collector/spec.md`
+- `openspec/specs/knowledge-gap-lifecycle/spec.md`
+- `openspec/specs/local-runtime-sync/spec.md`
+
+### Scope
+
+- Add CLI configuration for hosted collector source credentials or read endpoint.
+- List pending reports with enough context for owner review.
+- Import accepted reports as local structured knowledge gaps.
+- Preserve hosted report provenance.
+- Reject or archive reports without importing when the owner chooses.
+
+### Definition of Done
+
+- CLI can list pending reports from a configured collector without importing them.
+- CLI can import a selected report into the local instance as a structured knowledge gap.
+- Imported gap records hosted report id, collector source, source URL, published scope, reporter context, timestamp, schema version, and validation version.
+- Import uses existing local validation and conflict/gap lifecycle rules.
+- CLI can reject or archive a report when supported by the collector, or record local ignore state when remote status update is unavailable.
+- Tests cover list, import, duplicate import prevention, reject/archive, invalid remote payload, and collector unavailable failure.
+- No report bypasses local user consent or local validation.
+- Validation passes.
+
+### Resolved Planning Decisions
+
+- Owner review/import is mandatory.
+- Public submissions do not become local knowledge until imported.
+- CLI is the bridge from hosted pending reports to local source-of-truth knowledge.
+
+### Remaining Unknowns To Discuss
+
+- What CLI command names should be used for hosted gap pull/review/import?
+- Should accepted reports default to open gaps or staged review files?
+
+## Ticket FUTURE-012: Add Hosted Gap Collector Security, Privacy, and Cost Gate ([#186](https://github.com/enricopiovesan/youaskm3/issues/186))
+
+### Objective
+
+Add release gating and documentation that prevents enabling the hosted gap collector without abuse controls, privacy disclosure, and cost limits.
+
+### Governing Specs
+
+- `openspec/specs/hosted-gap-collector/spec.md`
+- `openspec/specs/hosted-service/spec.md`
+
+### Scope
+
+- Document the security, privacy, retention, and cost model for the hosted collector.
+- Add validation that release docs do not claim painless public gap capture unless a collector or honest fallback exists.
+- Add configuration checks for required collector limits and disclosure.
+- Keep the gate independent from full hosted accounts/sync/team readiness.
+
+### Definition of Done
+
+- Docs list what public gap data is collected, where it is stored, who can read it, retention expectations, and owner deletion/export path.
+- Docs list expected free-tier assumptions and conservative default limits.
+- Validation fails if public hosted gap capture is enabled without configured abuse control, body limit, rate limit, and privacy disclosure.
+- Validation fails if GitHub Pages docs claim automatic one-click submission while only GitHub issue draft/manual fallback is configured.
+- Tests cover missing disclosure, missing abuse control, missing limits, configured collector success, and fallback-only success.
+- The gate does not require full hosted youaskm3 accounts, sync, teams, or hosted runtime.
+- Validation passes.
+
+### Resolved Planning Decisions
+
+- Reducing user friction must not hide privacy, abuse, or cost risks.
+- Hosted collector readiness is separate from full hosted-service readiness.
+- Fallback-only static deployments are valid, but must be labeled honestly.
+
+### Remaining Unknowns To Discuss
+
+- What usage threshold should trigger moving from free-tier collector assumptions to explicit billing alerts?
+- What default retention period balances useful owner review with privacy minimization?
 
 ## First Tickets to Start
 
