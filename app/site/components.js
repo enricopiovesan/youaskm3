@@ -2,6 +2,7 @@ import {
   callBrowserTool,
   executeTraverseAnswerHttp,
   loadBrowserArtifacts,
+  submitPublicGapReport,
   TOOL_DESCRIPTORS
 } from "./runtime.js";
 
@@ -198,6 +199,45 @@ const styles = `
     padding: 12px 14px;
     border-radius: 16px;
     background: rgba(23, 53, 47, 0.06);
+    color: #587168;
+  }
+
+  .gap-panel {
+    display: grid;
+    gap: 10px;
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 18px;
+    border: 1px solid rgba(189, 139, 57, 0.28);
+    background: rgba(189, 139, 57, 0.1);
+  }
+
+  .gap-panel h3,
+  .gap-panel p {
+    margin: 0;
+  }
+
+  .gap-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .secondary-button,
+  .gap-link {
+    border: 1px solid rgba(23, 53, 47, 0.2);
+    border-radius: 14px;
+    background: rgba(255, 252, 246, 0.92);
+    color: #17352f;
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    font-weight: 700;
+    padding: 10px 14px;
+    text-decoration: none;
+  }
+
+  .gap-status {
     color: #587168;
   }
 
@@ -411,6 +451,41 @@ class M3Chat extends HTMLElement {
       this.getAttribute("instance-title") ?? "youaskm3 author instance";
     const instanceUrl = this.getAttribute("instance-url") ?? "";
     const busy = this.getAttribute("busy") === "true";
+    const gapVisible = this.getAttribute("gap-visible") === "true";
+    const collectorConfigured = this.getAttribute("gap-collector-configured") === "true";
+    const gapKnown = this.getAttribute("gap-known") ?? "";
+    const gapMissing = this.getAttribute("gap-missing") ?? "";
+    const gapDisclosure = this.getAttribute("gap-disclosure") ?? "";
+    const gapStatus = this.getAttribute("gap-status") ?? "";
+    const gapStatusKind = this.getAttribute("gap-status-kind") ?? "";
+    const fallbackIssueUrl = this.getAttribute("gap-fallback-issue-url") ?? "";
+    const fallbackMarkdown = this.getAttribute("gap-fallback-markdown") ?? "";
+    const fallbackDownload = this.getAttribute("gap-fallback-download") ?? "youaskm3-public-gap.md";
+    const fallbackDownloadHref = `data:text/markdown;charset=utf-8,${encodeURIComponent(fallbackMarkdown)}`;
+    const gapPanel = gapVisible
+      ? `
+          <section class="gap-panel" aria-label="Public gap submission" data-collector="${collectorConfigured ? "configured" : "missing"}">
+            <h3>Report missing public knowledge</h3>
+            <p><strong>Known:</strong> ${escapeHtml(gapKnown)}</p>
+            <p><strong>Missing:</strong> ${escapeHtml(gapMissing)}</p>
+            <p>${escapeHtml(gapDisclosure)}</p>
+            <div class="gap-actions">
+              ${
+                collectorConfigured
+                  ? '<button id="public-gap-submit" class="submit-button" type="button" aria-label="Submit public knowledge gap">Submit public gap</button>'
+                  : [
+                      fallbackIssueUrl
+                        ? `<a class="gap-link" href="${escapeHtml(fallbackIssueUrl)}">Draft GitHub issue</a>`
+                        : "",
+                      '<button id="public-gap-copy" class="secondary-button" type="button" aria-label="Copy public gap markdown">Copy gap markdown</button>',
+                      `<a class="gap-link" download="${escapeHtml(fallbackDownload)}" href="${fallbackDownloadHref}">Download gap package</a>`
+                    ].join("")
+              }
+            </div>
+            ${gapStatus ? `<p class="gap-status" role="status" data-status="${escapeHtml(gapStatusKind)}">${escapeHtml(gapStatus)}</p>` : ""}
+          </section>
+        `
+      : "";
 
     root.innerHTML = template(`
       <section class="chat-shell">
@@ -479,6 +554,7 @@ class M3Chat extends HTMLElement {
             Browser shell runtime is executing locally through the contract-shaped tool adapter in <code>runtime.js</code>.
             Traverse mode delegates answer execution to the configured HTTP/JSON runtime.
           </div>
+          ${gapPanel}
         </article>
         <aside class="panel">
           <div class="sources">
@@ -545,6 +621,26 @@ class M3Chat extends HTMLElement {
         })
       );
     });
+
+    root.querySelector("#public-gap-submit")?.addEventListener("click", () => {
+      this.dispatchEvent(
+        new CustomEvent("publicgapsubmit", {
+          bubbles: true
+        })
+      );
+    });
+
+    root.querySelector("#public-gap-copy")?.addEventListener("click", () => {
+      if (navigator.clipboard && fallbackMarkdown) {
+        void navigator.clipboard.writeText(fallbackMarkdown);
+      }
+      this.dispatchEvent(
+        new CustomEvent("publicgapcopy", {
+          detail: { markdown: fallbackMarkdown },
+          bubbles: true
+        })
+      );
+    });
   }
 }
 
@@ -569,6 +665,7 @@ let artifactState = {
   graph: null,
   message: "Generated search-index.json is missing or unavailable."
 };
+let gapSubmissionStatus = null;
 
 async function loadProviderConfig() {
   const response = await fetch("./provider-config.json");
@@ -623,6 +720,61 @@ function providerSummary(profile) {
   return `${profile.label} uses ${profile.endpoint}, ${authCopy}, and hints ${profile.modelHint}.${runtimeCopy}`;
 }
 
+function collectorConfig() {
+  const collector = authorInstance?.hostedGapCollector;
+  if (collector) {
+    return collector;
+  }
+
+  return {
+    enabled: false,
+    endpoint: null,
+    publicScope: {
+      instanceId: authorInstance?.instanceId ?? "youaskm3-author",
+      title: authorInstance?.title ?? "youaskm3 author instance",
+      shellUrl: authorInstance?.shellUrl ?? window.location.href,
+      knowledgeBase: authorInstance?.knowledgeBase ?? "knowledge/"
+    },
+    fallbackIssueUrl:
+      "https://github.com/enricopiovesan/youaskm3/issues/new?title=Public%20knowledge%20gap",
+    fallbackPackageName: "youaskm3-public-gap.md"
+  };
+}
+
+function gapInput(input, sources) {
+  return {
+    question: input,
+    missingKnowledge:
+      sources.length > 0
+        ? "The public answer still needs owner-reviewed missing knowledge."
+        : "No source-backed citations were returned for this question.",
+    checkedEvidence:
+      sources.length > 0
+        ? sources.map((source) => `${source.label}: ${source.detail}`)
+        : [artifactState.message, "No source-backed citations were returned."],
+    sourceUrl: window.location.href,
+    reporterContext: "Submitted from the public static chat shell."
+  };
+}
+
+function gapMarkdown(input, sources) {
+  const report = gapInput(input, sources);
+  return [
+    "# Public knowledge gap",
+    "",
+    `Question: ${report.question}`,
+    "",
+    `Missing knowledge: ${report.missingKnowledge}`,
+    "",
+    `Source URL: ${report.sourceUrl}`,
+    "",
+    "Checked evidence:",
+    ...report.checkedEvidence.map((entry) => `- ${entry}`),
+    "",
+    `Reporter context: ${report.reporterContext}`
+  ].join("\n");
+}
+
 async function runBrowserTool(toolName, input) {
   const provider = providerConfig ? activeProvider(providerConfig) : null;
   if (toolName === "answer" && provider?.runtime === "traverse-http") {
@@ -673,6 +825,9 @@ async function syncShell(toolName, input, state = "ready") {
 
   const result = shell.querySelector("m3-result");
   const provider = providerConfig ? activeProvider(providerConfig) : null;
+  const collector = collectorConfig();
+  const gapVisible = toolName === "answer" && state !== "loading" && sources.length === 0;
+  const fallbackMarkdown = gapMarkdown(input, sources);
 
   shell.setAttribute("tool", toolName);
   shell.setAttribute("input", input);
@@ -689,6 +844,24 @@ async function syncShell(toolName, input, state = "ready") {
     authorInstance?.title ?? "youaskm3 author instance"
   );
   shell.setAttribute("instance-url", authorInstance?.shellUrl ?? window.location.href);
+  shell.setAttribute("gap-visible", gapVisible ? "true" : "false");
+  shell.setAttribute("gap-collector-configured", collector.enabled && collector.endpoint ? "true" : "false");
+  shell.setAttribute("gap-known", artifactState.message);
+  shell.setAttribute(
+    "gap-missing",
+    "No source-backed citations were returned for this question."
+  );
+  shell.setAttribute(
+    "gap-disclosure",
+    collector.enabled && collector.endpoint
+      ? "Submitting sends this public gap report to the configured hosted collector for owner review."
+      : "Hosted gap submission is not configured; use a manual fallback instead."
+  );
+  shell.setAttribute("gap-fallback-issue-url", collector.fallbackIssueUrl ?? "");
+  shell.setAttribute("gap-fallback-markdown", fallbackMarkdown);
+  shell.setAttribute("gap-fallback-download", collector.fallbackPackageName ?? "youaskm3-public-gap.md");
+  shell.setAttribute("gap-status", gapSubmissionStatus?.message ?? "");
+  shell.setAttribute("gap-status-kind", gapSubmissionStatus?.kind ?? "");
 
   if (result instanceof HTMLElement) {
     result.setAttribute("prompt", summary.prompt);
@@ -752,6 +925,7 @@ if (shell instanceof HTMLElement) {
     const detail = event instanceof CustomEvent ? event.detail : null;
     currentInput = detail?.value ?? currentInput;
     currentTool = "answer";
+    gapSubmissionStatus = null;
     void syncShell(currentTool, currentInput, "loading");
     window.setTimeout(() => void syncShell(currentTool, currentInput), 0);
   });
@@ -769,5 +943,32 @@ if (shell instanceof HTMLElement) {
       );
     }
     void syncShell(currentTool, currentInput);
+  });
+
+  shell.addEventListener("publicgapsubmit", () => {
+    const collector = collectorConfig();
+    const currentSources = Array.from(shell.querySelectorAll("m3-source")).map((source) => ({
+      label: source.getAttribute("label") ?? "Evidence",
+      detail: source.getAttribute("detail") ?? ""
+    }));
+    void submitPublicGapReport(gapInput(currentInput, currentSources), collector).then((result) => {
+      if (result.status === "submitted") {
+        gapSubmissionStatus = {
+          kind: "success",
+          message: `HOSTED_GAP_REPORT_ACCEPTED: ${result.reportId}`
+        };
+      } else if (result.status === "fallback") {
+        gapSubmissionStatus = {
+          kind: "fallback",
+          message: result.code
+        };
+      } else {
+        gapSubmissionStatus = {
+          kind: "error",
+          message: `${result.code}: ${result.message}`
+        };
+      }
+      void syncShell(currentTool, currentInput);
+    });
   });
 }

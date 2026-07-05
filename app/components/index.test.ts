@@ -7,6 +7,7 @@ import {
   chatTagName,
   componentNamespace,
   providerConfigPath,
+  renderPublicGapSubmission,
   renderChatCard,
   renderRuntimeChatResponse,
   renderResultCard,
@@ -74,6 +75,8 @@ describe("renderRuntimeChatResponse", () => {
     expect(markup).toContain("I need one simple fact before I can answer.");
     expect(markup).toContain('class="m3-direct-fact"');
     expect(markup).toContain('data-gap-id="gap-author-name"');
+    expect(markup).toContain("Public gap submission");
+    expect(markup).toContain("HOSTED_GAP_COLLECTOR_NOT_CONFIGURED");
   });
 
   it("discloses only conflicts that affect the answer", () => {
@@ -117,6 +120,82 @@ describe("renderRuntimeChatResponse", () => {
     expect(markup).not.toContain("temporary harness");
     expect(markup).not.toContain("retrieval");
     expect(markup).not.toContain("context packing");
+  });
+});
+
+describe("renderPublicGapSubmission", () => {
+  it("renders a hosted submit action only when a collector is configured", () => {
+    const markup = renderPublicGapSubmission({
+      question: "What public source is missing?",
+      knownSummary: "The static shell checked public citations.",
+      missingKnowledge: "No source-backed citation covered the answer.",
+      collectorConfigured: true,
+      disclosure: "This sends a public gap report to the configured collector.",
+      fallbackMarkdown: "# gap",
+      downloadFileName: "gap.md"
+    });
+
+    expect(markup).toContain('data-collector="configured"');
+    expect(markup).toContain("Submit public gap");
+    expect(markup).not.toContain("Draft GitHub issue");
+  });
+
+  it("renders honest manual fallbacks when no collector is configured", () => {
+    const markup = renderPublicGapSubmission({
+      question: "What public source is missing?",
+      knownSummary: "No source-backed citations were returned.",
+      missingKnowledge: "The public artifact set does not answer this question.",
+      collectorConfigured: false,
+      disclosure: "Public hosted submission is not configured.",
+      fallbackIssueUrl: "https://github.com/enricopiovesan/youaskm3/issues/new",
+      fallbackMarkdown: "# Public knowledge gap",
+      downloadFileName: "youaskm3-public-gap.md",
+      status: {
+        kind: "fallback",
+        message: "HOSTED_GAP_COLLECTOR_NOT_CONFIGURED"
+      }
+    });
+
+    expect(markup).toContain('data-collector="missing"');
+    expect(markup).toContain("Draft GitHub issue");
+    expect(markup).toContain("Copy gap markdown");
+    expect(markup).toContain("Download gap package");
+    expect(markup).toContain('role="status"');
+    expect(markup).toContain("HOSTED_GAP_COLLECTOR_NOT_CONFIGURED");
+  });
+
+  it("renders accessible success and error status states", () => {
+    const success = renderPublicGapSubmission({
+      question: "What public source is missing?",
+      knownSummary: "The collector accepted the report.",
+      missingKnowledge: "The answer needs a missing public source.",
+      collectorConfigured: true,
+      disclosure: "This sends a public gap report to the configured collector.",
+      fallbackMarkdown: "# gap",
+      downloadFileName: "gap.md",
+      status: {
+        kind: "success",
+        message: "HOSTED_GAP_REPORT_ACCEPTED"
+      }
+    });
+    const failure = renderPublicGapSubmission({
+      question: "What public source is missing?",
+      knownSummary: "The collector rejected the report.",
+      missingKnowledge: "The answer needs a missing public source.",
+      collectorConfigured: true,
+      disclosure: "This sends a public gap report to the configured collector.",
+      fallbackMarkdown: "# gap",
+      downloadFileName: "gap.md",
+      status: {
+        kind: "error",
+        message: "HOSTED_GAP_STORAGE_FAILED"
+      }
+    });
+
+    expect(success).toContain('role="status"');
+    expect(success).toContain('data-status="success"');
+    expect(failure).toContain('role="status"');
+    expect(failure).toContain('data-status="error"');
   });
 });
 

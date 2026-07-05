@@ -50,5 +50,13 @@ describe("author instance manifest", () => {
     expect(DEFAULT_AUTHOR_INSTANCE.shellUrl).toContain("github.io/youaskm3");
     expect(DEFAULT_AUTHOR_INSTANCE.providerProfiles).toContain("browser-demo");
     expect(DEFAULT_AUTHOR_INSTANCE.providerProfiles).toContain("traverse-local");
+    expect(DEFAULT_AUTHOR_INSTANCE.hostedGapCollector).toMatchObject({
+      enabled: false,
+      endpoint: null,
+      publicScope: {
+        instanceId: "youaskm3-author",
+        knowledgeBase: "knowledge/"
+      }
+    });
   });
 });

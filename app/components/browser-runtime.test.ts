@@ -7,6 +7,7 @@ import {
   BROWSER_TOOL_DESCRIPTORS,
   browserArtifactState,
   browserToolNames,
+  buildPublicGapReport,
   buildTraverseRuntimeRequest,
   callBrowserTool,
   documentsFromSearchIndex,
@@ -14,6 +15,7 @@ import {
   isMissingInferenceDependency,
   isBrowserToolName,
   mapTraverseAnswerFailure,
+  submitPublicGapReport,
   temporaryTraverseChatHarness
 } from "./browser-runtime";
 
@@ -59,6 +61,19 @@ const graphFixture = {
       source_chunk_ids: ["knowledge-blog-mvp-fixture-article-index:chunk:0"]
     }
   ]
+};
+
+const hostedGapCollectorConfig = {
+  enabled: true,
+  endpoint: "https://collector.example.test/gaps",
+  publicScope: {
+    instanceId: "youaskm3-author",
+    title: "youaskm3 author instance",
+    shellUrl: "https://enricopiovesan.github.io/youaskm3/",
+    knowledgeBase: "knowledge/"
+  },
+  fallbackIssueUrl: "https://github.com/enricopiovesan/youaskm3/issues/new",
+  fallbackPackageName: "youaskm3-public-gap.md"
 };
 
 describe("browser runtime tool descriptors", () => {
@@ -516,6 +531,124 @@ describe("Traverse HTTP answer adapter", () => {
       message: "Traverse runtime endpoint is not configured.",
       recoverable: true
     });
+  });
+});
+
+describe("hosted public gap report submission", () => {
+  const publicGapInput = {
+    question: "What does the public instance know about collector UX?",
+    missingKnowledge: "No source-backed citation explains the public collector UX.",
+    checkedEvidence: ["No source-backed citations were returned."],
+    sourceUrl: "https://enricopiovesan.github.io/youaskm3/",
+    reporterContext: "Visitor saw an unanswered public chat question."
+  };
+
+  it("builds the portable public gap report payload", () => {
+    const report = buildPublicGapReport(
+      publicGapInput,
+      hostedGapCollectorConfig,
+      "2026-07-05T13:00:00.000Z"
+    );
+
+    expect(report).toEqual({
+      schema_version: "1.0.0",
+      validation_version: "hosted-gap-collector/0.1.0",
+      question: publicGapInput.question,
+      missing_knowledge: publicGapInput.missingKnowledge,
+      published_scope: hostedGapCollectorConfig.publicScope,
+      checked_evidence: publicGapInput.checkedEvidence,
+      source_url: publicGapInput.sourceUrl,
+      submitted_at: "2026-07-05T13:00:00.000Z",
+      reporter_context: publicGapInput.reporterContext
+    });
+  });
+
+  it("submits to a configured collector without browser secrets", async () => {
+    const requests: Array<{ input: string; body: unknown; headers: Record<string, string> }> = [];
+    const output = await submitPublicGapReport(
+      publicGapInput,
+      hostedGapCollectorConfig,
+      async (input, init) => {
+        requests.push({
+          input,
+          body: JSON.parse(init?.body ?? "{}"),
+          headers: init?.headers ?? {}
+        });
+        return {
+          ok: true,
+          status: 202,
+          json: async () => ({ report_id: "gap-report-1" })
+        };
+      },
+      "2026-07-05T13:00:00.000Z"
+    );
+
+    expect(output).toEqual({
+      status: "submitted",
+      reportId: "gap-report-1",
+      code: "HOSTED_GAP_REPORT_ACCEPTED"
+    });
+    expect(requests[0]?.input).toBe("https://collector.example.test/gaps");
+    expect(requests[0]?.headers).toEqual({
+      accept: "application/json",
+      "content-type": "application/json"
+    });
+    expect(JSON.stringify(requests[0]?.body)).not.toMatch(/token|secret|credential/i);
+  });
+
+  it("maps collector unavailable failures to the stable storage code", async () => {
+    const output = await submitPublicGapReport(
+      publicGapInput,
+      hostedGapCollectorConfig,
+      async () => {
+        throw new Error("collector unavailable");
+      },
+      "2026-07-05T13:00:00.000Z"
+    );
+
+    expect(output).toMatchObject({
+      status: "failed",
+      code: "HOSTED_GAP_STORAGE_FAILED",
+      recoverable: true
+    });
+  });
+
+  it("rejects invalid public gap reports before posting", async () => {
+    let called = false;
+    const output = await submitPublicGapReport(
+      { ...publicGapInput, missingKnowledge: "   " },
+      hostedGapCollectorConfig,
+      async () => {
+        called = true;
+        throw new Error("should not post invalid reports");
+      },
+      "2026-07-05T13:00:00.000Z"
+    );
+
+    expect(output).toMatchObject({
+      status: "failed",
+      code: "HOSTED_GAP_REPORT_INVALID"
+    });
+    expect(called).toBe(false);
+  });
+
+  it("returns manual fallback data when no collector is configured", async () => {
+    const output = await submitPublicGapReport(publicGapInput, {
+      ...hostedGapCollectorConfig,
+      enabled: false,
+      endpoint: null
+    });
+
+    expect(output).toMatchObject({
+      status: "fallback",
+      code: "HOSTED_GAP_COLLECTOR_NOT_CONFIGURED",
+      downloadFileName: "youaskm3-public-gap.md"
+    });
+    if (output.status !== "fallback") {
+      throw new Error("expected fallback output");
+    }
+    expect(output.fallbackMarkdown).toContain(publicGapInput.question);
+    expect(output.fallbackMarkdown).toContain(publicGapInput.missingKnowledge);
   });
 });
 

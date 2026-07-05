@@ -104,6 +104,62 @@ export type TraverseFetch = (
   }
 ) => Promise<TraverseFetchResponse>;
 
+export type HostedGapCollectorConfig = {
+  enabled: boolean;
+  endpoint: string | null;
+  publicScope: {
+    instanceId: string;
+    title: string;
+    shellUrl: string;
+    knowledgeBase: string;
+  };
+  fallbackIssueUrl?: string;
+  fallbackPackageName?: string;
+};
+
+export type PublicGapReportInput = {
+  question: string;
+  missingKnowledge: string;
+  checkedEvidence: string[];
+  sourceUrl: string;
+  reporterContext?: string;
+};
+
+export type PublicGapReport = {
+  schema_version: "1.0.0";
+  validation_version: "hosted-gap-collector/0.1.0";
+  question: string;
+  missing_knowledge: string;
+  published_scope: HostedGapCollectorConfig["publicScope"];
+  checked_evidence: string[];
+  source_url: string;
+  submitted_at: string;
+  reporter_context?: string;
+};
+
+export type HostedGapSubmissionResult =
+  | {
+      status: "submitted";
+      reportId: string;
+      code: "HOSTED_GAP_REPORT_ACCEPTED";
+    }
+  | {
+      status: "fallback";
+      code: "HOSTED_GAP_COLLECTOR_NOT_CONFIGURED";
+      fallbackMarkdown: string;
+      downloadFileName: string;
+    }
+  | {
+      status: "failed";
+      code:
+        | "HOSTED_GAP_REPORT_INVALID"
+        | "HOSTED_GAP_ABUSE_CHALLENGE_FAILED"
+        | "HOSTED_GAP_RATE_LIMITED"
+        | "HOSTED_GAP_STORAGE_FAILED";
+      message: string;
+      recoverable: boolean;
+    };
+
 export type BrowserCitation = {
   citation_id: string;
   artifact_id: string;
@@ -257,6 +313,102 @@ export function isMissingInferenceDependency(code: string): boolean {
   return MISSING_INFERENCE_DEPENDENCY_CODES.includes(
     code as (typeof MISSING_INFERENCE_DEPENDENCY_CODES)[number]
   );
+}
+
+export function buildPublicGapReport(
+  input: PublicGapReportInput,
+  config: HostedGapCollectorConfig,
+  submittedAt = new Date().toISOString()
+): PublicGapReport {
+  const question = requireInput(input.question);
+  const missingKnowledge = requireInput(input.missingKnowledge);
+  const sourceUrl = requireInput(input.sourceUrl);
+  const checkedEvidence = input.checkedEvidence
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+
+  if (checkedEvidence.length === 0) {
+    throw new Error("public gap report needs checked evidence");
+  }
+
+  return {
+    schema_version: "1.0.0",
+    validation_version: "hosted-gap-collector/0.1.0",
+    question,
+    missing_knowledge: missingKnowledge,
+    published_scope: config.publicScope,
+    checked_evidence: checkedEvidence,
+    source_url: sourceUrl,
+    submitted_at: submittedAt,
+    ...(input.reporterContext?.trim()
+      ? { reporter_context: input.reporterContext.trim() }
+      : {})
+  };
+}
+
+export async function submitPublicGapReport(
+  input: PublicGapReportInput,
+  config: HostedGapCollectorConfig,
+  fetchImpl: TraverseFetch = globalThis.fetch,
+  submittedAt = new Date().toISOString()
+): Promise<HostedGapSubmissionResult> {
+  if (!config.enabled || !config.endpoint || config.endpoint.trim().length === 0) {
+    return {
+      status: "fallback",
+      code: "HOSTED_GAP_COLLECTOR_NOT_CONFIGURED",
+      fallbackMarkdown: publicGapFallbackMarkdown(input),
+      downloadFileName: config.fallbackPackageName ?? "youaskm3-public-gap.md"
+    };
+  }
+
+  let report: PublicGapReport;
+  try {
+    report = buildPublicGapReport(input, config, submittedAt);
+  } catch (error) {
+    return {
+      status: "failed",
+      code: "HOSTED_GAP_REPORT_INVALID",
+      message: error instanceof Error ? error.message : "Invalid public gap report.",
+      recoverable: true
+    };
+  }
+
+  const response = await fetchImpl(config.endpoint, {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify(report)
+  }).catch((error) =>
+    Promise.resolve({
+      ok: false,
+      status: 503,
+      json: async () => ({
+        code: "HOSTED_GAP_STORAGE_FAILED",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Hosted gap collector is unavailable."
+      })
+    })
+  );
+  const body = (await response.json()) as Record<string, unknown>;
+
+  if (!response.ok) {
+    return {
+      status: "failed",
+      code: hostedGapFailureCode(body.code),
+      message: stringValue(body.message, "Hosted gap collector rejected the report."),
+      recoverable: response.status >= 500 || response.status === 429
+    };
+  }
+
+  return {
+    status: "submitted",
+    reportId: stringValue(body.report_id, "pending-report"),
+    code: "HOSTED_GAP_REPORT_ACCEPTED"
+  };
 }
 
 export function mapTraverseAnswerFailure(
@@ -529,6 +681,42 @@ function stringValue(value: unknown, fallback: string): string {
 
 function arrayValue(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
+}
+
+function hostedGapFailureCode(
+  value: unknown
+): "HOSTED_GAP_REPORT_INVALID" | "HOSTED_GAP_ABUSE_CHALLENGE_FAILED" | "HOSTED_GAP_RATE_LIMITED" | "HOSTED_GAP_STORAGE_FAILED" {
+  return [
+    "HOSTED_GAP_REPORT_INVALID",
+    "HOSTED_GAP_ABUSE_CHALLENGE_FAILED",
+    "HOSTED_GAP_RATE_LIMITED",
+    "HOSTED_GAP_STORAGE_FAILED"
+  ].includes(String(value))
+    ? (value as
+        | "HOSTED_GAP_REPORT_INVALID"
+        | "HOSTED_GAP_ABUSE_CHALLENGE_FAILED"
+        | "HOSTED_GAP_RATE_LIMITED"
+        | "HOSTED_GAP_STORAGE_FAILED")
+    : "HOSTED_GAP_STORAGE_FAILED";
+}
+
+function publicGapFallbackMarkdown(input: PublicGapReportInput): string {
+  return [
+    "# Public knowledge gap",
+    "",
+    `Question: ${input.question.trim()}`,
+    "",
+    `Missing knowledge: ${input.missingKnowledge.trim()}`,
+    "",
+    `Source URL: ${input.sourceUrl.trim()}`,
+    "",
+    "Checked evidence:",
+    ...input.checkedEvidence.map((entry) => `- ${entry.trim()}`).filter((entry) => entry !== "-"),
+    "",
+    input.reporterContext?.trim()
+      ? `Reporter context: ${input.reporterContext.trim()}`
+      : "Reporter context: not provided"
+  ].join("\n");
 }
 
 export function temporaryTraverseChatHarness(
