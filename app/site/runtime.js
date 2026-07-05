@@ -127,6 +127,98 @@ export function isMissingInferenceDependency(code) {
   ].includes(code);
 }
 
+export function buildPublicGapReport(input, config, submittedAt = new Date().toISOString()) {
+  const question = requireInput(input.question);
+  const missingKnowledge = requireInput(input.missingKnowledge);
+  const sourceUrl = requireInput(input.sourceUrl);
+  const checkedEvidence = input.checkedEvidence
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+
+  if (checkedEvidence.length === 0) {
+    throw new Error("public gap report needs checked evidence");
+  }
+
+  return {
+    schema_version: "1.0.0",
+    validation_version: "hosted-gap-collector/0.1.0",
+    question,
+    missing_knowledge: missingKnowledge,
+    published_scope: config.publicScope,
+    checked_evidence: checkedEvidence,
+    source_url: sourceUrl,
+    submitted_at: submittedAt,
+    ...(input.reporterContext?.trim()
+      ? { reporter_context: input.reporterContext.trim() }
+      : {})
+  };
+}
+
+export async function submitPublicGapReport(
+  input,
+  config,
+  fetchImpl = globalThis.fetch,
+  submittedAt = new Date().toISOString()
+) {
+  if (!config.enabled || !config.endpoint || config.endpoint.trim().length === 0) {
+    return {
+      status: "fallback",
+      code: "HOSTED_GAP_COLLECTOR_NOT_CONFIGURED",
+      fallbackMarkdown: publicGapFallbackMarkdown(input),
+      downloadFileName: config.fallbackPackageName ?? "youaskm3-public-gap.md"
+    };
+  }
+
+  let report;
+  try {
+    report = buildPublicGapReport(input, config, submittedAt);
+  } catch (error) {
+    return {
+      status: "failed",
+      code: "HOSTED_GAP_REPORT_INVALID",
+      message: error instanceof Error ? error.message : "Invalid public gap report.",
+      recoverable: true
+    };
+  }
+
+  const response = await fetchImpl(config.endpoint, {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json"
+    },
+    body: JSON.stringify(report)
+  }).catch((error) =>
+    Promise.resolve({
+      ok: false,
+      status: 503,
+      json: async () => ({
+        code: "HOSTED_GAP_STORAGE_FAILED",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Hosted gap collector is unavailable."
+      })
+    })
+  );
+  const body = await response.json();
+
+  if (!response.ok) {
+    return {
+      status: "failed",
+      code: hostedGapFailureCode(body.code),
+      message: stringValue(body.message, "Hosted gap collector rejected the report."),
+      recoverable: response.status >= 500 || response.status === 429
+    };
+  }
+
+  return {
+    status: "submitted",
+    reportId: stringValue(body.report_id, "pending-report"),
+    code: "HOSTED_GAP_REPORT_ACCEPTED"
+  };
+}
+
 export function mapTraverseAnswerFailure(query, failure) {
   const missingInference = isMissingInferenceDependency(failure.code);
 
@@ -327,6 +419,36 @@ function asRecord(value) {
 
 function stringValue(value, fallback) {
   return typeof value === "string" && value.length > 0 ? value : fallback;
+}
+
+function hostedGapFailureCode(value) {
+  return [
+    "HOSTED_GAP_REPORT_INVALID",
+    "HOSTED_GAP_ABUSE_CHALLENGE_FAILED",
+    "HOSTED_GAP_RATE_LIMITED",
+    "HOSTED_GAP_STORAGE_FAILED"
+  ].includes(String(value))
+    ? value
+    : "HOSTED_GAP_STORAGE_FAILED";
+}
+
+function publicGapFallbackMarkdown(input) {
+  return [
+    "# Public knowledge gap",
+    "",
+    `Question: ${input.question.trim()}`,
+    "",
+    `Missing knowledge: ${input.missingKnowledge.trim()}`,
+    "",
+    `Source URL: ${input.sourceUrl.trim()}`,
+    "",
+    "Checked evidence:",
+    ...input.checkedEvidence.map((entry) => `- ${entry.trim()}`).filter((entry) => entry !== "-"),
+    "",
+    input.reporterContext?.trim()
+      ? `Reporter context: ${input.reporterContext.trim()}`
+      : "Reporter context: not provided"
+  ].join("\n");
 }
 
 function arrayValue(value) {

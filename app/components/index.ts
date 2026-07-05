@@ -67,6 +67,21 @@ export type RuntimeChatResponse = {
   };
 };
 
+export type PublicGapSubmissionView = {
+  question: string;
+  knownSummary: string;
+  missingKnowledge: string;
+  collectorConfigured: boolean;
+  disclosure: string;
+  fallbackIssueUrl?: string;
+  fallbackMarkdown: string;
+  downloadFileName: string;
+  status?: {
+    kind: "success" | "error" | "fallback";
+    message: string;
+  };
+};
+
 export function componentNamespace(): string {
   return COMPONENT_NAMESPACE;
 }
@@ -144,8 +159,53 @@ export function renderRuntimeChatResponse(response: RuntimeChatResponse): string
     renderRuntimeCitations(response.citations),
     renderRuntimeGraphEvidence(response.graph_evidence),
     renderRuntimeGaps(directFactGaps),
+    response.failure
+      ? renderPublicGapSubmission({
+          question: response.failure.message,
+          knownSummary:
+            response.citations.length > 0
+              ? `${response.citations.length} citation(s) were checked.`
+              : "No source-backed citations were returned.",
+          missingKnowledge: response.failure.message,
+          collectorConfigured: false,
+          disclosure:
+            "Public gap submission is not configured for this static shell. Use a manual fallback.",
+          fallbackMarkdown: publicGapMarkdown(response.failure.message),
+          downloadFileName: "youaskm3-public-gap.md",
+          status: {
+            kind: "fallback",
+            message: "HOSTED_GAP_COLLECTOR_NOT_CONFIGURED"
+          }
+        })
+      : "",
     renderRuntimeConflicts(relevantConflicts),
     `</article>`
+  ].join("");
+}
+
+export function renderPublicGapSubmission(view: PublicGapSubmissionView): string {
+  const hostedAction = view.collectorConfigured
+    ? `<button class="m3-public-gap-submit" type="button" aria-label="Submit public knowledge gap">Submit public gap</button>`
+    : [
+        view.fallbackIssueUrl
+          ? `<a class="m3-public-gap-fallback" href="${escapeHtml(view.fallbackIssueUrl)}">Draft GitHub issue</a>`
+          : "",
+        `<button class="m3-public-gap-copy" type="button" aria-label="Copy public gap markdown">Copy gap markdown</button>`,
+        `<a class="m3-public-gap-download" download="${escapeHtml(view.downloadFileName)}" href="data:text/markdown;charset=utf-8,${encodeURIComponent(view.fallbackMarkdown)}">Download gap package</a>`
+      ].join("");
+  const status = view.status
+    ? `<p class="m3-public-gap-status" role="status" data-status="${escapeHtml(view.status.kind)}">${escapeHtml(view.status.message)}</p>`
+    : "";
+
+  return [
+    `<section class="m3-public-gap" aria-label="Public gap submission" data-collector="${view.collectorConfigured ? "configured" : "missing"}">`,
+    `<h3>Report missing public knowledge</h3>`,
+    `<p class="m3-public-gap-known"><strong>Known:</strong> ${escapeHtml(view.knownSummary)}</p>`,
+    `<p class="m3-public-gap-missing"><strong>Missing:</strong> ${escapeHtml(view.missingKnowledge)}</p>`,
+    `<p class="m3-public-gap-disclosure">${escapeHtml(view.disclosure)}</p>`,
+    `<div class="m3-public-gap-actions">${hostedAction}</div>`,
+    status,
+    `</section>`
   ].join("");
 }
 
@@ -240,4 +300,17 @@ function renderRuntimeConflicts(conflicts: RuntimeConflict[]): string {
     .join("");
 
   return `<section class="m3-runtime-conflicts" aria-label="Relevant conflicts"><h3>Relevant conflicts</h3><ul>${items}</ul></section>`;
+}
+
+function publicGapMarkdown(question: string): string {
+  return [
+    "# Public knowledge gap",
+    "",
+    `Question: ${question}`,
+    "",
+    "Missing knowledge: not enough public source-backed evidence was available.",
+    "",
+    "Checked evidence:",
+    "- No source-backed citations were returned."
+  ].join("\n");
 }

@@ -20,6 +20,18 @@ export type AuthorInstanceManifest = {
   shellUrl: string;
   providerProfiles: string[];
   knowledgeBase: string;
+  hostedGapCollector?: {
+    enabled: boolean;
+    endpoint: string | null;
+    publicScope: {
+      instanceId: string;
+      title: string;
+      shellUrl: string;
+      knowledgeBase: string;
+    };
+    fallbackIssueUrl?: string;
+    fallbackPackageName?: string;
+  };
 };
 
 export const DEFAULT_PROVIDER_CONFIG: ProviderConfig = {
@@ -68,7 +80,20 @@ export const DEFAULT_AUTHOR_INSTANCE: AuthorInstanceManifest = {
   title: "youaskm3 author instance",
   shellUrl: "https://enricopiovesan.github.io/youaskm3/",
   providerProfiles: ["browser-demo", "traverse-local", "claude-api", "openai-api"],
-  knowledgeBase: "knowledge/"
+  knowledgeBase: "knowledge/",
+  hostedGapCollector: {
+    enabled: false,
+    endpoint: null,
+    publicScope: {
+      instanceId: "youaskm3-author",
+      title: "youaskm3 author instance",
+      shellUrl: "https://enricopiovesan.github.io/youaskm3/",
+      knowledgeBase: "knowledge/"
+    },
+    fallbackIssueUrl:
+      "https://github.com/enricopiovesan/youaskm3/issues/new?title=Public%20knowledge%20gap",
+    fallbackPackageName: "youaskm3-public-gap.md"
+  }
 };
 
 export function activeProvider(
