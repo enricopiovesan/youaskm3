@@ -119,3 +119,16 @@ lifecycle and must preserve hosted report id, source URL, published scope,
 reporter context, timestamps, schema version, and validation version. The
 collector must not mark a report imported without an explicit owner-side
 workflow.
+
+The CLI review bridge is `m3 hosted-gaps`:
+
+```bash
+./scripts/m3.sh hosted-gaps list --collector-url https://collector.example.com/reports
+./scripts/m3.sh hosted-gaps import --collector-url https://collector.example.com/reports --report-id gap_123 --accept
+./scripts/m3.sh hosted-gaps reject --collector-url https://collector.example.com/reports --report-id gap_123
+```
+
+Use `M3_HOSTED_GAP_COLLECTOR_TOKEN` or `--collector-token` for owner-only read
+endpoints. When a collector cannot update remote status, reject and archive
+commands record local review state under the knowledge root so ignored reports
+do not appear in subsequent local review lists.
