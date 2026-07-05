@@ -142,6 +142,13 @@ explicitly imports, rejects, or archives them.
 - AND shows report id, question, missing knowledge, source URL, published scope, evidence checked, timestamp, and validation status
 - AND does not import any report without an explicit owner action
 
+#### Scenario: Owner rejects or archives report
+
+- GIVEN a pending hosted report exists
+- WHEN the owner rejects or archives it through the CLI
+- THEN the CLI records the owner review action locally when the collector cannot update remote status
+- AND the report is not imported into local knowledge
+
 ### Requirement: Import through the existing gap lifecycle
 
 The system SHALL import accepted hosted reports through the same local knowledge
