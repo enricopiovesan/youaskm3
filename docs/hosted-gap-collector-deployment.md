@@ -86,6 +86,36 @@ When `TURNSTILE_SECRET_KEY` is configured, `challenge_token` is required and is
 verified server-side. Accepted reports return `202` with
 `HOSTED_GAP_REPORT_ACCEPTED`, a report id, and `pending` status.
 
+## Public Gap Data
+
+The collector receives only the public gap report payload: visitor question,
+missing knowledge summary, checked public evidence, source URL, published
+scope, submission timestamp, schema and validation versions, and optional
+reporter-provided context. It does not request account identity, local persona
+secrets, private graph data, hidden inference traces, or local knowledge files.
+
+## Storage And Access
+
+Accepted reports are stored in the configured pending report store, such as D1
+for the reference Worker deployment. The instance owner can read reports
+through the owner review endpoint or an exported collector file. The collector
+operator may have infrastructure-level access according to the selected
+provider policy; this must be disclosed before enabling public submission.
+
+## Retention
+
+Pending reports should use short owner-reviewed retention. The MVP default is to
+keep reports only long enough for owner review/import and to configure provider
+cleanup or manual deletion before raising public traffic limits.
+
+## Owner Deletion And Export
+
+The owner review path is `m3 hosted-gaps`. It can list pending reports, import
+accepted reports into local structured gaps, and record local reject/archive
+state when a collector cannot update remote status. Provider deployment docs
+must also identify how the owner exports pending rows and deletes rejected,
+archived, imported, or expired rows from hosted storage.
+
 ## Stable Errors
 
 The endpoint maps failures to stable codes:

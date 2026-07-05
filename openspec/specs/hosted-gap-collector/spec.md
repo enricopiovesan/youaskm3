@@ -212,6 +212,25 @@ are stored in the configured hosted collector.
 - THEN it states what will be sent and where it will be stored
 - AND it does not request or store more personal data than needed for the gap report
 
+### Requirement: Gate hosted collector readiness
+
+The system SHALL fail hosted collector readiness when required abuse controls,
+privacy disclosure, or cost limits are missing.
+
+#### Scenario: Enabled collector lacks readiness controls
+
+- GIVEN a public hosted gap collector is enabled
+- WHEN readiness validation runs
+- THEN it fails unless privacy disclosure, challenge or equivalent abuse control, origin policy, body limit, rate limit, and retention/cost documentation are present
+- AND this gate does not require full hosted accounts, hosted sync, hosted teams, or hosted runtime
+
+#### Scenario: Fallback-only deployment is honest
+
+- GIVEN the hosted collector is disabled
+- WHEN readiness validation runs
+- THEN manual fallback configuration is accepted
+- AND docs must not claim automatic or painless public hosted gap submission
+
 ### Requirement: Keep hosted collector optional
 
 The system SHALL keep the hosted collector optional and independent from local
