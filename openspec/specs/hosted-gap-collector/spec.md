@@ -22,6 +22,9 @@ controls, portability, and owner-review semantics.
 The architecture is documented in
 `docs/hosted-gap-collector-architecture.md`.
 
+The reference endpoint and deployment boundary are documented in
+`docs/hosted-gap-collector-deployment.md`.
+
 ## Requirements
 
 ### Requirement: Preserve local-first source of truth
@@ -176,6 +179,19 @@ unexpected cost growth.
 - WHEN setup completes
 - THEN the docs list expected provider resources, free-tier assumptions, rate limits, body limits, retention policy, and owner cleanup path
 - AND the implementation defaults to conservative quotas suitable for MVP use
+
+### Requirement: Provide a pending-only reference endpoint
+
+The system SHALL provide a minimal reference endpoint that accepts public gap
+reports, validates abuse controls, and stores pending reports for owner review.
+
+#### Scenario: Reference endpoint accepts report
+
+- GIVEN a configured hosted gap collector receives a valid public gap report
+- WHEN origin, challenge, body size, schema, and rate-limit checks pass
+- THEN it returns `HOSTED_GAP_REPORT_ACCEPTED`
+- AND stores the report with `pending` status, stable report id, validation version, source URL, published scope, checked evidence, missing knowledge, and reporter context when present
+- AND no local knowledge, graph artifact, inference path, GitHub issue, or import status is mutated
 
 ### Requirement: Preserve privacy and consent
 
