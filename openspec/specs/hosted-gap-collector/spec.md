@@ -19,6 +19,9 @@ and Turnstile or equivalent zero/near-zero-cost managed primitives. Equivalent
 providers are allowed only if they preserve the same trust boundary, cost
 controls, portability, and owner-review semantics.
 
+The architecture is documented in
+`docs/hosted-gap-collector-architecture.md`.
+
 ## Requirements
 
 ### Requirement: Preserve local-first source of truth
@@ -54,7 +57,7 @@ validated before storage and imported later through the CLI.
 
 #### Scenario: Valid report
 
-- GIVEN a report includes question, missing knowledge, published scope, checked evidence, source URL, timestamp, and reporter-provided context
+- GIVEN a report includes schema version, validation version, question, missing knowledge, published scope, checked evidence, source URL, timestamp, and optional reporter-provided context
 - WHEN validation runs
 - THEN the collector accepts the report
 - AND records a stable report id
@@ -64,8 +67,20 @@ validated before storage and imported later through the CLI.
 
 - GIVEN a report omits required fields or exceeds configured limits
 - WHEN validation runs
-- THEN the collector rejects the report with a stable error code
+- THEN the collector rejects the report with `HOSTED_GAP_REPORT_INVALID`
 - AND no pending gap report is stored
+
+### Requirement: Define provider-equivalent architecture
+
+The system SHALL define the trust, abuse-control, storage, cost, and owner-review
+requirements that an equivalent hosted provider must satisfy.
+
+#### Scenario: Equivalent provider selected
+
+- GIVEN the implementation does not use Cloudflare Worker, D1, and Turnstile
+- WHEN hosted collector readiness is reviewed
+- THEN the provider proves server-side secret custody, challenge or equivalent abuse prevention, origin checks, rate limits, request body limits, pending-only durable storage, owner-readable export or pull path, owner deletion or cleanup path, and conservative cost controls
+- AND the provider does not require full hosted accounts, hosted sync, hosted runtime, or hosted inference
 
 ### Requirement: Require abuse controls
 
@@ -84,6 +99,32 @@ accepting external writes.
 - WHEN the collector receives the report
 - THEN the collector rejects the report with a stable error code
 - AND records only the minimum operational telemetry needed for abuse analysis
+
+### Requirement: Use stable hosted gap error codes
+
+The system SHALL expose stable failure codes for collector configuration,
+payload validation, abuse checks, rate limits, storage, and owner import.
+
+#### Scenario: Collector missing
+
+- GIVEN the public chat has no hosted collector endpoint configured
+- WHEN a visitor tries to submit a hosted gap report
+- THEN the UI reports `HOSTED_GAP_COLLECTOR_NOT_CONFIGURED`
+- AND offers an honest manual fallback
+
+#### Scenario: Collector rejects or cannot store a report
+
+- GIVEN a hosted gap report reaches the collector
+- WHEN payload validation, challenge verification, rate limiting, or storage fails
+- THEN the collector maps the failure to one of `HOSTED_GAP_REPORT_INVALID`, `HOSTED_GAP_ABUSE_CHALLENGE_FAILED`, `HOSTED_GAP_RATE_LIMITED`, or `HOSTED_GAP_STORAGE_FAILED`
+- AND does not mutate local knowledge or graph artifacts
+
+#### Scenario: Owner import fails
+
+- GIVEN the owner reviews a pending hosted report
+- WHEN local CLI import fails
+- THEN the CLI reports `HOSTED_GAP_OWNER_IMPORT_FAILED`
+- AND preserves the pending hosted report for later review when the provider supports that state
 
 ### Requirement: Keep reports pending until owner review
 
