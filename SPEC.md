@@ -239,6 +239,12 @@ These tickets keep youaskm3 product-led while using concrete app evidence to dri
 
 The expanded second-brain tranche is tracked as MVP-041 and later in [docs/mvp-ticket-backlog.md](docs/mvp-ticket-backlog.md). It does not replace MVP-031 through MVP-040; it layers the approved decision-log, reasoning graph, knowledge gap, sync, local runtime, and final expanded acceptance requirements on top of the existing Traverse-backed runtime baseline.
 
+### Public hosted gap collector
+
+Published GitHub Pages chat can browse and answer from public artifacts without a server, but low-friction external knowledge-gap capture requires a trusted write boundary. The approved minimal hosted surface is [hosted-gap-collector](openspec/specs/hosted-gap-collector/spec.md): an optional, narrow gap inbox backed by zero/near-zero-cost managed primitives such as Cloudflare Worker, D1, and Turnstile.
+
+The collector stores pending external gap reports only. It does not answer questions, run inference, write to the local knowledge graph, or replace the local Traverse-backed runtime. The owner pulls, reviews, and imports accepted reports through the CLI so the user-owned local instance remains the source of truth.
+
 ### Post-first-MVP missing scope
 
 The following surfaces are intentionally outside the first MVP but now have explicit future-scope specs and backlog tickets:
@@ -413,6 +419,7 @@ Dual-licensed: **MIT** and **Apache-2.0**. Users choose.
 ### Later — Fork, Federation, and Network Effects
 - [ ] One-command setup documented in README with a target under 15 minutes.
 - [ ] `youaskm3.com` serves the author's public instance.
+- [ ] Optional hosted gap collector supports low-friction public gap submissions without browser secrets or full hosted youaskm3 accounts.
 - [ ] Federation registry and cross-instance search remain separate from the first MVP.
 
 ---

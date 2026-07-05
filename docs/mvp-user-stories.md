@@ -39,6 +39,7 @@ MVP runtime acceptance requires the real implementation. Browser demo, temporary
 - Production-quality hosted model service.
 - Claims that the local model engine itself is WASM-native before Traverse exposes that evidence.
 - Hosted youaskm3 sync service, user accounts, or cloud storage control plane.
+- Low-friction hosted public gap collection for GitHub Pages visitors.
 - Zip/archive decision-log package ingestion.
 - Automatic inbox watcher for decision-log packages.
 - Claim-level partial ingestion after failed semantic validation.
@@ -50,6 +51,7 @@ These post-MVP surfaces now have explicit future-scope specs:
 - `openspec/specs/semantic-quality-evaluation/spec.md`
 - `openspec/specs/multi-persona/spec.md`
 - `openspec/specs/hosted-service/spec.md`
+- `openspec/specs/hosted-gap-collector/spec.md`
 - `openspec/specs/federated-answer/spec.md`
 - `openspec/specs/wasm-native-model-evidence/spec.md`
 
@@ -308,6 +310,33 @@ Acceptance criteria:
 - AND remaining gaps are represented as backlog tickets rather than undocumented assumptions
 - AND confirmed missing Traverse public surfaces are escalated upstream with reproduction evidence instead of hidden in downstream workaround code
 - AND first-MVP completion is declared only after the final acceptance gate passes
+
+### Public Knowledge Visitor
+
+As a public knowledge visitor, I want to submit a knowledge gap from a published GitHub Pages chat without needing to manually create a GitHub issue, so that the instance owner can improve the published second brain with less friction.
+
+Capability and ticket map:
+
+- `hosted-gap-collector`
+- `knowledge-gap-lifecycle`
+- `pwa-shell`
+- FUTURE-008 hosted public gap collector architecture
+- FUTURE-009 static chat gap submission UX
+- FUTURE-010 minimal hosted gap collector endpoint
+- FUTURE-011 CLI pull/review/import for hosted gap reports
+- FUTURE-012 hosted gap collector security, privacy, and cost gate
+
+Acceptance criteria:
+
+- GIVEN a published GitHub Pages chat has a hosted gap collector configured
+- WHEN the visitor submits a gap report
+- THEN no browser secret or GitHub token is exposed
+- AND the report is validated and stored as pending external input
+- AND the visitor sees honest success or failure feedback
+- AND the local knowledge graph is not mutated
+- AND the owner can later pull, review, and import the report through the CLI
+- AND deployments without a collector show an honest fallback such as GitHub issue draft, copy markdown, or download gap package
+- AND the UI discloses what public gap data leaves the page
 
 ## Demo Acceptance Path
 
