@@ -87,6 +87,17 @@ Historical note: Traverse `v0.4.0`, released on 2026-06-22, remains the first ap
 
 The downstream local inference policy is defined in [mvp-local-inference-policy.md](mvp-local-inference-policy.md). Default youaskm3 smoke must not require a live local LLM; optional live local conformance remains explicit and opt-in.
 
+### Newer Traverse releases under evaluation
+
+As of the 2026-07-18 audit, Traverse `v0.8.1` is the latest release. It does not replace the approved youaskm3 first-MVP baseline by itself:
+
+- `v0.7.0` adds the `traverse-starter` reference app path for downstream app registration and local HTTP execution validation without model-provider setup.
+- `v0.8.0` adds public Rust and Web/TypeScript embedder SDKs plus durable event journal replay for subscription continuity across broker restarts.
+- `v0.8.1` fixes the crates.io publish pipeline for the `v0.8.0` release line and has no functional/spec/API behavior changes from `v0.8.0`.
+- `traverse-framework/App-References` now contains `apps/youaskm3-starter-kit` and `apps/browser-consumer` reference paths for browser-hosted downstream apps.
+
+These newer surfaces are tracked as follow-up planning tickets in `docs/mvp-ticket-backlog.md` rather than silently changing the first-MVP acceptance baseline. A future PR may move the approved baseline only after it adds focused validation evidence for the newer release pairing.
+
 ## MVP Runtime Flow
 
 The downstream app needs this end-to-end runtime flow:
