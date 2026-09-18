@@ -177,6 +177,16 @@ The following planning decisions were approved after the future-scope tickets we
 - The public client must provide a no-hosted fallback such as GitHub issue draft, copy markdown, or download gap package.
 - Cost controls, abuse controls, privacy disclosure, and retention policy are required before enabling a collector.
 
+### Traverse v0.7/v0.8 and App-References Audit
+
+- Traverse `v0.8.1` is the latest release as of the 2026-07-18 audit.
+- Traverse `v0.8.1` is a publish-pipeline patch over `v0.8.0`; it does not add runtime, contract, API, or spec behavior beyond `v0.8.0`.
+- Traverse `v0.7.0` adds the `traverse-starter` reference app path for downstream app registration and local HTTP execution validation without model-provider setup.
+- Traverse `v0.8.0` adds public Rust and Web/TypeScript embedder SDKs and durable event journal replay for subscription continuity across broker restarts.
+- The App-References repo now contains a `youaskm3-starter-kit` and `browser-consumer` reference path for browser-hosted downstream apps.
+- The existing youaskm3 `v0.5.0` baseline remains valid until a focused ticket changes it; newer Traverse surfaces should be added as explicit tickets rather than silently changing first-MVP acceptance.
+- Release notes are planning evidence only; release-pairing decisions need public conformance commands or focused smoke tests before blockers are reclassified.
+
 ### Import Automation
 
 - Archive ingestion comes before inbox/watch-folder automation.

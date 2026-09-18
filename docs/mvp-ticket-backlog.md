@@ -1334,6 +1334,13 @@ Approved hosted public gap collector tranche after the 2026-07-05 planning sessi
 - FUTURE-011 CLI pull/review/import for hosted gap reports ([#188](https://github.com/enricopiovesan/youaskm3/issues/188))
 - FUTURE-012 hosted gap collector security, privacy, and cost gate ([#186](https://github.com/enricopiovesan/youaskm3/issues/186))
 
+Approved Traverse v0.7/v0.8 and App-References follow-up tranche after the 2026-07-18 release audit:
+
+- FUTURE-013 Traverse v0.8.1 release pairing and app-consumable baseline audit ([#198](https://github.com/enricopiovesan/youaskm3/issues/198))
+- FUTURE-014 App-References youaskm3 starter-kit adoption path ([#197](https://github.com/enricopiovesan/youaskm3/issues/197))
+- FUTURE-015 Traverse Web/TypeScript embedder feasibility for the browser shell ([#200](https://github.com/enricopiovesan/youaskm3/issues/200))
+- FUTURE-016 durable event replay and subscription-resume conformance ([#199](https://github.com/enricopiovesan/youaskm3/issues/199))
+
 ## Ticket MVP-041: Build the Canonical Reasoning Skill and Generated Adapters
 
 ### Objective
@@ -2349,6 +2356,167 @@ Add release gating and documentation that prevents enabling the hosted gap colle
 
 - What usage threshold should trigger moving from free-tier collector assumptions to explicit billing alerts?
 - What default retention period balances useful owner review with privacy minimization?
+
+## Ticket FUTURE-013: Audit Traverse v0.8.1 Release Pairing and App-Consumable Baseline ([#198](https://github.com/enricopiovesan/youaskm3/issues/198))
+
+### Objective
+
+Decide and document whether youaskm3 should stay pinned to Traverse `v0.5.0` for first-MVP runtime acceptance or add a newer optional/required app-consumable baseline from Traverse `v0.7.0`, `v0.8.0`, and `v0.8.1`.
+
+### Governing Specs
+
+- `openspec/specs/traverse-integration/spec.md`
+- `docs/traverse-mvp-requirements.md`
+- `docs/mvp-local-inference-policy.md`
+
+### Scope
+
+- Compare current youaskm3 `v0.5.0` assumptions against Traverse `v0.7.0`, `v0.8.0`, and `v0.8.1` release notes.
+- Record that `v0.8.1` is a publish-pipeline patch over `v0.8.0` with no runtime/spec behavior change.
+- Record that `v0.7.0` adds the `traverse-starter` reference app path.
+- Record that `v0.8.0` adds public Rust and Web/TypeScript embedder SDKs and durable event journal replay.
+- Decide which surfaces are first-MVP requirements, optional post-MVP improvements, or future hardening.
+- Update readiness docs without weakening the real-runtime/no-placeholder rule.
+
+### Definition of Done
+
+- `docs/traverse-mvp-requirements.md` distinguishes the minimum first-MVP baseline from optional newer Traverse release surfaces.
+- `SPEC.md` and `openspec/specs/traverse-integration/spec.md` are updated only if the approved baseline changes.
+- The docs explicitly state whether `v0.8.1` is required, optional, or irrelevant for current youaskm3 acceptance.
+- The docs explain that release prose is not enough; pinned conformance must use public validation commands where available.
+- Existing blocked issues are reclassified only when focused evidence proves a blocker is gone.
+- No ticket claims Web embedder, starter-kit, or durable replay adoption until a matching validation path exists.
+- Validation passes for docs/spec checks.
+
+### Resolved Planning Decisions
+
+- Traverse `v0.8.1` is currently the latest release.
+- `v0.8.1` has no functional or API/spec changes from `v0.8.0`; it fixes publishing.
+- Consumers that only need app validation/registration may remain on `v0.5.0`; consumers embedding Traverse or requiring durable replay should evaluate `v0.8.x`.
+
+### Remaining Unknowns To Discuss
+
+- Should youaskm3 move the first-MVP baseline to `v0.8.1`, or keep `v0.5.0` minimum plus optional `v0.8.x` tracks?
+- Which new validation command should become the default downstream pairing gate?
+
+## Ticket FUTURE-014: Adopt the App-References youaskm3 Starter-Kit Path ([#197](https://github.com/enricopiovesan/youaskm3/issues/197))
+
+### Objective
+
+Add an explicit youaskm3 adoption and validation path for the Traverse App-References `youaskm3-starter-kit` and `browser-consumer` reference package.
+
+### Governing Specs
+
+- `openspec/specs/traverse-integration/spec.md`
+- `openspec/specs/pwa-shell/spec.md`
+- `docs/traverse-mvp-requirements.md`
+
+### Scope
+
+- Document the App-References `apps/youaskm3-starter-kit` and `apps/browser-consumer` paths as reference inputs, not private Traverse internals.
+- Add or update youaskm3 validation that checks starter-kit references, release pairing, and browser consumer assumptions.
+- Keep downstream UI/product behavior in youaskm3; do not import reference-app UX as product requirements.
+- Preserve the rule that business logic remains Traverse-governed WASM and the PWA remains UI-only.
+
+### Definition of Done
+
+- Docs link to the App-References `youaskm3-starter-kit` and `browser-consumer` reference paths with pinned release/commit guidance.
+- A validation script or smoke step checks that referenced starter-kit paths exist and match the documented release pairing.
+- The docs distinguish reference-app adoption from direct Traverse source checkout coupling.
+- The PWA/browser shell integration docs explain which browser consumer assumptions are accepted and which are out of scope.
+- Tests or smoke coverage fail clearly when the referenced App-References path is unavailable, unpinned, or incompatible.
+- No private App-References implementation detail becomes required business logic.
+- Validation passes.
+
+### Resolved Planning Decisions
+
+- Traverse now publishes a `youaskm3` starter-kit guide that points to `traverse-framework/App-References`.
+- The App-References repo includes `apps/youaskm3-starter-kit` and `apps/browser-consumer`.
+- The starter kit is a reference adoption path for browser-hosted downstream apps, not a replacement for youaskm3 product code.
+
+### Remaining Unknowns To Discuss
+
+- Should App-References be pinned by release tag, commit SHA, or vendored manifest?
+- Should starter-kit validation run in normal smoke or only in Traverse pairing/conformance jobs?
+
+## Ticket FUTURE-015: Evaluate Traverse Web Embedder SDK for the Browser Shell ([#200](https://github.com/enricopiovesan/youaskm3/issues/200))
+
+### Objective
+
+Evaluate and, if accepted, integrate the Traverse Web/TypeScript embedder SDK path for browser-hosted youaskm3 execution without adding hidden business logic to the PWA.
+
+### Governing Specs
+
+- `openspec/specs/traverse-integration/spec.md`
+- `openspec/specs/pwa-shell/spec.md`
+- `openspec/specs/mcp-interface/spec.md`
+
+### Scope
+
+- Evaluate Traverse `v0.8.x` Web/TypeScript embedder SDK and App-References browser consumer package against youaskm3 browser/PWA needs.
+- Determine whether the browser shell should keep using the local HTTP/JSON path, add Web embedder support as an optional path, or migrate a specific browser-hosted mode.
+- Validate digest checking, Traverse Host ABI checking, WASI preview1 assumptions, trace visibility, and terminal outcome handling.
+- Keep all retrieval, graph traversal, context packing, inference selection, validation, formatting, gap lifecycle, and conflict policy outside PWA code.
+
+### Definition of Done
+
+- A written evaluation compares local HTTP/JSON, App-References browser consumer, and Web embedder paths for youaskm3.
+- If implementation is included, it is behind explicit configuration and does not replace the real local Traverse path silently.
+- Browser tests prove the PWA can render runtime-provided states without owning business logic.
+- Validation covers digest/ABI failure, missing bundle, successful browser-hosted execution, trace fetch/render, and terminal error display.
+- The implementation does not require private Traverse source imports or unpinned `main` branch internals.
+- MCP parity expectations remain documented when the browser path differs from local HTTP.
+- Validation passes.
+
+### Resolved Planning Decisions
+
+- Traverse `v0.8.0` adds a public Web/TypeScript embedder SDK with real runtime-WASM execution.
+- This may improve browser-hosted youaskm3, but it is not automatically required for the current local-first MVP.
+
+### Remaining Unknowns To Discuss
+
+- Should Web embedder support be part of first-MVP acceptance or a post-MVP browser-hosted enhancement?
+- What bundle size and browser compatibility limits are acceptable?
+
+## Ticket FUTURE-016: Add Durable Event Replay and Subscription-Resume Conformance ([#199](https://github.com/enricopiovesan/youaskm3/issues/199))
+
+### Objective
+
+Use Traverse `v0.8.x` durable event journal and subscription replay surfaces to harden long-running chat/runtime progress reporting and MCP parity.
+
+### Governing Specs
+
+- `openspec/specs/traverse-integration/spec.md`
+- `openspec/specs/mcp-interface/spec.md`
+- `openspec/specs/local-runtime-sync/spec.md`
+- `openspec/specs/pwa-shell/spec.md`
+
+### Scope
+
+- Define which youaskm3 runtime events must survive runtime/broker restart.
+- Add conformance for resuming answer progress, trace availability, gap updates, and terminal outcomes after restart.
+- Keep UI behavior limited to displaying resumed runtime state; do not duplicate workflow state machines in the PWA.
+- Decide whether durable replay is required for first MVP, post-MVP hardening, or hosted/service mode only.
+
+### Definition of Done
+
+- Docs define restart/replay expectations for PWA and MCP clients.
+- Tests or smoke coverage prove subscription resume after broker/runtime restart when Traverse `v0.8.x` is configured.
+- Failure modes distinguish unsupported Traverse release, missing durable journal, expired event retention, and downstream runtime error.
+- Trace evidence remains available after replay or the failure is stable and actionable.
+- PWA and MCP paths show equivalent terminal outcomes after resume.
+- No local UI state is treated as the source of truth for business workflow progress.
+- Validation passes.
+
+### Resolved Planning Decisions
+
+- Traverse `v0.8.0` completes durable event journal replay for subscriptions across broker restarts.
+- youaskm3 should evaluate this for product-quality progress/resume behavior, but should not silently make it a requirement until conformance is added.
+
+### Remaining Unknowns To Discuss
+
+- Which events should be retained, and for how long?
+- Should replay conformance run in normal CI, Traverse-pairing CI, or release-only acceptance?
 
 ## First Tickets to Start
 
